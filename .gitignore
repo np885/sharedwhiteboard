@@ -1,5 +1,5 @@
 *.iml
-.idea 
+.idea
 
 logs
 project/project
@@ -8,3 +8,4 @@ target
 tmp
 dist
 .cache
+.settings

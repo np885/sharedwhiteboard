@@ -1,0 +1,17 @@
+.bodywrapper{
+    width: 1024px;
+    margin: auto;
+}
+
+.loginwrapper{
+    width: 400px;
+    margin: auto;
+}
+.maincontent{
+}
+
+.welcome{
+    font-size: 34px;
+    text-align: center;
+    padding-bottom: 10px;
+}

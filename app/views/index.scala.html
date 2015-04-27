@@ -4,15 +4,36 @@
     <head>
         <title>Shardewhiteboard</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-3.3.4-dist/css/bootstrap.min.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/angular.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/angular-route.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/ui-bootstrap-tpls-0.12.1.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("app.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/LoginController.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/WhiteboardController.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/WhiteboardListController.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("controller/MainController.js")" type="text/javascript"></script>
     </head>
-    <body>
-        <div ng-view></div>
+    <body ng-controller="MainController" class="bodywrapper">
+        <!-- Header-->
+        <div class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#/whiteboadlist" >Shared Whiteboard</a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav" ng-show="isWhiteboardDetail()">
+                        <li ><a ng-href="#/whiteboardlist"><span class="glyphicon glyphicon-list"></span> Whiteboard List</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right" ng-show="isLoggedIn()">
+                        <p class="navbar-text">Angemeldet als </p>
+                        <li ><a ng-href="#/login" ng-click="logout()"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        @*Content*@
+        <div class="maincontent" ng-view></div>
     </body>
 </html>

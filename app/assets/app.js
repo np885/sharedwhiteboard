@@ -1,7 +1,7 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-var app = angular.module('sharedwhiteboard', ['ngRoute']);
+var app = angular.module('sharedwhiteboard', ['ngRoute', 'ui.bootstrap']);
 
 app.config(['$routeProvider', function($routeProvider) {
     $routeProvider.

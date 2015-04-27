@@ -3,11 +3,15 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET         /                    controllers.Application.index
 
-GET     /whoop                      controllers.AbstractAuthenticatedController.whoop()
+
+#User Management:
+GET         /login               controllers.users.UserManagementController.checkLoginCredentials()
+POST        /register            controllers.users.UserManagementController.registerUser()
+GET         /users               controllers.users.UserCollectionController.getAllUsers()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET         /assets/*file        controllers.Assets.at(path="/public", file)
 
     

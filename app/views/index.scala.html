@@ -9,7 +9,9 @@
         <script src="@routes.Assets.at("javascripts/angular.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/angular-route.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/ui-bootstrap-tpls-0.12.1.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/ngStorage.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("app.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("service/AuthenticationService.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/LoginController.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/WhiteboardController.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/WhiteboardListController.js")" type="text/javascript"></script>
@@ -17,17 +19,16 @@
     </head>
     <body ng-controller="MainController" class="bodywrapper">
         <!-- Header-->
-        <div class="navbar navbar-default" role="navigation">
+        <div class="navbar navbar-default" role="navigation" >
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="#/whiteboadlist" >Shared Whiteboard</a>
+                    <a class="navbar-brand" href="#/login" >Shared Whiteboard</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    <ul class="nav navbar-nav" ng-show="isWhiteboardDetail()">
+                    <ul class="nav navbar-nav"  ng-show="isWhiteboardDetail()">
                         <li ><a ng-href="#/whiteboardlist"><span class="glyphicon glyphicon-list"></span> Whiteboard List</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right" ng-show="isLoggedIn()">
-                        <p class="navbar-text">Angemeldet als </p>
                         <li ><a ng-href="#/login" ng-click="logout()"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
                     </ul>
                 </div>

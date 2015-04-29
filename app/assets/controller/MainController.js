@@ -1,12 +1,22 @@
-app.controller('MainController', ['$scope', function($scope){
+'use strict';
 
-    $scope.isLoggedIn = function(){
-        //Check if User is logged in
-        return true;
-    };
+app.controller('MainController', ['$scope', 'AuthenticationService', '$location',
+    function($scope, AuthenticationService, $location){
 
-    $scope.isWhiteboardDetail = function(){
-        //Check if WhiteboardDetails Page is open
-        return true;
-    };
-}]);
+        $scope.isLoggedIn = function(){
+            //Check if User is logged in
+            return AuthenticationService.isAuthenticated();
+        };
+
+        $scope.isWhiteboardDetail = function(){
+            //Check if WhiteboardDetails Page is open
+            return $location.url().indexOf('/whiteboard/') > -1;
+        };
+
+        $scope.logout = function(){
+            AuthenticationService.clearCredentials();
+            $location.path('/login');
+        };
+
+    }]);
+

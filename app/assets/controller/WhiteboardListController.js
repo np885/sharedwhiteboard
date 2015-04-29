@@ -1,5 +1,6 @@
 'use strict';
 
 app.controller('WhiteboardListController', ['$scope', function($scope){
-    console.log('YIPIIE');
+
+    $scope.whiteboards = [{name: 'name1'}, {name: 'name2'}];
 }]);

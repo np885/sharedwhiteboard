@@ -24,6 +24,10 @@ app.service('AuthenticationService',
                     return $sessionStorage.user;
                 };
 
+                service.registerUser = function(user){
+                    return $http.post('/register', user);
+                };
+
                 service.isAuthenticated = function(){
                     return $sessionStorage.user !== undefined && $sessionStorage.user !== null;
                 };

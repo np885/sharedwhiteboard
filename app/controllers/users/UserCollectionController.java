@@ -1,11 +1,15 @@
 package controllers.users;
 
+import controllers.users.dto.UserMapper;
 import controllers.users.dto.UserReadDTO;
+import model.user.entities.User;
+import play.db.jpa.JPA;
+import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,9 +17,15 @@ import java.util.List;
  */
 public class UserCollectionController extends Controller {
 
+    @Transactional
     public static Result getAllUsers() {
-        List<UserReadDTO> allUsers = Arrays.asList(new UserReadDTO[]{new UserReadDTO("hans1"), new UserReadDTO("hans2"), new UserReadDTO("hans3")});
+        List<User> users = JPA.em().createQuery("SELECT u FROM User u").getResultList();
 
-        return ok(Json.toJson(allUsers));
+        List<UserReadDTO> dtos = new ArrayList<>();
+        for (User u : users) {
+            dtos.add(UserMapper.mapToReadDTO(u));
+        }
+
+        return ok(Json.toJson(dtos));
     }
 }

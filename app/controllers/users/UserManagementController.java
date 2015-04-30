@@ -22,6 +22,7 @@ import java.util.List;
 public class UserManagementController extends Controller {
 
     @AuthRequired
+    @Transactional
     public static Result checkLoginCredentials() {
         return ok();
     }
@@ -72,7 +73,7 @@ public class UserManagementController extends Controller {
         List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
                 .setParameter("username", searchedUsername)
                 .getResultList();
-        if (users.size() > 0) {
+        if (users.size() > 1) {
             Logger.warn("several Users found for username " + searchedUsername);
         }
 

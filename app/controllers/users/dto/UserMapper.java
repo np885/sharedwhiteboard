@@ -14,4 +14,9 @@ public class UserMapper {
         return mappedUser;
     }
 
+    public static UserReadDTO mapToReadDTO(User user) {
+        UserReadDTO dto = new UserReadDTO(user.getUsername());
+        return dto;
+    }
+
 }

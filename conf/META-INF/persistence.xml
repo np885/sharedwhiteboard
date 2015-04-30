@@ -6,10 +6,13 @@
     <persistence-unit name="SWB" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <non-jta-data-source>MariaDB</non-jta-data-source>
+
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <property name="hibernate.archive.autodetection" value="class"/>
         </properties>
+
     </persistence-unit>
 
 </persistence>

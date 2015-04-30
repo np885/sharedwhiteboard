@@ -15,8 +15,12 @@ app.controller('RegisterController', ['$scope', '$modalInstance', 'Authenticatio
                 $modalInstance.close($scope.user.username);
             })
             .error(function (data, status, headers, config) {
-                //TODO: Check Status for Username Alreadey exists
-                $scope.error = 'Die Registrierung ist fehlgeschlagen';
+                if (status === 422) {
+                    //semantic error:
+                    $scope.error = data;
+                } else {
+                    $scope.error = 'Die Registrierung ist fehlgeschlagen';
+                }
             });
     };
 

@@ -29,7 +29,7 @@ app.service('AuthenticationService',
                 };
 
                 service.isAuthenticated = function(){
-                    return $sessionStorage.user !== null;
+                    return $sessionStorage.user != null;
                 };
 
                 return service;

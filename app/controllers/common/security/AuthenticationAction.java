@@ -1,6 +1,7 @@
 package controllers.common.security;
 
 import model.user.entities.User;
+import model.user.repositories.UserRepo;
 import play.Logger;
 import play.db.jpa.JPA;
 import play.db.jpa.Transactional;
@@ -40,32 +41,13 @@ public class AuthenticationAction extends Action.Simple {
         final String username = splittedDecode[0];
         final String password = splittedDecode[1];
 
-        //TODO refactorn, sobald klar ist, wie DB-Abfragen ausgelagert werden koennen
+        User requestingUser = UserRepo.getUserForUsername(username);
 
-        Boolean authenticated = JPA.withTransaction(new F.Function0<Boolean>() {
-
-            @Override
-            public Boolean apply() throws Throwable {
-                User userForUsername = getUserForUsername(username);
-                return userForUsername != null && userForUsername.getPassword().equals(password);
-            }
-        });
-
-        if (authenticated) {
-            return delegate.call(context);
+        if (requestingUser == null || !requestingUser.getPassword().equals(password)) {
+            //username not found or wrong password ^
+            return unauthorizedResult;
         }
-        return unauthorizedResult;
+        return delegate.call(context);
     }
 
-    private static User getUserForUsername(String searchedUsername) {
-        //TODO das ist hier voellig deplatziert, aber in andere klassen auslagern hat noch nicht funktioniert, siehe User
-        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
-                .setParameter("username", searchedUsername)
-                .getResultList();
-        if (users.size() > 1) {
-            Logger.warn("several Users found for username " + searchedUsername);
-        }
-
-        return (users.size() > 0) ? users.get(0) : null;
-    }
 }

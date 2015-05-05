@@ -4,17 +4,15 @@ import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
 import controllers.users.dto.UserMapper;
+import model.user.UserAlreadyExistsException;
 import model.user.entities.User;
-import play.Logger;
-import play.db.jpa.JPA;
+import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import java.util.List;
 
 /**
  * Created by Flo on 26.04.2015.
@@ -45,38 +43,35 @@ public class UserManagementController extends Controller {
             return badRequest("could not find a valid (not empty) username or password in your payload!");
         }
 
+        //map:
         User userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
-//        try {
-            if (getUserForUsername(userToSave.getUsername()) != null) {
-                return status(422, "User already exists!");
-            }
-            JPA.em().persist(userToSave);
-//            userToSave.save();<-- funktionierjt noch nicht...
-//        } catch (UserAlreadyExistsException e) {
-//            return status(422, "User already exists!");
-//        }
 
+        try {
+            UserRepo.createNewUser(userToSave);
+        } catch (UserAlreadyExistsException e) {
+            //semantic error => "unproc. entity" status 422
+            return status(422, "User already exists!");
+        }
+
+        //set location link header to user collection
         response().setHeader(
                 Http.HeaderNames.LOCATION,
                 routes.UserCollectionController.getAllUsers().absoluteURL(request()));
+
         return created();
     }
 
+    /**
+     * Validates that the dto has all necessary fields not empty.
+     *
+     * @param dto
+     * @return true if valid
+     */
     private static boolean validateUserDTO(NewUserWriteDTO dto) {
         return dto != null
                 && dto.getUsername() != null && !dto.getUsername().trim().isEmpty()
                 && dto.getUsername() != null && !dto.getUsername().trim().isEmpty();
     }
 
-    private static User getUserForUsername(String searchedUsername) {
-        //TODO das ist hier voellig deplatziert, aber in andere klassen auslagern hat noch nicht funktioniert, siehe User
-        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
-                .setParameter("username", searchedUsername)
-                .getResultList();
-        if (users.size() > 1) {
-            Logger.warn("several Users found for username " + searchedUsername);
-        }
 
-        return (users.size() > 0) ? users.get(0) : null;
-    }
 }

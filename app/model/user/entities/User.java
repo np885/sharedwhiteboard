@@ -5,6 +5,8 @@ import model.user.UserAlreadyExistsException;
 import play.Logger;
 import play.db.jpa.JPA;
 import play.libs.F;
+//import play.db.jpa.JPA;
+//import play.libs.F;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,28 +40,4 @@ public class User extends AbstractEntity {
     }
 
 
-    ///////////////////////
-    // funktioniert noch nicht: beim persist fliegt "unknwon entity" .__.
-    public void save() throws UserAlreadyExistsException {
-        JPA.withTransaction(new F.Callback0() {
-            @Override
-            public void invoke() throws UserAlreadyExistsException {
-//                if (findByUserName(username) != null) {
-//                    throw new UserAlreadyExistsException();
-//                }
-                JPA.em().persist(this);
-            }
-        });
-    }
-
-    public static User findByUserName(String username) {
-        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
-                .setParameter("username", username)
-                .getResultList();
-        if (users.size() > 0) {
-            Logger.warn("several Users found for username " + username);
-        }
-
-        return (users.size() > 0) ? users.get(0) : null;
-    }
 }

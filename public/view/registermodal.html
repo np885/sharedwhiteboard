@@ -1,7 +1,7 @@
 <div class="modal-header">
     <h3 class="modal-title">Registrierung für die Shared Whiteboard App</h3>
 </div>
-<form  name="form" ng-submit="register()" role="form">
+<form  name="form" role="form">
     <div class="modal-body loginwrapper">
         <div ng-show="error" class="alert alert-danger">{{error}}</div>
             <div class="form-group">
@@ -24,7 +24,7 @@
             </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" ng-disabled="form.$invalid || dataLoading || !checkVerification()" class="btn btn-primary">Registrieren</button>
+        <button type="submit" ng-click="register()" ng-disabled="form.$invalid || dataLoading || !checkVerification()" class="btn btn-primary">Registrieren</button>
         <button class="btn btn-warning" ng-click="cancel()">Abbrechen</button>
     </div>
 </form>

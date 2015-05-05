@@ -17,7 +17,7 @@ app.service('AuthenticationService',
 
                 service.clearCredentials = function () {
                     delete $sessionStorage.user;
-                    $http.defaults.headers.common.Token = '';
+                    delete $http.defaults.headers.common.Authorization;
                 };
 
                 service.getUser = function(){
@@ -29,7 +29,7 @@ app.service('AuthenticationService',
                 };
 
                 service.isAuthenticated = function(){
-                    return $sessionStorage.user !== undefined && $sessionStorage.user !== null;
+                    return $sessionStorage.user !== null;
                 };
 
                 return service;

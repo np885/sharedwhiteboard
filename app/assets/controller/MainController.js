@@ -15,7 +15,6 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
 
         $scope.logout = function(){
             AuthenticationService.clearCredentials();
-            $location.path('/login');
         };
 
     }]);

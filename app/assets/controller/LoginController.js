@@ -29,6 +29,9 @@ app.controller('LoginController', ['$scope', 'AuthenticationService', '$location
 
         modalInstance.result.then(function (username) {
             $scope.user.username = username;
+            $scope.user.password = '';
+            $scope.error = null;
+
         }, function () {
             //Dissmiss do nothing
         });

@@ -20,7 +20,7 @@
                     <span ng-show="form.password.$dirty && form.password.$error.required" class="help-block">Passwort wird benötigt</span>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" ng-disabled="form.$invalid || dataLoading" class="btn btn-primary">Anmelden</button>
+                    <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary">Anmelden</button>
                     <label class="small">Noch keinen Account? </label> <button class="btn btn-sm btn-link" type="button" ng-click="register()" >Hier registrieren </button>
                 </div>
             </form>

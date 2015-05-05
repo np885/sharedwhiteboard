@@ -18,7 +18,7 @@
         <script src="@routes.Assets.at("controller/MainController.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("controller/RegisterController.js")" type="text/javascript"></script>
     </head>
-    <body ng-controller="MainController" class="bodywrapper">
+    <body ng-controller="MainController" class="container">
         <!-- Header-->
         <div class="navbar navbar-default" role="navigation" >
             <div class="container-fluid">
@@ -36,6 +36,6 @@
             </div>
         </div>
         @*Content*@
-        <div class="maincontent" ng-view></div>
+        <div ng-view></div>
     </body>
 </html>

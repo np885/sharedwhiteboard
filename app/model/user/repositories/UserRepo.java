@@ -1,6 +1,6 @@
 package model.user.repositories;
 
-import model.user.UserAlreadyExistsException;
+import model.AlreadyExistsException;
 import model.user.entities.User;
 import play.Logger;
 import play.db.jpa.JPA;
@@ -30,13 +30,13 @@ public class UserRepo {
         }
     }
 
-    public static void createNewUser(final User userToSave) throws UserAlreadyExistsException {
+    public static void createNewUser(final User userToSave) throws AlreadyExistsException {
         if (getUserForUsername(userToSave.getUsername()) != null) {
-            throw new UserAlreadyExistsException();
+            throw new AlreadyExistsException();
         }
         JPA.withTransaction(new F.Callback0() {
             @Override
-            public void invoke() throws UserAlreadyExistsException {
+            public void invoke() throws AlreadyExistsException {
                 JPA.em().persist(userToSave);
             }
         });

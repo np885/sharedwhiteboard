@@ -2,16 +2,12 @@ package controllers.common.security;
 
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
-import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.Transactional;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import sun.misc.BASE64Decoder;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +17,8 @@ import java.util.Map;
  *
  */
 public class AuthenticationAction extends Action.Simple {
-    private static final F.Promise<Result> unauthorizedResult = F.Promise.pure((Result) unauthorized(""));
+    private static final Result unauthorizedResult = (Result) unauthorized("");
+    private static final F.Promise<Result> unauthorizedResultPromise = F.Promise.pure(unauthorizedResult);
 
     @Override
     public F.Promise<Result> call(final Http.Context context) throws Throwable {
@@ -31,7 +28,8 @@ public class AuthenticationAction extends Action.Simple {
         /* now authHeader[0] contains the authentication method (expected to be "basic")
          * and authHeader[1] should contain the base64 hash!       */
         if (authHeader == null || ! authHeader[0].equalsIgnoreCase("basic")) {
-            return unauthorizedResult;
+            addAuthMethodHeader(context.response());
+            return unauthorizedResultPromise;
         }
 
         BASE64Decoder decoder = new BASE64Decoder();
@@ -45,9 +43,16 @@ public class AuthenticationAction extends Action.Simple {
 
         if (requestingUser == null || !requestingUser.getPassword().equals(password)) {
             //username not found or wrong password ^
-            return unauthorizedResult;
+            addAuthMethodHeader(context.response());
+            return unauthorizedResultPromise;
         }
+
+        context.args.put("currentuser", requestingUser);
         return delegate.call(context);
+    }
+
+    private void addAuthMethodHeader(Http.Response response) {
+        response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
     }
 
 }

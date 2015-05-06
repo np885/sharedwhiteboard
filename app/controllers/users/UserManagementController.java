@@ -4,12 +4,11 @@ import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
 import controllers.users.dto.UserMapper;
-import model.user.UserAlreadyExistsException;
+import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -25,7 +24,6 @@ public class UserManagementController extends Controller {
         return ok();
     }
 
-    @BodyParser.Of(BodyParser.Json.class)
     @ConsumesJSON
     @Transactional
     /*public, NO AUTHENTICATION needed!*/
@@ -48,7 +46,7 @@ public class UserManagementController extends Controller {
 
         try {
             UserRepo.createNewUser(userToSave);
-        } catch (UserAlreadyExistsException e) {
+        } catch (AlreadyExistsException e) {
             //semantic error => "unproc. entity" status 422
             return status(422, "User already exists!");
         }

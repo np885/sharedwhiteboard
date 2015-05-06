@@ -1,11 +1,7 @@
 package model.user.entities;
 
 import model.AbstractEntity;
-import model.user.UserAlreadyExistsException;
 import model.whiteboards.entities.Whiteboard;
-import play.Logger;
-import play.db.jpa.JPA;
-import play.libs.F;
 //import play.db.jpa.JPA;
 //import play.libs.F;
 

@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class WhiteboardRepo {
 
-    public static List<Whiteboard> findAll() {
+    public List<Whiteboard> findAll() {
         try {
             return JPA.withTransaction(new F.Function0<List<Whiteboard>>() {
                 @Override
@@ -29,7 +29,7 @@ public class WhiteboardRepo {
         }
     }
 
-    public static void createWhiteboard(final Whiteboard wb) throws AlreadyExistsException {
+    public void createWhiteboard(final Whiteboard wb) throws AlreadyExistsException {
         if (getWhiteboardForName(wb.getName()) != null) {
             throw new AlreadyExistsException(String.format("Whiteboard with name '%s' already exists", wb.getName()));
         }
@@ -45,7 +45,7 @@ public class WhiteboardRepo {
      * @param wbName
      * @return null, if no Whiteboard found for the given name.
      */
-    public static Whiteboard getWhiteboardForName(final String wbName) {
+    public Whiteboard getWhiteboardForName(final String wbName) {
         try {
             return JPA.withTransaction(new F.Function0<Whiteboard>() {
                 @Override

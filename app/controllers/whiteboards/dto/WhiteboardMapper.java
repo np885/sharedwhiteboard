@@ -10,7 +10,7 @@ import model.whiteboards.entities.Whiteboard;
  */
 public class WhiteboardMapper {
 
-    private static class UserDescription {
+    public static class UserDescription {
         private String username;
 
         public UserDescription(String username) {

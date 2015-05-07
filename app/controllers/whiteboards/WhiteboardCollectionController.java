@@ -27,6 +27,8 @@ import java.util.List;
  */
 public class WhiteboardCollectionController extends Controller {
 
+    private static WhiteboardRepo whiteboardRepo = new WhiteboardRepo();
+
     /**
      * GET whiteboard collection
      *
@@ -36,7 +38,7 @@ public class WhiteboardCollectionController extends Controller {
     public static Result getWhiteboardCollection() {
         //TODO test
         //fetch from db:
-        List<Whiteboard> whiteboards = WhiteboardRepo.findAll();
+        List<Whiteboard> whiteboards = whiteboardRepo.findAll();
         WhiteboardCollectionReadDTO collectionDto = new WhiteboardCollectionReadDTO();
 
         //map:
@@ -68,13 +70,17 @@ public class WhiteboardCollectionController extends Controller {
             return badRequest("Could not parse your json values:\n " + e.getCause().getMessage());
         }
 
+        if (newWhiteboardWriteDTO.getName() == null || newWhiteboardWriteDTO.getName().isEmpty()) {
+            return badRequest("no board name found.");
+        }
+
         //map: current authenticated user will be the owner.
         Whiteboard wb = WhiteboardMapper.mapFromNewWriteDTO(newWhiteboardWriteDTO);
         wb.setOwner((User) ctx().args.get("currentuser"));
 
         //persist:
         try {
-            WhiteboardRepo.createWhiteboard(wb);
+            whiteboardRepo.createWhiteboard(wb);
         } catch (AlreadyExistsException e) {
             return status(422, e.getMessage());
         }
@@ -97,7 +103,7 @@ public class WhiteboardCollectionController extends Controller {
 
         whiteboardWriteTemplate.setName("My tiny Whiteboard.");
 
-        dto.getActions().add (
+        dto.getActions().add(
                 new XHref(
                         "create",
                         Paths.WHITEBOARDS_FULL,
@@ -105,4 +111,10 @@ public class WhiteboardCollectionController extends Controller {
                         whiteboardWriteTemplate)
         );
     }
+
+
+    public static void setRequired(WhiteboardRepo whiteboardRepo) {
+        WhiteboardCollectionController.whiteboardRepo = whiteboardRepo;
+    }
+
 }

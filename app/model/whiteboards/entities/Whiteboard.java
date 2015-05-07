@@ -16,7 +16,6 @@ import java.util.Set;
 @Entity
 public class Whiteboard extends AbstractEntity {
 
-    @Length(max = 40, min = 4)
     @Column(unique = true, nullable = false)
     private String name = "";
 

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Flo on 06.05.2015.
+ * DTOs with Action-Lists.
  */
 public interface LinkedDTO {
 

@@ -7,8 +7,9 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 
 /**
- * Created by Flo on 06.05.2015.
- */
+  * Handles API Requests for Socket-Connections to Whiteboards.
+  *
+  */
 public class WhiteboardSessionController extends Controller {
 
     //TODO doc

@@ -8,10 +8,14 @@ import model.whiteboards.entities.Whiteboard;
 @Deprecated
 public class Paths {
     public static final String ROOT = "http://localhost:9000";
-    public static final String WHITEBOARDS_FULL = ROOT + "/whiteboards";
-    public static final String USER_FULL = ROOT + "/users";
+
+    public static final String WHITEBOARDS_RELATIVE = "/whiteboards";
+    public static final String WHITEBOARDS_FULL = ROOT + WHITEBOARDS_RELATIVE;
+    public static final String USERS_FULL = ROOT + "/users";
 
     public static String forWhiteboard(Whiteboard wb) {
         return WHITEBOARDS_FULL + "/" + wb.getId();
     }
+
+
 }

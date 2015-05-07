@@ -22,34 +22,45 @@ import play.mvc.Result;
 import java.util.List;
 
 /**
- * Created by Flo on 06.05.2015.
+ * Producing Representations for Whiteboard Collection:
+ * "{@value Paths#WHITEBOARDS_RELATIVE}"
  */
 public class WhiteboardCollectionController extends Controller {
 
-    //TODO doc
+    /**
+     * GET whiteboard collection
+     *
+     * @return ok with {@link WhiteboardCollectionReadDTO}
+     */
     @AuthRequired
     public static Result getWhiteboardCollection() {
         //TODO test
+        //fetch from db:
         List<Whiteboard> whiteboards = WhiteboardRepo.findAll();
-        System.out.println(whiteboards);
         WhiteboardCollectionReadDTO collectionDto = new WhiteboardCollectionReadDTO();
 
+        //map:
         for (Whiteboard wb : whiteboards) {
             collectionDto.getBoards().add(WhiteboardMapper.mapEntityToReadDTO(wb));
         }
 
+        //response:
         addCreateWhiteboardXHref(collectionDto);
 
         return ok(Json.toJson(collectionDto));
     }
 
 
-    //TODO doc
+    /**
+     * POST whiteboard item
+     *
+     * @return created with location link to Whiteboard; 422 if whiteboard name already exists.
+     */
     @ConsumesJSON
     @AuthRequired
     public static Result createNewWhiteboard() {
-        //TODO impl
         //TODO test
+        //parse body:
         NewWhiteboardWriteDTO newWhiteboardWriteDTO;
         try {
             newWhiteboardWriteDTO = Json.fromJson(request().body().asJson(), NewWhiteboardWriteDTO.class);
@@ -57,15 +68,18 @@ public class WhiteboardCollectionController extends Controller {
             return badRequest("Could not parse your json values:\n " + e.getCause().getMessage());
         }
 
+        //map: current authenticated user will be the owner.
         Whiteboard wb = WhiteboardMapper.mapFromNewWriteDTO(newWhiteboardWriteDTO);
         wb.setOwner((User) ctx().args.get("currentuser"));
 
+        //persist:
         try {
             WhiteboardRepo.createWhiteboard(wb);
         } catch (AlreadyExistsException e) {
             return status(422, e.getMessage());
         }
 
+        //response:
         response().setHeader(
                 Http.HeaderNames.LOCATION,
                 Paths.forWhiteboard(wb));
@@ -73,6 +87,11 @@ public class WhiteboardCollectionController extends Controller {
         return created();
     }
 
+    /**
+     * Adds a POST-{@link XHref} to the actions-list of dto.
+     *
+     * @param dto the dto to add the actionlink to.
+     */
     private static void addCreateWhiteboardXHref(LinkedDTO dto) {
         NewWhiteboardWriteDTO whiteboardWriteTemplate = new NewWhiteboardWriteDTO();
 

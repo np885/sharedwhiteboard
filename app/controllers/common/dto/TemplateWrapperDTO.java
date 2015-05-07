@@ -1,7 +1,8 @@
 package controllers.common.dto;
 
 /**
- * Created by Flo on 06.05.2015.
+ * Used for JSON serialization: Wrappes an object into a "template" key, so that the client can recognize it as a
+ * POST or PUT template for sending data.
  */
 public class TemplateWrapperDTO {
     private Object template;

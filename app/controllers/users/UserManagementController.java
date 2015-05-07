@@ -1,5 +1,6 @@
 package controllers.users;
 
+import controllers.common.Paths;
 import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
@@ -54,7 +55,7 @@ public class UserManagementController extends Controller {
         //set location link header to user collection
         response().setHeader(
                 Http.HeaderNames.LOCATION,
-                routes.UserCollectionController.getAllUsers().absoluteURL(request()));
+                Paths.USERS_FULL);
 
         return created();
     }

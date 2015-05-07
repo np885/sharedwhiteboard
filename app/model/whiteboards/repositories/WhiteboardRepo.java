@@ -20,7 +20,7 @@ public class WhiteboardRepo {
             return JPA.withTransaction(new F.Function0<List<Whiteboard>>() {
                 @Override
                 public List<Whiteboard> apply() throws Throwable {
-                    return JPA.em().createQuery("SELECT DISTINCT w FROM Whiteboard w JOIN FETCH w.collaborators").getResultList();
+                    return JPA.em().createQuery("SELECT DISTINCT w FROM Whiteboard w LEFT JOIN FETCH w.collaborators").getResultList();
                 }
             });
         } catch (Throwable throwable) {

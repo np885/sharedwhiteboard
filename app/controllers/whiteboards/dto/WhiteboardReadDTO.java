@@ -10,8 +10,20 @@ import java.util.List;
  */
 public class WhiteboardReadDTO {
     private String name;
+    private long id;
+
+
     private XHref owner;
     private List<XHref> collaborators = new ArrayList<>();
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

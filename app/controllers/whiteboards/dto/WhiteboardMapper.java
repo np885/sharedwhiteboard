@@ -34,6 +34,7 @@ public class WhiteboardMapper {
         WhiteboardReadDTO dto = new WhiteboardReadDTO();
 
         dto.setName(whiteboard.getName());
+        dto.setId(whiteboard.getId());
         dto.setOwner(new XHref(null, Paths.USERS_FULL, null, new UserDescription(whiteboard.getOwner().getUsername())));
         for (User u : whiteboard.getCollaborators()) {
             dto.getCollaborators().add(new XHref(null, Paths.USERS_FULL, null, new UserDescription(u.getUsername())));

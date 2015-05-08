@@ -9,7 +9,7 @@ public class UserMapper {
 
     public static User mapFromNewUserDTO(NewUserWriteDTO dto) {
         User mappedUser = new User();
-        mappedUser.setUsername(dto.getUsername());
+        mappedUser.setUsername(dto.getUsername().toLowerCase());
         mappedUser.setPassword(dto.getPassword());
         return mappedUser;
     }

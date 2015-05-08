@@ -82,7 +82,7 @@ public class WhiteboardCollectionController extends Controller {
         try {
             whiteboardRepo.createWhiteboard(wb);
         } catch (AlreadyExistsException e) {
-            return status(422, e.getMessage());
+            return status(422, "" + e.getMessage());
         }
 
         //response:
@@ -112,7 +112,11 @@ public class WhiteboardCollectionController extends Controller {
         );
     }
 
-
+    /**
+     * "inject" (overwrite) required components.
+     *
+     * @param whiteboardRepo
+     */
     public static void setRequired(WhiteboardRepo whiteboardRepo) {
         WhiteboardCollectionController.whiteboardRepo = whiteboardRepo;
     }

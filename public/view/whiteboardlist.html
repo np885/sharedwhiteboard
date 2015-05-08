@@ -9,12 +9,14 @@
     <div class="col-md-2"><button type="button" class="btn btn-primary" ng-click="addWhiteboard()"><span class="glyphicon glyphicon-plus-sign"></span> Add Whiteboard</button></div>
 </div>
 
-<div ng-repeat="whiteboard in whiteboards | filter:search">
-    <div class="list-group">
-        <a href="#" class="list-group-item">
-            <h4 class="list-group-item-heading">List group item heading</h4>
-            <p class="list-group-item-text">...</p>
-            {{whiteboard.name}}
+<div class="list-group">
+    <div ng-repeat="whiteboard in whiteboards | filter:search">
+        <a ng-href="#/whiteboard/{{whiteboard.id}}" class="list-group-item" ng-hide="myown && loggedInUser.id !== whiteboard.owner">
+            <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>
+            <div ng-repeat="user in whiteboard.users">
+
+                {{user.name}}
+            </div>
         </a>
     </div>
 </div>

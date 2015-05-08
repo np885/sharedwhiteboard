@@ -1,16 +1,13 @@
 package controllers.common.security;
 
 import model.user.entities.User;
-import play.Logger;
-import play.db.jpa.JPA;
-import play.db.jpa.Transactional;
+import model.user.repositories.UserRepo;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import sun.misc.BASE64Decoder;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +17,8 @@ import java.util.Map;
  *
  */
 public class AuthenticationAction extends Action.Simple {
-    private static final F.Promise<Result> unauthorizedResult = F.Promise.pure((Result) unauthorized(""));
+    private static final Result unauthorizedResult = (Result) unauthorized("");
+    private static final F.Promise<Result> unauthorizedResultPromise = F.Promise.pure(unauthorizedResult);
 
     @Override
     public F.Promise<Result> call(final Http.Context context) throws Throwable {
@@ -30,7 +28,8 @@ public class AuthenticationAction extends Action.Simple {
         /* now authHeader[0] contains the authentication method (expected to be "basic")
          * and authHeader[1] should contain the base64 hash!       */
         if (authHeader == null || ! authHeader[0].equalsIgnoreCase("basic")) {
-            return unauthorizedResult;
+            addAuthMethodHeader(context.response());
+            return unauthorizedResultPromise;
         }
 
         BASE64Decoder decoder = new BASE64Decoder();
@@ -40,32 +39,20 @@ public class AuthenticationAction extends Action.Simple {
         final String username = splittedDecode[0];
         final String password = splittedDecode[1];
 
-        //TODO refactorn, sobald klar ist, wie DB-Abfragen ausgelagert werden koennen
+        User requestingUser = UserRepo.getUserForUsername(username);
 
-        Boolean authenticated = JPA.withTransaction(new F.Function0<Boolean>() {
-
-            @Override
-            public Boolean apply() throws Throwable {
-                User userForUsername = getUserForUsername(username);
-                return userForUsername != null && userForUsername.getPassword().equals(password);
-            }
-        });
-
-        if (authenticated) {
-            return delegate.call(context);
-        }
-        return unauthorizedResult;
-    }
-
-    private static User getUserForUsername(String searchedUsername) {
-        //TODO das ist hier voellig deplatziert, aber in andere klassen auslagern hat noch nicht funktioniert, siehe User
-        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
-                .setParameter("username", searchedUsername)
-                .getResultList();
-        if (users.size() > 1) {
-            Logger.warn("several Users found for username " + searchedUsername);
+        if (requestingUser == null || !requestingUser.getPassword().equals(password)) {
+            //username not found or wrong password ^
+            addAuthMethodHeader(context.response());
+            return unauthorizedResultPromise;
         }
 
-        return (users.size() > 0) ? users.get(0) : null;
+        context.args.put("currentuser", requestingUser);
+        return delegate.call(context);
     }
+
+    private void addAuthMethodHeader(Http.Response response) {
+        response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
+    }
+
 }

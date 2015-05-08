@@ -1,5 +1,6 @@
 package controllers.common.mediatypes;
 
+import play.mvc.BodyParser;
 import play.mvc.With;
 
 import java.lang.annotation.ElementType;
@@ -11,6 +12,7 @@ import java.lang.annotation.Target;
  * @see JSONonlyAction
  */
 @With(JSONonlyAction.class)
+@BodyParser.Of(BodyParser.Json.class)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConsumesJSON {

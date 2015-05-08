@@ -1,14 +1,16 @@
 package model.user.entities;
 
 import model.AbstractEntity;
-import model.user.UserAlreadyExistsException;
-import play.Logger;
-import play.db.jpa.JPA;
-import play.libs.F;
+import model.whiteboards.entities.Whiteboard;
+//import play.db.jpa.JPA;
+//import play.libs.F;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.util.List;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by Flo on 27.04.2015.
@@ -20,6 +22,10 @@ public class User extends AbstractEntity {
     private String username;
 
     private String password;
+
+    @ManyToMany
+    @JoinTable(name = "whiteboard_collaborators")
+    private Set<Whiteboard> whiteboards = new HashSet<>();
 
     public String getUsername() {
         return username;
@@ -37,29 +43,10 @@ public class User extends AbstractEntity {
         this.password = password;
     }
 
-
-    ///////////////////////
-    // funktioniert noch nicht: beim persist fliegt "unknwon entity" .__.
-    public void save() throws UserAlreadyExistsException {
-        JPA.withTransaction(new F.Callback0() {
-            @Override
-            public void invoke() throws UserAlreadyExistsException {
-//                if (findByUserName(username) != null) {
-//                    throw new UserAlreadyExistsException();
-//                }
-                JPA.em().persist(this);
-            }
-        });
-    }
-
-    public static User findByUserName(String username) {
-        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.username=:username")
-                .setParameter("username", username)
-                .getResultList();
-        if (users.size() > 0) {
-            Logger.warn("several Users found for username " + username);
-        }
-
-        return (users.size() > 0) ? users.get(0) : null;
+    /**
+     * @return Set of Whiteboards, on which this user is collaborating
+     */
+    public Set<Whiteboard> getWhiteboards() {
+        return whiteboards;
     }
 }

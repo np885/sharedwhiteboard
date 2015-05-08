@@ -1,10 +1,15 @@
 'use strict';
 
-app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', function($scope, $modal, AuthenticationService, $http){
+app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService',
+    function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
     $scope.currentUser = AuthenticationService.getUser();
 
     $scope.whiteboards = [];
     $scope.whitboardWithMeta = {};
+
+    $scope.openWhiteboardSocket = function(whiteboard){
+        WhiteboardSocketService.setWebsocketPath(whiteboard.socket);
+    };
 
     $scope.loadWhiteboard = function(){
         $http.get('/whiteboards')
@@ -26,7 +31,7 @@ app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationS
                 var user = whiteboard.collaborators[j];
                 collaborators.push({name: user.description.username});
             }
-            $scope.whiteboards.push({name: whiteboard.name, id: whiteboard.id, owner: whiteboard.owner.description.username, collaborators: collaborators});
+            $scope.whiteboards.push({name: whiteboard.name, id: whiteboard.id, owner: whiteboard.owner.description.username, collaborators: collaborators, socket: whiteboard.socket.href});
         }
     };
 

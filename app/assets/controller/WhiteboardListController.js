@@ -1,11 +1,33 @@
 'use strict';
 
-app.controller('WhiteboardListController', ['$scope', '$modal', function($scope, $modal){
-    $scope.loggedInUser = {};
-    $scope.loggedInUser.id = 1;
-    $scope.whiteboards = [
-        {name: 'Mein Malboard', id: 1, owner: 1, users:[{id: 1, name: 'Niclas'}, {id: 2, name: 'Peter'}, {id: 3, name: 'Hans'}]},
-        {name: 'Brainstorming', id: 2, owner: 2, users:[{id: 2, name: 'Peter'}, {id: 3, name: 'Hans'}]}];
+app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', function($scope, $modal, AuthenticationService, $http){
+    $scope.currentUser = AuthenticationService.getUser();
+
+    $scope.whiteboards = [];
+    $scope.whitboardWithMeta = {};
+
+    $scope.loadWhiteboard = function(){
+        $http.get('/whiteboards')
+            .success(function(data, status, headers, config) {
+                $scope.transform(data);
+                $scope.whitboardWithMeta = data;
+            })
+            .error(function (data, status, headers, config) {
+                //ToDO: error
+            });
+    };
+
+    $scope.transform = function(data){
+        for(var i = 0; i < data.boards.length; i++){
+            var collaborators = [];
+            var whiteboard = data.boards[i];
+            for(var j = 0; j < whiteboard.collaborators.length; j++){
+                var user = whiteboard.collaborators[j];
+                collaborators.push({name: user.name.description.username});
+            }
+            $scope.whiteboards.push({name: whiteboard.name, id: whiteboard.id, owner: whiteboard.owner.description.username, collaborators: collaborators});
+        }
+    };
 
     $scope.addWhiteboard = function(){
         var modalInstance = $modal.open({
@@ -23,4 +45,5 @@ app.controller('WhiteboardListController', ['$scope', '$modal', function($scope,
             //Dissmiss do nothing
         });
     };
+    $scope.loadWhiteboard();
 }]);

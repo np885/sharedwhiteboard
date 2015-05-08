@@ -5,7 +5,6 @@ import model.whiteboards.entities.Whiteboard;
 /**
  * Behilfsloesung solange die Play-generierten "routes" Klassen rumspinnen.
  */
-@Deprecated
 public class Paths {
     public static final String ROOT = "http://localhost:9000";
 

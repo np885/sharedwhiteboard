@@ -12,7 +12,7 @@ app.service('AuthenticationService',
                 };
 
                 service.setCredentials = function (user) {
-                    $sessionStorage.user = user.username;
+                    $sessionStorage.user = user.username.toLowerCase();
                 };
 
                 service.clearCredentials = function () {

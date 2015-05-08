@@ -50,7 +50,7 @@ app.run(['$rootScope', '$location', 'AuthenticationService', 'WhiteboardSocketSe
                     $location.path('/whiteboardlist');
                 });
             }
-            if(current !== undefined && current.$$route.originalPath.indexOf('/whiteboard/') > 1 && current !== next){
+            if(current !== undefined && current.$$route.originalPath.indexOf('/whiteboard/') > -1 && current !== next){
                 WhiteboardSocketService.closeConnection();
             }
         });

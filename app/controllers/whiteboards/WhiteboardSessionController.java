@@ -1,7 +1,11 @@
 package controllers.whiteboards;
 
+import actors.WebSocketInActor;
+import akka.actor.ActorRef;
+import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import controllers.common.security.AuthRequired;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
@@ -14,9 +18,15 @@ public class WhiteboardSessionController extends Controller {
 
     //TODO doc
     @AuthRequired
-    public static WebSocket<JsonNode> connectToWhiteboard(long id) {
-        //TODO impl
+    public static WebSocket<String> connectToWhiteboard(long id) {
         //TODO test
-        return null;
+
+        return WebSocket.withActor(new F.Function<ActorRef, Props>() {
+            @Override
+            public Props apply(ActorRef outActor) throws Throwable {
+                System.out.println("----------------");
+                return Props.create(WebSocketInActor.class, outActor, "board1");
+            }
+        });
     }
 }

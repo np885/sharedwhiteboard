@@ -12,10 +12,17 @@ public class WhiteboardReadDTO {
     private String name;
     private long id;
 
-
     private XHref owner;
     private List<XHref> collaborators = new ArrayList<>();
+    private XHref socket;
 
+    public XHref getSocket() {
+        return socket;
+    }
+
+    public void setSocket(XHref socket) {
+        this.socket = socket;
+    }
 
     public long getId() {
         return id;

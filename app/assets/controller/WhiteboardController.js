@@ -3,7 +3,7 @@
 app.controller('WhiteboardController', ['$scope', '$routeParams', function($scope, $routeParams){
     $scope.boardId = $routeParams.boardId;
 
-    var connection = new WebSocket('ws://whiteboards/' + $scope.boardId + '/session');
+    var connection = new WebSocket('ws://localhost:9000/whiteboards/' + $scope.boardId + '/session');
 
     connection.onopen = function () {
         connection.send('Ping'); // Send the message 'Ping' to the server

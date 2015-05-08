@@ -17,4 +17,7 @@ public class Paths {
     }
 
 
+    public static String SocketPathForWhiteboard(Whiteboard whiteboard) {
+        return WHITEBOARDS_FULL.replace("http", "ws") + "/" + whiteboard.getId() + "/session";
+    }
 }

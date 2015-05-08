@@ -4,5 +4,5 @@ app.controller('WhiteboardController', ['$scope', '$routeParams', 'WhiteboardSoc
 function($scope, $routeParams, WhiteboardSocketService){
     $scope.boardId = $routeParams.boardId;
 
-    var connection = WhiteboardSocketService.openSocketConnection();
+    WhiteboardSocketService.openSocketConnection();
 }]);

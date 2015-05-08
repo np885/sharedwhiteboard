@@ -3,13 +3,13 @@
 app.service('WhiteboardSocketService',[ '$http', function ($http) {
     var service = {};
     var websocketPath;
-
+    var connection;
     service.setWebsocketPath = function(path){
         websocketPath = path;
     };
 
     service.openSocketConnection = function(){
-        var connection = new WebSocket(websocketPath);
+        connection = new WebSocket(websocketPath);
 
         connection.onopen = function () {
             connection.send('Ping'); // Send the message 'Ping' to the server
@@ -23,7 +23,9 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         connection.onerror = function (error) {
             console.log('WebSocket Error ' + error);
         };
-        return connection;
+    };
+    service.closeConnection = function(){
+      connection.close();
     };
 
 

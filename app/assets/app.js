@@ -31,8 +31,8 @@ app.config(['$routeProvider', function($routeProvider) {
         });
 }]);
 
-app.run(['$rootScope', '$location', 'AuthenticationService',
-    function ($rootScope, $location, AuthenticationService) {
+app.run(['$rootScope', '$location', 'AuthenticationService', 'WhiteboardSocketService',
+    function ($rootScope, $location, AuthenticationService, WhiteboardSocketService) {
 
         $rootScope.$on('$routeChangeStart', function (event, next, current) {
             //Check if it's a secure Route
@@ -49,6 +49,9 @@ app.run(['$rootScope', '$location', 'AuthenticationService',
                 $rootScope.$evalAsync(function() {
                     $location.path('/whiteboardlist');
                 });
+            }
+            if(current !== undefined && current.$$route.originalPath.indexOf('/whiteboard/') > 1 && current !== next){
+                WhiteboardSocketService.closeConnection();
             }
         });
     }]);

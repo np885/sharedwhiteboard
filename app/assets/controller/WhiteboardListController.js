@@ -9,6 +9,7 @@ app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationS
     $scope.loadWhiteboard = function(){
         $http.get('/whiteboards')
             .success(function(data, status, headers, config) {
+                $scope.whiteboards = [];
                 $scope.transform(data);
                 $scope.whitboardWithMeta = data;
             })
@@ -36,11 +37,8 @@ app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationS
             resolve: {}
         });
 
-        modalInstance.result.then(function (username) {
-            $scope.user.username = username;
-            $scope.user.password = '';
-            $scope.error = null;
-
+        modalInstance.result.then(function () {
+            $scope.loadWhiteboard();
         }, function () {
             //Dissmiss do nothing
         });

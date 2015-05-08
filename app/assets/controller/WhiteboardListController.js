@@ -24,7 +24,7 @@ app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationS
             var whiteboard = data.boards[i];
             for(var j = 0; j < whiteboard.collaborators.length; j++){
                 var user = whiteboard.collaborators[j];
-                collaborators.push({name: user.name.description.username});
+                collaborators.push({name: user.description.username});
             }
             $scope.whiteboards.push({name: whiteboard.name, id: whiteboard.id, owner: whiteboard.owner.description.username, collaborators: collaborators});
         }

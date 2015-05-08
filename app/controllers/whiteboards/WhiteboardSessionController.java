@@ -24,7 +24,6 @@ public class WhiteboardSessionController extends Controller {
         return WebSocket.withActor(new F.Function<ActorRef, Props>() {
             @Override
             public Props apply(ActorRef outActor) throws Throwable {
-                System.out.println("----------------");
                 return Props.create(WebSocketInActor.class, outActor, "board1");
             }
         });

@@ -2,6 +2,7 @@ package actors;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import play.Logger;
 
 public class WebSocketInActor extends UntypedActor {
     private String boardName;
@@ -13,6 +14,8 @@ public class WebSocketInActor extends UntypedActor {
     @Override
     public void postStop() throws Exception {
         super.postStop();
+
+        Logger.debug("SOCKET ACTOR '" + this.toString() + "' WAS KILLED!");
 
 //        ActorRef eventDispatcher = Akka.system().actorFor(BoardEventDispatcher.path);
 //        eventDispatcher.tell(new SocketClosedEvent(self(), out, boardName), self());

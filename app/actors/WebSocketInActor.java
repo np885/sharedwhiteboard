@@ -3,12 +3,14 @@ package actors;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import play.Logger;
+import play.api.libs.json.Json;
 
 public class WebSocketInActor extends UntypedActor {
     private String boardName;
+    private ActorRef out;
 
     public WebSocketInActor(ActorRef out, String boardName) {
-        out.tell("whooop whooop, tis is the sound of teh police", self());
+        this.out = out;
     }
 
     @Override
@@ -25,6 +27,7 @@ public class WebSocketInActor extends UntypedActor {
     @Override
     public void onReceive(Object message) throws Exception {
         System.out.println("client sendet via socket zum server: " + message);
+        out.tell(message, self());
 //        JsonNode parsed = Json.parse((String) message);
 //        int x = parsed.get("x").asInt();
 //        int y = parsed.get("y").asInt();

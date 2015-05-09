@@ -44,13 +44,13 @@ app.run(['$rootScope', '$location', 'AuthenticationService', 'WhiteboardSocketSe
                     });
                 }
             }
-            if(next.$$route.originalPath === "/login" && AuthenticationService.isAuthenticated()){
+            if(next.$$route && next.$$route.originalPath === "/login" && AuthenticationService.isAuthenticated()){
                 event.preventDefault();
                 $rootScope.$evalAsync(function() {
                     $location.path('/whiteboardlist');
                 });
             }
-            if(current !== undefined && current.$$route.originalPath.indexOf('/whiteboard/') > -1 && current !== next){
+            if(current && current.$$route && current.$$route.originalPath.indexOf('/whiteboard/') > -1 && current !== next){
                 WhiteboardSocketService.closeConnection();
             }
         });

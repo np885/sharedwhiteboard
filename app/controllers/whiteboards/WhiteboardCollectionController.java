@@ -36,7 +36,6 @@ public class WhiteboardCollectionController extends Controller {
      */
     @AuthRequired
     public static Result getWhiteboardCollection() {
-        //TODO test
         //fetch from db:
         List<Whiteboard> whiteboards = whiteboardRepo.findAll();
         WhiteboardCollectionReadDTO collectionDto = new WhiteboardCollectionReadDTO();

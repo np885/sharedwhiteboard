@@ -1,12 +1,9 @@
 package controllers.whiteboards;
 
-import controllers.util.AbstractControllerTest;
 import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.whiteboards.entities.Whiteboard;
-import model.whiteboards.repositories.WhiteboardRepo;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -21,14 +18,7 @@ import static org.mockito.Mockito.*;
  * <br>
  * Under Test: {@link WhiteboardCollectionController#createNewWhiteboard()}
  */
-public class WhiteboardCollectionControllerCreateWhiteboardUnitTest extends AbstractControllerTest {
-    private WhiteboardRepo wbRepoMock;
-
-    @Before
-    public void setupMockComponents() {
-        wbRepoMock = mock(WhiteboardRepo.class);
-        WhiteboardCollectionController.setRequired(wbRepoMock);
-    }
+public class WhiteboardCollectionControllerCreateWhiteboardUnitTest extends AbstractWhiteboardCollectionControllerUnitTest {
 
     /**
      * Happy Day: Testing plain data would be persisted & correct Response is build by controller.

@@ -35,11 +35,14 @@ class TestDataUtil {
     public static final String OWNER_NAME = "Pit Schnass";
     public static final String COLLAB1_NAME = "Brad Hard";
     public static final String COLLAB2_NAME = "André Seite";
+    public static final long ID_WHITEBOARD = 789123L;
+
 
     @Test
     public Whiteboard createFullWhiteboard() {
         Whiteboard fullWhiteboard = new Whiteboard();
         fullWhiteboard.setName(WHITEBOARD_NAME);
+        fullWhiteboard.setId(ID_WHITEBOARD);
 
         User owner = new User();
         owner.setUsername(OWNER_NAME);
@@ -59,6 +62,8 @@ class TestDataUtil {
 
     public void assertDto(WhiteboardReadDTO dto) {
         Assert.assertEquals(WHITEBOARD_NAME, dto.getName());
+        Assert.assertEquals("Whiteboard ID", ID_WHITEBOARD, dto.getId());
+        Assert.assertTrue(dto.getSocket().getHref().startsWith("ws://"));
         Assert.assertEquals(OWNER_NAME, ((WhiteboardMapper.UserDescription) dto.getOwner().getDescription()).getUsername());
 
         List<String> collaboratorNames = new ArrayList<>();

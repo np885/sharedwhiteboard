@@ -28,20 +28,26 @@ public class AbstractControllerTest {
      *
      * @return mockRequest
      */
-
     protected void mockContextWithJsonBody(String body) {
+        mockContext(true, body);
+    }
+    protected void mockContextWithoutBody() {
+        mockContext(false, null);
+    }
+
+    private void mockContext(boolean withBody, String body) {
         Map<String, String> flashData = Collections.emptyMap();
         Map<String, Object> argData = Collections.emptyMap();
         Long id = 2L;
 
         headerMock = mock(RequestHeader.class);
-
-        Http.RequestBody bodyMock = mock(Http.RequestBody.class);
-        when(bodyMock.asJson()).thenReturn(Json.parse(body));
-
         rqustMock = mock(Http.Request.class);
-        when(rqustMock.body()).thenReturn(bodyMock);
 
+        if (withBody) {
+            Http.RequestBody bodyMock = mock(Http.RequestBody.class);
+            when(bodyMock.asJson()).thenReturn(Json.parse(body));
+            when(rqustMock.body()).thenReturn(bodyMock);
+        }
 
         Http.Context context = new Http.Context(id, headerMock, rqustMock, flashData, flashData, argData);
         Http.Context.current.set(context);

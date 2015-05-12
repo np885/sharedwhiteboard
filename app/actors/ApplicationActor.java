@@ -6,6 +6,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import javassist.tools.web.Webserver;
+import play.Logger;
 import play.libs.Akka;
 
 import java.util.HashMap;
@@ -24,21 +25,25 @@ public class ApplicationActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        if(message instanceof WebSocketConnection){
-            BoardUserOpenEvent event = new BoardUserOpenEvent((WebSocketConnection) message);
-
-            if(!boardActors.containsKey(event.getBoardId())){
-                ActorRef actorRef = Akka.system().actorOf(Props.create(WhiteboardActor.class, event.getConnection()), "whiteboards-" + event.getBoardId());
-                boardActors.put(event.getBoardId(), actorRef);
-            } else {
-                ActorRef actorRef = boardActors.get(event.getBoardId());
-                actorRef.tell(event, self());
-            }
-
+        if(message instanceof BoardUserOpenEvent){
+            onBoardUserOpenEvent((BoardUserOpenEvent) message);
         }
     }
 
-
+    /**
+     * A User opened a Whiteboard and thus created a new Websocket Connection:
+     */
+    private void onBoardUserOpenEvent(BoardUserOpenEvent event) {
+        if(!boardActors.containsKey(event.getBoardId())){
+            ActorRef actorRef = Akka.system().actorOf(
+                    Props.create(WhiteboardActor.class, event.getConnection()),
+                    "whiteboards-" + event.getBoardId());
+            boardActors.put(event.getBoardId(), actorRef);
+        } else {
+            ActorRef actorRef = boardActors.get(event.getBoardId());
+            actorRef.tell(event, self());
+        }
+    }
 
 
 }

@@ -2,6 +2,7 @@ package actors;
 
 import actors.events.sockets.BoardUserOpenEvent;
 import akka.actor.UntypedActor;
+import play.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,8 @@ public class WhiteboardActor extends UntypedActor {
     private List<WebSocketConnection> socketConnections = new ArrayList<>();
 
     public WhiteboardActor( WebSocketConnection connection) {
+        Logger.debug("Creating Whiteboard Actor: " + self().path());
+
         this.boardId = connection.getBoardId();
         socketConnections.add(connection);
     }

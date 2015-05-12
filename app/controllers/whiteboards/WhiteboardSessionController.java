@@ -18,13 +18,13 @@ public class WhiteboardSessionController extends Controller {
 
     //TODO doc
     @AuthRequired
-    public static WebSocket<String> connectToWhiteboard(long id) {
+    public static WebSocket<String> connectToWhiteboard(final long boardId) {
         //TODO test
 
         return WebSocket.withActor(new F.Function<ActorRef, Props>() {
             @Override
             public Props apply(ActorRef outActor) throws Throwable {
-                return Props.create(WebSocketInActor.class, outActor, "board1");
+                return Props.create(WebSocketInActor.class, outActor, boardId);
             }
         });
     }

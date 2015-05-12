@@ -6,18 +6,18 @@ import akka.actor.ActorRef;
  * Created by Flo on 09.05.2015.
  */
 public class WebSocketConnection {
-    private String boardName;
+    private long boardId;
     private ActorRef in;
     private ActorRef out;
 
-    public WebSocketConnection(String boardName, ActorRef in, ActorRef out) {
-        this.boardName = boardName;
+    public WebSocketConnection(long boardId, ActorRef in, ActorRef out) {
+        this.boardId = boardId;
         this.in = in;
         this.out = out;
     }
 
-    public String getBoardName() {
-        return boardName;
+    public long getBoardId() {
+        return boardId;
     }
 
     /**

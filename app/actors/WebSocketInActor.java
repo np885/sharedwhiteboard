@@ -1,16 +1,21 @@
 package actors;
 
+import actors.events.sockets.BoardUserOpenEvent;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import play.Logger;
 import play.api.libs.json.Json;
+import play.libs.Akka;
 
 public class WebSocketInActor extends UntypedActor {
-    private String boardName;
+    private long boardId;
     private ActorRef out;
 
-    public WebSocketInActor(ActorRef out, String boardName) {
+    public WebSocketInActor(ActorRef out, long boardId) {
+        this.boardId = boardId;
         this.out = out;
+        BoardUserOpenEvent event = new BoardUserOpenEvent(new WebSocketConnection(boardId, self(), out));
+        Akka.system().eventStream().publish(event);
     }
 
     @Override

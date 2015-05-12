@@ -31,7 +31,7 @@ public class WebSocketInActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        System.out.println("client sendet via socket zum server: " + message);
+        Logger.debug("client via socket -> server: " + message);
         out.tell(message, self());
     }
 

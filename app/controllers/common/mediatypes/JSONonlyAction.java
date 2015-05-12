@@ -19,7 +19,7 @@ public class JSONonlyAction extends Action.Simple {
     public F.Promise<Result> call(Http.Context context) throws Throwable {
         String[] contentTypeHeader = context.request().headers().get("Content-Type");
         contentTypeHeader = (contentTypeHeader == null || contentTypeHeader.length == 0) ? null: contentTypeHeader[0].split(";");
-        System.out.println(Arrays.toString(contentTypeHeader));
+
         if (contentTypeHeader == null || contentTypeHeader.length == 0 ||
                 (!contentTypeHeader[0].equalsIgnoreCase("text/json") && !contentTypeHeader[0].equalsIgnoreCase("application/json"))) {
             return unsopportedMediaType;

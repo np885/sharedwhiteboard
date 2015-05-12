@@ -15,13 +15,13 @@ public class Global extends GlobalSettings{
 
     @Override
     public void onStart(Application application) {
-        System.out.println("Application started :-)");
+        Logger.info("Application started :-) Global Object active!");
         applicationActorRef = Akka.system().actorOf(Props.create(ApplicationActor.class), ApplicationActor.NAME);
     }
 
     @Override
     public void onStop(Application application) {
-        System.out.println("Lets kill the ApplicationActor");
+        Logger.info("Application stops; Global Object poisining ApplicationActor!");
         applicationActorRef.tell(PoisonPill.getInstance(), applicationActorRef);
 
     }

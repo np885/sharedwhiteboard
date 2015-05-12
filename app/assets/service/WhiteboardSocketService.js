@@ -10,23 +10,29 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
     };
 
     service.openSocketConnection = function(){
-        connection = new WebSocket(websocketPath);
+        //try to create ticket:
+        $http.post(websocketPath).success(function(data, status, headers, config) {
+            //on success: create socket. Path of ticket will be send by server in Location Header.
+            connection = new WebSocket(headers('Location'));
 
-        connection.onopen = function () {
-            //connection.send('Ping'); // Send the message 'Ping' to the server
-        };
+            connection.onopen = function () {
+                //connection.send('Ping'); // Send the message 'Ping' to the server
+            };
 
-        connection.onmessage = function (e) {
-            console.log(e.data);
-            var e = JSON.parse(e.data);
-            fkt(e.lastX, e.lastY, e.currentX, e.currentY);
-        };
+            connection.onmessage = function (e) {
+                console.log(e.data);
+                var e = JSON.parse(e.data);
+                fkt(e.lastX, e.lastY, e.currentX, e.currentY);
+            };
 
-        // Log errors
-        connection.onerror = function (error) {
-            console.log('WebSocket Error ' + error);
-        };
+            // Log errors
+            connection.onerror = function (error) {
+                console.log('WebSocket Error ' + error);
+            };
+        });;
     };
+
+
     service.closeConnection = function(){
       connection.close();
     };

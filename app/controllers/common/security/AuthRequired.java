@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @see JSONonlyAction
+ * @see AuthenticationAction
  */
 @With(AuthenticationAction.class)
 @Target({ElementType.TYPE, ElementType.METHOD})

@@ -35,7 +35,8 @@ public class WhiteboardMapper {
 
         dto.setName(whiteboard.getName());
         dto.setId(whiteboard.getId());
-        dto.setSocket(new XHref("connect", Paths.SocketPathForWhiteboard(whiteboard), null, null));
+        dto.setSocket(new XHref("connect", Paths.TicketPathForSockets(whiteboard), XHref.POST, null));
+
         dto.setOwner(new XHref(null, Paths.USERS_FULL, null, new UserDescription(whiteboard.getOwner().getUsername())));
         for (User u : whiteboard.getCollaborators()) {
             dto.getCollaborators().add(new XHref(null, Paths.USERS_FULL, null, new UserDescription(u.getUsername())));

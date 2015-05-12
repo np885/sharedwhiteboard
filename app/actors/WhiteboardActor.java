@@ -1,6 +1,7 @@
 package actors;
 
 import actors.events.sockets.BoardUserOpenEvent;
+import actors.serialization.SessionEventSerializationUtil;
 import akka.actor.UntypedActor;
 import play.Logger;
 
@@ -22,7 +23,16 @@ public class WhiteboardActor extends UntypedActor {
     @Override
     public void onReceive(Object message) throws Exception {
         if(message instanceof BoardUserOpenEvent){
-            WebSocketConnection connection = ((BoardUserOpenEvent) message).getConnection();
+            BoardUserOpenEvent event = (BoardUserOpenEvent) message;
+            WebSocketConnection connection = event.getConnection();
+
+            //Tell everyone about the new connection:
+            for (WebSocketConnection c : socketConnections) {
+                String outputJSON = SessionEventSerializationUtil.serialize(event);
+                c.getOut().tell(outputJSON, self());
+            }
+
+            //Add connection to list:
             socketConnections.add(connection);
         }
     }

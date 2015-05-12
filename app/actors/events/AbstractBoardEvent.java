@@ -1,13 +1,14 @@
 package actors.events;
 
 public abstract class AbstractBoardEvent {
-    private String boardName;
 
-    public String getBoardName() {
-        return boardName;
+    private long boardId;
+
+    public long getBoardId() {
+        return boardId;
     }
 
-    public void setBoardName(String boardName) {
-        this.boardName = boardName;
+    public void setBoardId(long boardId) {
+        this.boardId = boardId;
     }
 }

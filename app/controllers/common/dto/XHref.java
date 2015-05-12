@@ -60,7 +60,7 @@ public class XHref {
      *                    into a {@link TemplateWrapperDTO} to serve the client as requestbody template</i>
      */
     public void setDescription(Object description) {
-        if (method != null && (method.equals(POST) || method.equals(PUT))) {
+        if (method != null && description != null && (method.equals(POST) || method.equals(PUT))) {
             this.description = new TemplateWrapperDTO(description);
         } else {
             this.description = description;

@@ -63,7 +63,8 @@ class TestDataUtil {
     public void assertDto(WhiteboardReadDTO dto) {
         Assert.assertEquals(WHITEBOARD_NAME, dto.getName());
         Assert.assertEquals("Whiteboard ID", ID_WHITEBOARD, dto.getId());
-        Assert.assertTrue(dto.getSocket().getHref().startsWith("ws://"));
+
+        Assert.assertEquals("Connection-Rel Attribute of Socket Link", "connect", dto.getSocket().getRel());
         Assert.assertEquals(OWNER_NAME, ((WhiteboardMapper.UserDescription) dto.getOwner().getDescription()).getUsername());
 
         List<String> collaboratorNames = new ArrayList<>();

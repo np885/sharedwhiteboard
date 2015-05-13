@@ -16,8 +16,7 @@ public class WebSocketInActor extends UntypedActor {
         this.boardId = boardId;
         this.out = out;
 
-        BoardUserOpenEvent event = new BoardUserOpenEvent(new WebSocketConnection(boardId, self(), out));
-        event.setUser(user);
+        BoardUserOpenEvent event = new BoardUserOpenEvent(new WebSocketConnection(boardId, user, self(), out));
         Akka.system().eventStream().publish(event);
     }
 

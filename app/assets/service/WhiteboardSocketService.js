@@ -12,7 +12,8 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
     //List of hanlded Events:
     var handledServerEvents = {
-        'BoardUserOpenEvent' : new SocketServerEvent('BoardUserOpenEvent')
+        'BoardUserOpenEvent' : new SocketServerEvent('BoardUserOpenEvent'),
+        'InitialBoardStateEvent' : new SocketServerEvent('InitialBoardStateEvent')
     };
 
     var service = {};

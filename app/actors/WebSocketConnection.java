@@ -1,17 +1,20 @@
 package actors;
 
 import akka.actor.ActorRef;
+import model.user.entities.User;
 
 /**
  * Created by Flo on 09.05.2015.
  */
 public class WebSocketConnection {
     private long boardId;
+    private User user;
     private ActorRef in;
     private ActorRef out;
 
-    public WebSocketConnection(long boardId, ActorRef in, ActorRef out) {
+    public WebSocketConnection(long boardId, User user, ActorRef in, ActorRef out) {
         this.boardId = boardId;
+        this.user = user;
         this.in = in;
         this.out = out;
     }
@@ -32,5 +35,9 @@ public class WebSocketConnection {
      */
     public ActorRef getOut() {
         return out;
+    }
+
+    public User getUser() {
+        return user;
     }
 }

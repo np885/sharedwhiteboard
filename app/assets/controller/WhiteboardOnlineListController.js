@@ -18,4 +18,11 @@ function($scope, whiteboardSocketService){
             $scope.collaborators.push(new Collaborator(boardUserOpenEvent.userId, boardUserOpenEvent.username, true));
         });
     });
+    whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
+        $scope.$apply(function() {
+            initStateEvent.colaborators.forEach(function (collab) {
+                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, true));
+            });
+        });
+    });
 }]);

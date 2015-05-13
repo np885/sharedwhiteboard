@@ -46,7 +46,9 @@ public class WhiteboardActor extends UntypedActor {
             //tell the new connection the initial State:
             connection.getOut().tell(produceCurrentStateRepresentation(), self());
         } else if (message instanceof FreeHandEvent) {
-            System.out.println("yay freehand!");
+            for (WebSocketConnection c : socketConnections) {
+                c.getOut().tell(Json.stringify(Json.toJson(message)), self());
+            }
         }
     }
 

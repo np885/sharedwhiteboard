@@ -17,17 +17,19 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             var currentX;
             var currentY;
 
-            var drawLine = function(lX, lY, cX, cY){
+            var drawLine = function(freeHandEvent){
                 // line from
-                ctx.moveTo(lX,lY);
+                ctx.moveTo(freeHandEvent.xStart, freeHandEvent.yStart);
                 // to
-                ctx.lineTo(cX,cY);
+                ctx.lineTo(freeHandEvent.xEnd, freeHandEvent.yEnd);
                 // color
                 ctx.strokeStyle = '#4bf';
                 // draw it
                 ctx.stroke();
             };
-            WhiteboardSocketService.setFkt(drawLine);
+
+            WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLine);
+
             element.bind('mousedown', function(event){
                 if(event.offsetX!==undefined){
                     lastX = event.offsetX;
@@ -64,10 +66,7 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     payload.yEnd = currentY;
                     payload.boardElementId = 4711;//later useful
 
-                    console.log(JSON.stringify(payload));
-
                     WhiteboardSocketService.send(JSON.stringify(payload));
-                    //drawLine(lastX, lastY, currentX, currentY);
 
                     // set current coordinates to last one
                     lastX = currentX;

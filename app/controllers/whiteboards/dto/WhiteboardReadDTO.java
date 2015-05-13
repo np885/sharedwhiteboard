@@ -1,14 +1,23 @@
 package controllers.whiteboards.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import controllers.common.Paths;
 import controllers.common.dto.XHref;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Flo on 06.05.2015.
  */
+@JsonPropertyOrder({"href"})
 public class WhiteboardReadDTO {
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String href;
+
     private String name;
     private long id;
 
@@ -29,6 +38,7 @@ public class WhiteboardReadDTO {
     }
 
     public void setId(long id) {
+        this.href = Paths.forWhiteboardId(id);
         this.id = id;
     }
 

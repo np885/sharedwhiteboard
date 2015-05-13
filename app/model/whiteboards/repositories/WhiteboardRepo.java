@@ -62,4 +62,31 @@ public class WhiteboardRepo {
             return null;
         }
     }
+
+    /**
+     *  will load the lazy collaborators.
+     *
+     * @param id the id of the whiteboard to find
+     * @return null, if no Whiteboard found for the given id.
+     */
+    public Whiteboard getWhiteboardForId(final long id) {
+        try {
+            return JPA.withTransaction(new F.Function0<Whiteboard>() {
+                @Override
+                public Whiteboard apply() throws Throwable {
+                    List<Whiteboard> wbList =
+                            JPA.em().createQuery("" +
+                                            "SELECT DISTINCT w" +
+                                            "   FROM Whiteboard w LEFT JOIN FETCH w.collaborators" +
+                                            "   WHERE w.id = :id"
+                            ).setParameter("id", id).getResultList();
+
+                    return (wbList.size() == 0) ? null : wbList.get(0);
+                }
+            });
+        } catch (Throwable throwable) {
+            Logger.error("", throwable);
+            return null;
+        }
+    }
 }

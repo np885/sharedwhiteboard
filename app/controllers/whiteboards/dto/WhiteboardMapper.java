@@ -10,6 +10,7 @@ import model.whiteboards.entities.Whiteboard;
  */
 public class WhiteboardMapper {
 
+
     public static class UserDescription {
         private String username;
 
@@ -33,6 +34,20 @@ public class WhiteboardMapper {
     public static WhiteboardReadDTO mapEntityToReadDTO(Whiteboard whiteboard) {
         WhiteboardReadDTO dto = new WhiteboardReadDTO();
 
+        mapCommonReadDTOProps(whiteboard, dto);
+
+        return dto;
+    }
+
+    public static WhiteboardReadDetailDTO mapEntityToReadDetailDTO(Whiteboard whiteboard) {
+        WhiteboardReadDetailDTO dto = new WhiteboardReadDetailDTO();
+
+        mapCommonReadDTOProps(whiteboard, dto);
+
+        return dto;
+    }
+
+    private static void mapCommonReadDTOProps(Whiteboard whiteboard, WhiteboardReadDTO dto) {
         dto.setName(whiteboard.getName());
         dto.setId(whiteboard.getId());
         dto.setSocket(new XHref("connect", Paths.TicketPathForSockets(whiteboard), XHref.POST, null));
@@ -41,7 +56,6 @@ public class WhiteboardMapper {
         for (User u : whiteboard.getCollaborators()) {
             dto.getCollaborators().add(new XHref(null, Paths.USERS_FULL, null, new UserDescription(u.getUsername())));
         }
-
-        return dto;
     }
+
 }

@@ -3,22 +3,23 @@
 # ~~~~
 
 # Home page
-GET         /                    controllers.Application.index
+GET         /                                       controllers.Application.index
 
 
 #User Management:
-GET         /login               controllers.users.UserManagementController.checkLoginCredentials()
-POST        /register            controllers.users.UserManagementController.registerUser()
-GET         /users               controllers.users.UserCollectionController.getAllUsers()
+GET         /login                                  controllers.users.UserManagementController.checkLoginCredentials()
+POST        /register                               controllers.users.UserManagementController.registerUser()
+GET         /users                                  controllers.users.UserCollectionController.getAllUsers()
 
 #Whiteboard Management:
-GET         /whiteboards        controllers.whiteboards.WhiteboardCollectionController.getWhiteboardCollection()
-POST        /whiteboards        controllers.whiteboards.WhiteboardCollectionController.createNewWhiteboard()
-GET         /whiteboards/:id/session/:ticket    controllers.whiteboards.WhiteboardSessionController.connectToWhiteboard(id: Long, ticket: String)
-POST        /whiteboards/:id/session/ticket    controllers.whiteboards.WhiteboardSessionController.createTicket(id: Long)
+GET         /whiteboards                            controllers.whiteboards.WhiteboardCollectionController.getWhiteboardCollection()
+POST        /whiteboards                            controllers.whiteboards.WhiteboardCollectionController.createNewWhiteboard()
+GET         /whiteboards/:id                        controllers.whiteboards.WhiteboardItemController.get(id: Long)
+GET         /whiteboards/:id/session/:ticket        controllers.whiteboards.WhiteboardSessionController.connectToWhiteboard(id: Long, ticket: String)
+POST        /whiteboards/:id/session/ticket         controllers.whiteboards.WhiteboardSessionController.createTicket(id: Long)
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file        controllers.Assets.at(path="/public", file)
+GET         /assets/*file                           controllers.Assets.at(path="/public", file)
 
 
     

@@ -15,6 +15,9 @@ public class Paths {
     public static String forWhiteboard(Whiteboard wb) {
         return WHITEBOARDS_FULL + "/" + wb.getId();
     }
+    public static String forWhiteboardId(long id) {
+        return WHITEBOARDS_FULL + "/" + id;
+    }
 
 
     public static String TicketPathForSockets(Whiteboard whiteboard) {

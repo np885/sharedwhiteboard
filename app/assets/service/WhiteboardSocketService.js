@@ -1,37 +1,66 @@
 'use strict';
 
 app.service('WhiteboardSocketService',[ '$http', function ($http) {
-    var service = {};
-    var websocketPath;
-    var connection;
-    var fkt;
-    service.setWebsocketPath = function(path){
-        websocketPath = path;
+    //Event 'class'
+    function SocketServerEvent(eventType) {
+        this.eventType = eventType;
+        this.callbacks = [];
+    }
+    SocketServerEvent.prototype.registerCallback = function(callback){
+        this.callbacks.push(callback);
+    }
+
+    //List of hanlded Events:
+    var handledServerEvents = {
+        'BoardUserOpenEvent' : new SocketServerEvent('BoardUserOpenEvent')
     };
+
+    var service = {};
+    var websocketTicketPath;
+    var connection;
+    var drawFunction;
+
+    service.setWebsocketPath = function(path){
+        websocketTicketPath = path;
+    };
+
+    service.registerForSocketEvent = function(eventName, theCallback) {
+        handledServerEvents[eventName].callbacks.push(theCallback);
+    }
+
+    service.dispatchServerEvent = function(e) {
+        if (e.eventType != null) {
+            //execute all callbacks that are registered for that type of server event:
+            handledServerEvents[e.eventType].callbacks.forEach(function(registeredCallback) {
+                registeredCallback(e);
+            })
+        } else {
+            drawFunction(e.lastX, e.lastY, e.currentX, e.currentY);
+        }
+    }
 
     service.openSocketConnection = function(){
-        //try to create ticket:
-        $http.post(websocketPath).success(function(data, status, headers, config) {
-            //on success: create socket. Path of ticket will be send by server in Location Header.
-            connection = new WebSocket(headers('Location'));
+        //try to create a connection ticket:
+        $http.post(websocketTicketPath)
+            .success(function(data, status, headers, config) {
+                //on success: connect to socket. Path of ticket will be send by server in Location Header.
+                connection = new WebSocket(headers('Location'));
 
-            connection.onopen = function () {
-                //connection.send('Ping'); // Send the message 'Ping' to the server
-            };
+                connection.onopen = function () {
+                    //connection.send('Ping'); // Send the message 'Ping' to the server
+                };
 
-            connection.onmessage = function (e) {
-                console.log(e.data);
-                var e = JSON.parse(e.data);
-                fkt(e.lastX, e.lastY, e.currentX, e.currentY);
-            };
+                connection.onmessage = function (e) {
+                    var event = JSON.parse(e.data);
+                    service.dispatchServerEvent(event);
+                };
 
-            // Log errors
-            connection.onerror = function (error) {
-                console.log('WebSocket Error ' + error);
-            };
-        });;
+                // Log errors
+                connection.onerror = function (error) {
+                    console.log('WebSocket Error ' + error);
+                };
+            });
     };
-
 
     service.closeConnection = function(){
       connection.close();
@@ -42,7 +71,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
     };
 
     service.setFkt = function(fktCallback){
-        fkt = fktCallback;
+        drawFunction = fktCallback;
     }
 
 

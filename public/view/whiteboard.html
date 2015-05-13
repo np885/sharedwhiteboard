@@ -1,3 +1,12 @@
 <div>whiteboard {{ boardId }}</div>
 
 <canvas width="500" height="300" id="canvas" style="border: 1px solid lime" drawing></canvas>
+
+<div ng-controller="WhiteboardOnlineListController">
+    <h3>Online:</h3>
+    <ul>
+        <li ng-repeat="collab in collaborators" title="User ID: {{collab.id}}">
+            {{collab.name}} ist online.
+        </li>
+    </ul>
+</div>

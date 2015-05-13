@@ -1,8 +1,9 @@
-package actors.events.draw;
+package actors.events.socket.draw;
 
 import actors.events.AbstractBoardEvent;
+import actors.events.SocketEvent;
 
-public abstract class DrawEvent extends AbstractBoardEvent {
+public abstract class DrawEvent extends SocketEvent {
     /* common representation for the client:
         {
             eventtype : '',

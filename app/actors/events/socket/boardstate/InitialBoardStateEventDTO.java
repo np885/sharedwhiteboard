@@ -1,13 +1,13 @@
-package actors.serialization.boardstate;
+package actors.events.socket.boardstate;
 
-import actors.serialization.AbstractSocketOutDTO;
+import actors.events.SocketEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  */
-public class InitialBoardStateEventDTO extends AbstractSocketOutDTO {
+public class InitialBoardStateEventDTO extends SocketEvent {
     private List<Collab> colaborators = new ArrayList<>();
 
     @Override

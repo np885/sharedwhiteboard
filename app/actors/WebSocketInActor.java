@@ -1,12 +1,15 @@
 package actors;
 
-import actors.events.sockets.BoardUserOpenEvent;
+import actors.events.intern.boardsessions.BoardUserOpenEvent;
+import actors.events.SocketEvent;
+import actors.events.socket.draw.FreeHandEvent;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import com.fasterxml.jackson.databind.JsonNode;
 import model.user.entities.User;
 import play.Logger;
-import play.api.libs.json.Json;
 import play.libs.Akka;
+import play.libs.Json;
 
 public class WebSocketInActor extends UntypedActor {
     private long boardId;
@@ -28,10 +31,27 @@ public class WebSocketInActor extends UntypedActor {
     }
 
 
+
+
     @Override
     public void onReceive(Object message) throws Exception {
         Logger.debug("client via socket -> server: " + message);
-        out.tell(message, self());
+        JsonNode parsedMessage = Json.parse((String) message);
+        String eventType = parsedMessage.get("eventType").asText();
+        switch (eventType) {
+            case "FreeHandEvent":
+                FreeHandEvent freeHandEvent = Json.fromJson(parsedMessage, FreeHandEvent.class);
+                ActorRef boardActorRef = Akka.system().actorFor("user/whiteboards-" + boardId);
+
+                if (!boardActorRef.isTerminated()) {
+                    boardActorRef.tell(freeHandEvent, self());
+                }
+                break;
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Json.toJson(new FreeHandEvent()));
     }
 
 }

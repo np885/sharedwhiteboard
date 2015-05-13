@@ -1,9 +1,10 @@
 package actors;
 
-import actors.events.sockets.BoardUserOpenEvent;
-import actors.serialization.boardsessions.SessionEventSerializationUtil;
-import actors.serialization.boardstate.Collab;
-import actors.serialization.boardstate.InitialBoardStateEventDTO;
+import actors.events.intern.boardsessions.BoardUserOpenEvent;
+import actors.events.socket.boardsessions.SessionEventSerializationUtil;
+import actors.events.socket.boardstate.Collab;
+import actors.events.socket.boardstate.InitialBoardStateEventDTO;
+import actors.events.socket.draw.FreeHandEvent;
 import akka.actor.UntypedActor;
 import play.Logger;
 import play.libs.Json;
@@ -16,7 +17,7 @@ public class WhiteboardActor extends UntypedActor {
     private List<WebSocketConnection> socketConnections = new ArrayList<>();
 
     public WhiteboardActor(WebSocketConnection connection) {
-        Logger.debug("Creating Whiteboard Actor: " + self().path());
+        Logger.info("Creating Whiteboard Actor: " + self().path());
 
         this.boardId = connection.getBoardId();
 
@@ -44,6 +45,8 @@ public class WhiteboardActor extends UntypedActor {
 
             //tell the new connection the initial State:
             connection.getOut().tell(produceCurrentStateRepresentation(), self());
+        } else if (message instanceof FreeHandEvent) {
+            System.out.println("yay freehand!");
         }
     }
 

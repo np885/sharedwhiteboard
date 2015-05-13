@@ -56,15 +56,16 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     lastPoint.x = currentX;
                     lastPoint.y = currentY;
 
-                    var currentPoint = {};
-                    currentPoint.x = currentX;
-                    currentPoint.y = currentY;
                     var payload = {};
-                    payload.lastX = lastX;
-                    payload.lastY = lastY;
-                    payload.currentX = currentX;
-                    payload.currentY = currentY;
+                    payload.eventType = "FreeHandEvent";
+                    payload.xStart = lastX;
+                    payload.yStart = lastY;
+                    payload.xEnd = currentX;
+                    payload.yEnd = currentY;
+                    payload.boardElementId = 4711;//later useful
+
                     console.log(JSON.stringify(payload));
+
                     WhiteboardSocketService.send(JSON.stringify(payload));
                     //drawLine(lastX, lastY, currentX, currentY);
 

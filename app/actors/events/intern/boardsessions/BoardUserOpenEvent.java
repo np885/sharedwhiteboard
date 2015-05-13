@@ -1,4 +1,4 @@
-package actors.events.sockets;
+package actors.events.intern.boardsessions;
 
 import actors.WebSocketConnection;
 

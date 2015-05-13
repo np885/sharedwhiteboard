@@ -1,13 +1,16 @@
-package actors.serialization.boardstate;
+package actors.events.socket.boardsessions;
 
-public class Collab {
+import actors.events.SocketEvent;
+
+public class BoardUserOpenEvent extends SocketEvent {
+
+    @Override
+    public String getEventType() {
+        return "BoardUserOpenEvent";
+    }
+
     private long userId;
     private String username;
-
-    public Collab(long userId, String username) {
-        this.userId = userId;
-        this.username = username;
-    }
 
     public long getUserId() {
         return userId;

@@ -1,13 +1,12 @@
-package actors.serialization.boardsessions;
+package actors.events.socket.boardsessions;
 
-import actors.events.sockets.BoardUserOpenEvent;
 import play.libs.Json;
 
 public class SessionEventSerializationUtil {
     //TODO doc
-    public static String serialize(BoardUserOpenEvent event) {
+    public static String serialize(actors.events.intern.boardsessions.BoardUserOpenEvent event) {
         //TODO test
-        BoardUserOpenEventDTO dto = new BoardUserOpenEventDTO();
+        BoardUserOpenEvent dto = new BoardUserOpenEvent();
         dto.setUserId(event.getConnection().getUser().getId());
         dto.setUsername(event.getConnection().getUser().getUsername());
 

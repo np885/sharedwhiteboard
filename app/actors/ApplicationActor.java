@@ -1,12 +1,10 @@
 package actors;
 
-import actors.events.sockets.BoardSessionEvent;
-import actors.events.sockets.BoardUserOpenEvent;
+import actors.events.intern.boardsessions.BoardSessionEvent;
+import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
-import javassist.tools.web.Webserver;
-import play.Logger;
 import play.libs.Akka;
 
 import java.util.HashMap;

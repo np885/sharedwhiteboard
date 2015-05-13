@@ -1,15 +1,13 @@
-package actors.serialization.boardsessions;
+package actors.events.socket.boardstate;
 
-import actors.serialization.AbstractSocketOutDTO;
-
-public class BoardUserOpenEventDTO extends AbstractSocketOutDTO {
-
-    @Override
-    public String getEventType() {
-        return "BoardUserOpenEvent";
-    }
+public class Collab {
     private long userId;
     private String username;
+
+    public Collab(long userId, String username) {
+        this.userId = userId;
+        this.username = username;
+    }
 
     public long getUserId() {
         return userId;

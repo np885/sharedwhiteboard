@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  */
-public class InitialBoardStateEventDTO extends SocketEvent {
+public class InitialBoardStateEvent extends SocketEvent {
     private List<Collab> colaborators = new ArrayList<>();
 
     @Override

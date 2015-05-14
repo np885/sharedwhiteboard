@@ -1,7 +1,5 @@
 package actors.events.socket.draw;
 
-import actors.events.SocketEvent;
-
 /**
  */
 public class FreeHandEvent extends DrawEvent {

@@ -2,5 +2,5 @@ package actors.events;
 
 /**
  */
-public interface ServerInternEvent {
+public interface ServerInternEvent extends SWBEvent {
 }

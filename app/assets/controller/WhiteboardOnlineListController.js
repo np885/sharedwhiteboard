@@ -12,7 +12,6 @@ function($scope, whiteboardSocketService){
     $scope.collaborators = [];
 
     whiteboardSocketService.registerForSocketEvent('BoardUserOpenEvent', function(boardUserOpenEvent) {
-        console.log(boardUserOpenEvent);
         $scope.$apply(function() {
             //need scope-apply cause we are out of angular digest cycle, when the server sends events and calls this callback
             $scope.collaborators.push(new Collaborator(boardUserOpenEvent.userId, boardUserOpenEvent.username, true));
@@ -22,6 +21,15 @@ function($scope, whiteboardSocketService){
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
                 $scope.collaborators.push(new Collaborator(collab.userId, collab.username, true));
+            });
+        });
+    });
+    whiteboardSocketService.registerForSocketEvent('BoardUserCloseEvent', function(boardUserCloseEvent) {
+        $scope.$apply(function() {
+            $scope.collaborators = $scope.collaborators.filter(function (colab) {
+                //filter function: return true if element should sty in array
+                //  => delete the disco-User:
+                return colab.name !== boardUserCloseEvent.username;
             });
         });
     });

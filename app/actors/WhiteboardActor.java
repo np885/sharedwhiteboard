@@ -1,9 +1,10 @@
 package actors;
 
+import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.boardstate.Collab;
-import actors.events.socket.boardstate.InitialBoardStateEventDTO;
+import actors.events.socket.boardstate.InitialBoardStateEvent;
 import actors.events.socket.draw.FreeHandEvent;
 import akka.actor.UntypedActor;
 import play.Logger;
@@ -36,6 +37,7 @@ public class WhiteboardActor extends UntypedActor {
 
             //Tell everyone about the new connection:
             for (WebSocketConnection c : socketConnections) {
+                System.out.println("telling about new user...");
                 String outputJSON = SessionEventSerializationUtil.serialize(event);
                 c.getOut().tell(outputJSON, self());
             }
@@ -45,6 +47,17 @@ public class WhiteboardActor extends UntypedActor {
 
             //tell the new connection the initial State:
             connection.getOut().tell(produceCurrentStateRepresentation(), self());
+        } else if (message instanceof BoardUserCloseEvent) {
+            BoardUserCloseEvent event = (BoardUserCloseEvent) message;
+
+            boolean removedConnection = socketConnections.remove(event.getConnection());
+            if (!removedConnection) {
+                Logger.error("Connection not properly removed!");
+            }
+            for (WebSocketConnection c : socketConnections) {
+                c.getOut().tell(SessionEventSerializationUtil.serialize(event), self());
+            }
+
         } else if (message instanceof FreeHandEvent) {
             for (WebSocketConnection c : socketConnections) {
                 c.getOut().tell(Json.stringify(Json.toJson(message)), self());
@@ -53,7 +66,7 @@ public class WhiteboardActor extends UntypedActor {
     }
 
     private String produceCurrentStateRepresentation() {
-        InitialBoardStateEventDTO dto = new InitialBoardStateEventDTO();
+        InitialBoardStateEvent dto = new InitialBoardStateEvent();
         for (WebSocketConnection c : socketConnections) {
             dto.getColaborators().add(new Collab(c.getUser().getId(), c.getUser().getUsername()));
         }

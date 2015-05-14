@@ -1,5 +1,7 @@
 package actors;
 
+import actors.events.SWBEvent;
+import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.SocketEvent;
 import actors.events.socket.draw.FreeHandEvent;
@@ -12,22 +14,27 @@ import play.libs.Akka;
 import play.libs.Json;
 
 public class WebSocketInActor extends UntypedActor {
-    private long boardId;
-    private ActorRef out;
+    private final long boardId;
+    private final ActorRef out;
+    private final WebSocketConnection socketConnection;
+
+    private ActorRef boardActorRef;
 
     public WebSocketInActor(ActorRef out, long boardId, User user) {
         this.boardId = boardId;
         this.out = out;
 
-        BoardUserOpenEvent event = new BoardUserOpenEvent(new WebSocketConnection(boardId, user, self(), out));
+        this.socketConnection = new WebSocketConnection(boardId, user, self(), out);
+        BoardUserOpenEvent event = new BoardUserOpenEvent(socketConnection);
         Akka.system().eventStream().publish(event);
     }
 
     @Override
     public void postStop() throws Exception {
-        super.postStop();
-
         Logger.debug("SOCKET ACTOR '" + this.toString() + "' WAS KILLED!");
+
+        tellMyWhiteboardActor(new BoardUserCloseEvent(this.socketConnection));
+        super.postStop();
     }
 
 
@@ -41,17 +48,18 @@ public class WebSocketInActor extends UntypedActor {
         switch (eventType) {
             case "FreeHandEvent":
                 FreeHandEvent freeHandEvent = Json.fromJson(parsedMessage, FreeHandEvent.class);
-                ActorRef boardActorRef = Akka.system().actorFor("user/whiteboards-" + boardId);
-
-                if (!boardActorRef.isTerminated()) {
-                    boardActorRef.tell(freeHandEvent, self());
-                }
+                tellMyWhiteboardActor(freeHandEvent);
                 break;
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(Json.toJson(new FreeHandEvent()));
+
+    private void tellMyWhiteboardActor(SWBEvent event) {
+         if (boardActorRef == null) {
+             boardActorRef = Akka.system().actorFor("user/whiteboards-" + boardId);
+         }
+
+        boardActorRef.tell(event, self());
     }
 
 }

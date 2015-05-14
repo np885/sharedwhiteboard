@@ -2,13 +2,9 @@ package actors.events.socket.boardsessions;
 
 import actors.events.SocketEvent;
 
-public class BoardUserOpenEvent extends SocketEvent {
-
-    @Override
-    public String getEventType() {
-        return "BoardUserOpenEvent";
-    }
-
+/**
+ */
+public abstract class AbstractBoardUserSocketEvent extends SocketEvent {
     private long userId;
     private String username;
 

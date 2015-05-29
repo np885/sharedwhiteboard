@@ -14,3 +14,21 @@
     text-align: center;
     padding-bottom: 10px;
 }
+.canvas{
+    border: 1px solid #333333;
+}
+.whiteboardlist{
+    max-height: 600px;
+    overflow-y: scroll;
+}
+.whiteboardsidebar{
+    margin-top: 56px;
+}
+.whiteboardsidebarlist{
+    max-height: 250px;
+    overflow-y: scroll;
+}
+.panelnobottom{
+    margin-bottom: 0px !important;
+}
+

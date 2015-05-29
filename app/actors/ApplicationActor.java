@@ -1,10 +1,12 @@
 package actors;
 
+import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import play.Logger;
 import play.libs.Akka;
 
 import java.util.HashMap;
@@ -19,13 +21,21 @@ public class ApplicationActor extends UntypedActor {
 
     public ApplicationActor() {
         Akka.system().eventStream().subscribe(self(), BoardSessionEvent.class);
+        Akka.system().eventStream().subscribe(self(), BoardActorClosedEvent.class);
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
         if(message instanceof BoardUserOpenEvent){
             onBoardUserOpenEvent((BoardUserOpenEvent) message);
+        } else if (message instanceof BoardActorClosedEvent) {
+            onBoardActorClosedEvent((BoardActorClosedEvent) message);
         }
+    }
+
+    private void onBoardActorClosedEvent(BoardActorClosedEvent message) {
+        Logger.debug("Removed closed BoardActor with id=" + message.getBoardId());
+        boardActors.remove(message.getBoardId());
     }
 
     /**

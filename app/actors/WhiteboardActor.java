@@ -1,13 +1,16 @@
 package actors;
 
+import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.boardstate.Collab;
 import actors.events.socket.boardstate.InitialBoardStateEvent;
 import actors.events.socket.draw.FreeHandEvent;
+import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import play.Logger;
+import play.libs.Akka;
 import play.libs.Json;
 
 import java.util.ArrayList;
@@ -64,6 +67,10 @@ public class WhiteboardActor extends UntypedActor {
                 c.getOut().tell(SessionEventSerializationUtil.serialize(event), self());
             }
 
+            if (socketConnections.isEmpty()) {
+                Akka.system().eventStream().publish(new BoardActorClosedEvent(boardId));
+                self().tell(PoisonPill.getInstance(), self());
+            }
         } else if (message instanceof FreeHandEvent) {
             freeHandEvents.add((FreeHandEvent) message);
             for (WebSocketConnection c : socketConnections) {

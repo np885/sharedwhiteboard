@@ -16,6 +16,7 @@ import java.util.List;
 public class WhiteboardActor extends UntypedActor {
     private long boardId;
     private List<WebSocketConnection> socketConnections = new ArrayList<>();
+    private List<FreeHandEvent> freeHandEvents = new ArrayList<>();
 
     public WhiteboardActor(WebSocketConnection connection) {
         Logger.info("Creating Whiteboard Actor: " + self().path());
@@ -47,6 +48,11 @@ public class WhiteboardActor extends UntypedActor {
 
             //tell the new connection the initial State:
             connection.getOut().tell(produceCurrentStateRepresentation(), self());
+
+            //tell the new connection all freehandEvents of this session
+            for(FreeHandEvent freeHandEvent : freeHandEvents){
+                connection.getOut().tell(Json.stringify(Json.toJson(freeHandEvent)), self());
+            }
         } else if (message instanceof BoardUserCloseEvent) {
             BoardUserCloseEvent event = (BoardUserCloseEvent) message;
 
@@ -59,6 +65,7 @@ public class WhiteboardActor extends UntypedActor {
             }
 
         } else if (message instanceof FreeHandEvent) {
+            freeHandEvents.add((FreeHandEvent) message);
             for (WebSocketConnection c : socketConnections) {
                 c.getOut().tell(Json.stringify(Json.toJson(message)), self());
             }

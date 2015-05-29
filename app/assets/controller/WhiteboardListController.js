@@ -1,11 +1,25 @@
 'use strict';
 
 app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService',
-    function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
+function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
+    function Whiteboard(id, name, owner, collaborators, socket){
+        this.id = id;
+        this.name = name;
+        this.owner = owner;
+        this.collaborators = collaborators;
+        this.socket = socket;
+    }
+
     $scope.currentUser = AuthenticationService.getUser();
 
     $scope.whiteboards = [];
     $scope.whitboardWithMeta = {};
+
+    //TODO: We have to rework something here. At the end this should also be reactive with Socket connection.
+    $scope.dummyCollabs = [
+        {name: 'niclas', online: true, join: true},
+        {name: 'peter', online: false, join: true},
+        {name: 'hans', online: false, join: false}];
 
     $scope.openWhiteboardSocket = function(whiteboard){
         WhiteboardSocketService.setWebsocketPath(whiteboard.socket);
@@ -31,7 +45,7 @@ app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationS
                 var user = whiteboard.collaborators[j];
                 collaborators.push({name: user.description.username});
             }
-            $scope.whiteboards.push({name: whiteboard.name, id: whiteboard.id, owner: whiteboard.owner.description.username, collaborators: collaborators, socket: whiteboard.socket.href});
+            $scope.whiteboards.push(new Whiteboard(whiteboard.id, whiteboard.name, whiteboard.owner.description.username, collaborators, whiteboard.socket.href));
         }
     };
 

@@ -89,4 +89,21 @@ public class WhiteboardRepo {
             return null;
         }
     }
+
+    public Whiteboard saveWhiteboard(final Whiteboard whiteboard) {
+        try {
+            return JPA.withTransaction(new F.Function0<Whiteboard>() {
+                @Override
+                public Whiteboard apply() throws Throwable {
+                    if (whiteboard.getId() == null || whiteboard.getId().longValue() == 0) {
+                        throw new IllegalArgumentException("whiteboard not found in db");
+                    }
+                    return JPA.em().merge(whiteboard);
+                }
+            });
+        } catch (Throwable throwable) {
+            Logger.error("", throwable);
+            return null;
+        }
+    }
 }

@@ -3,8 +3,13 @@
 app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketService){
     return {
         restrict: 'A',
-        link: function(scope, element){
+        link: function(scope, element, attrs, constant){
             var ctx = element[0].getContext('2d');
+            var tool;
+
+            scope.$watch(attrs.drawing, function(value) {
+                tool = value;
+            });
 
             // variable that decides if something should be drawn on mousemove
             var drawing = false;
@@ -13,6 +18,13 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             var lastX;
             var lastY;
 
+            function FreeHandEvent(lastX, lastY, newX, newY){
+                this.lastX = lastX;
+                this.lastY = lastY;
+                this.newX = newX;
+                this.newY = newY;
+            }
+            var freeHandLine = [];
 
             var currentX;
             var currentY;
@@ -27,6 +39,7 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                 // draw it
                 ctx.stroke();
             };
+
 
             WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLine);
 
@@ -58,6 +71,8 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     lastPoint.x = currentX;
                     lastPoint.y = currentY;
 
+                    freeHandLine.push(new FreeHandEvent(lastX, lastY, currentX, currentY));
+
                     var payload = {};
                     payload.eventType = "FreeHandEvent";
                     payload.xStart = lastX;
@@ -71,11 +86,14 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     // set current coordinates to last one
                     lastX = currentX;
                     lastY = currentY;
+                    console.log(tool);
                 }
 
             });
             element.bind('mouseup', function(event){
                 // stop drawing
+
+                console.log(JSON.stringify(freeHandLine));
                 drawing = false;
             });
 

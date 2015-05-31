@@ -31,18 +31,42 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             var currentX;
             var currentY;
 
-            var drawLine = function(freeHandEvent){
+            var drawLineEvent = function(freeHandEvent){
+                drawLine(freeHandEvent.xStart, freeHandEvent.yStart,
+                    freeHandEvent.xEnd, freeHandEvent.yEnd);
+            };
+            var drawLine = function(xStart, yStart, xEnd, yEnd) {
                 // line from
-                ctx.moveTo(freeHandEvent.xStart, freeHandEvent.yStart);
+                ctx.moveTo(xStart, yStart);
                 // to
-                ctx.lineTo(freeHandEvent.xEnd, freeHandEvent.yEnd);
+                ctx.lineTo(xEnd, yEnd);
                 // color
                 ctx.strokeStyle = '#4bf';
                 // draw it
                 ctx.stroke();
             };
 
-            WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLine);
+
+            WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLineEvent);
+
+            WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
+
+                initStateEvent.drawings.forEach(function (drawing) {
+                    if (drawing.type === 'FreeHandDrawing') {
+                        var xStart, yStart;
+                        drawing.points.forEach(function (point, i) {
+                            if (i == 0) {
+                                xStart = point.x;
+                                yStart = point.y;
+                            } else {
+                                drawLine(xStart, yStart, point.x, point.y);
+                                xStart = point.x;
+                                yStart = point.y;
+                            }
+                        });
+                    }// elseif type === '...'
+                });
+            });
 
             element.bind('mousedown', function(event){
                 if(event.offsetX!==undefined){

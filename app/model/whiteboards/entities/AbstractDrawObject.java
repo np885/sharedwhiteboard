@@ -17,4 +17,21 @@ public abstract class AbstractDrawObject extends AbstractEntity {
     @JoinColumn(name = "whiteboard_id")
     private Whiteboard whiteboard;
 
+    private int boardElementId;
+
+    public int getBoardElementId() {
+        return boardElementId;
+    }
+
+    public void setBoardElementId(int boardElementId) {
+        this.boardElementId = boardElementId;
+    }
+
+    public Whiteboard getWhiteboard() {
+        return whiteboard;
+    }
+
+    public void setWhiteboard(Whiteboard whiteboard) {
+        this.whiteboard = whiteboard;
+    }
 }

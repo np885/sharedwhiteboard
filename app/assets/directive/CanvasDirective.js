@@ -18,11 +18,13 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             var lastX;
             var lastY;
 
-            function FreeHandEvent(lastX, lastY, newX, newY){
-                this.lastX = lastX;
-                this.lastY = lastY;
-                this.newX = newX;
-                this.newY = newY;
+            function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
+                this.eventType = "FreeHandEvent";
+                this.boardElementId = boardElementId;
+                this.xStart = xStart;
+                this.yStart = yStart;
+                this.xEnd = xEnd;
+                this.yEnd = yEnd;
             }
             var freeHandLine = [];
 
@@ -39,7 +41,6 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                 // draw it
                 ctx.stroke();
             };
-
 
             WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLine);
 
@@ -71,17 +72,10 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     lastPoint.x = currentX;
                     lastPoint.y = currentY;
 
-                    freeHandLine.push(new FreeHandEvent(lastX, lastY, currentX, currentY));
+                    var freeHandEvent = new FreeHandEvent(4711, lastX, lastY, currentX, currentY);
+                    freeHandLine.push(freeHandEvent);
 
-                    var payload = {};
-                    payload.eventType = "FreeHandEvent";
-                    payload.xStart = lastX;
-                    payload.yStart = lastY;
-                    payload.xEnd = currentX;
-                    payload.yEnd = currentY;
-                    payload.boardElementId = 4711;//later useful
-
-                    WhiteboardSocketService.send(JSON.stringify(payload));
+                    WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
 
                     // set current coordinates to last one
                     lastX = currentX;

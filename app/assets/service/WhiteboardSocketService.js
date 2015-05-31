@@ -38,7 +38,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
                 registeredCallback(e);
             })
         } else {
-            drawFunction(e.lastX, e.lastY, e.currentX, e.currentY);
+            drawFunction(e.xStart, e.yStart, e.currentX, e.currentY);
         }
     }
 

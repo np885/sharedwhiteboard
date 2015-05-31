@@ -5,10 +5,7 @@ import model.user.entities.User;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Flo on 06.05.2015.
@@ -26,8 +23,9 @@ public class Whiteboard extends AbstractEntity {
     @ManyToMany(mappedBy = "whiteboards")
     private Set<User> collaborators = new HashSet<>();
 
-    @OneToMany(mappedBy = "whiteboard")
-    private List<AbstractDrawObject> drawObjects = new ArrayList<>();
+    @OneToMany(mappedBy = "whiteboard", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @MapKey(name = "boardElementId")
+    private Map<Integer, AbstractDrawObject> drawObjects = new HashMap<>();
 
 
     public String getName() {
@@ -50,15 +48,11 @@ public class Whiteboard extends AbstractEntity {
         return collaborators;
     }
 
-    public void setCollaborators(Set<User> collaborators) {
-        this.collaborators = collaborators;
-    }
-
-    public List<AbstractDrawObject> getDrawObjects() {
+    public Map<Integer, AbstractDrawObject> getDrawObjects() {
         return drawObjects;
     }
 
-    public void setDrawObjects(List<AbstractDrawObject> drawObjects) {
-        this.drawObjects = drawObjects;
+    public void setCollaborators(Set<User> collaborators) {
+        this.collaborators = collaborators;
     }
 }

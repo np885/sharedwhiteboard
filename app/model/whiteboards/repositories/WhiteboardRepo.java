@@ -98,6 +98,7 @@ public class WhiteboardRepo {
                     if (whiteboard.getId() == null || whiteboard.getId().longValue() == 0) {
                         throw new IllegalArgumentException("whiteboard not found in db");
                     }
+                    Logger.debug("updating persisted whiteboard state.");
                     return JPA.em().merge(whiteboard);
                 }
             });

@@ -1,6 +1,7 @@
 package model.whiteboards.repositories;
 
 import model.AlreadyExistsException;
+import model.whiteboards.entities.FreeHandDrawing;
 import model.whiteboards.entities.Whiteboard;
 import org.hibernate.QueryException;
 import play.Logger;

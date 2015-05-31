@@ -11,6 +11,7 @@ app.controller('LoginController', ['$scope', 'AuthenticationService', '$location
         AuthenticationService.login($scope.user)
             .success(function(data, status, headers, config) {
                 AuthenticationService.setCredentials($scope.user);
+                AuthenticationService.setUserId(data.id);
                 $location.path('/whiteboardlist');
             })
             .error(function (data, status, headers, config) {

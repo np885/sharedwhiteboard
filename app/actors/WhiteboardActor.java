@@ -26,7 +26,6 @@ public class WhiteboardActor extends UntypedActor {
 
     private long boardId;
     private List<WebSocketConnection> socketConnections = new ArrayList<>();
-    private List<FreeHandEvent> freeHandEvents = new ArrayList<>();
 
     private Whiteboard currentState;
 
@@ -71,15 +70,9 @@ public class WhiteboardActor extends UntypedActor {
 
         //tell the new connection the initial State:
         connection.getOut().tell(produceCurrentStateRepresentation(), self());
-
-        //tell the new connection all freehandEvents of this session
-        for(FreeHandEvent freeHandEvent : freeHandEvents){
-            connection.getOut().tell(Json.stringify(Json.toJson(freeHandEvent)), self());
-        }
     }
 
     private void onFreeHandEvent(FreeHandEvent fhe) {
-        freeHandEvents.add(fhe);
         //save to current state:
 
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(fhe.getBoardElementId());
@@ -88,8 +81,9 @@ public class WhiteboardActor extends UntypedActor {
             drawObjForElementId.setBoardElementId(fhe.getBoardElementId());
             drawObjForElementId.setWhiteboard(currentState); //<-- this should actually be done by jpa cascade? todo.
             currentState.getDrawObjects().put(fhe.getBoardElementId(), drawObjForElementId);
+
             ((FreeHandDrawing)drawObjForElementId).getPoints()
-                    .add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxStart(), fhe.getxEnd()));
+                    .add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxStart(), fhe.getyStart()));
         } else {
             if (! (drawObjForElementId instanceof FreeHandDrawing)) {
                 //error...... todo

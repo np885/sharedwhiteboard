@@ -30,6 +30,7 @@ public class BoardStateSerializationUtil {
 
     private static DrawingDTO mapDrawing(FreeHandDrawing fhd) {
         FreeHandDrawingDTO dto = new FreeHandDrawingDTO();
+        dto.setBoardElementId(fhd.getBoardElementId());
 
         for (FreeHandDrawing.FreeHandDrawingPoint point : fhd.getPoints()) {
             dto.getPoints().add(new PointDTO(point.getX(), point.getY()));

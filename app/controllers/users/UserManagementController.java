@@ -22,7 +22,8 @@ public class UserManagementController extends Controller {
     @AuthRequired
     @Transactional
     public static Result checkLoginCredentials() {
-        return ok();
+        User currentuser = (User) ctx().args.get("currentuser");
+        return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
     }
 
     @ConsumesJSON

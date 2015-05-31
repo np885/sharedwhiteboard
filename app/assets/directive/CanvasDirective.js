@@ -1,6 +1,7 @@
 'use strict';
 
-app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketService){
+app.directive('drawing',['WhiteboardSocketService', 'AuthenticationService',
+    function(WhiteboardSocketService, AuthenticationService){
     return {
         restrict: 'A',
         link: function(scope, element, attrs, constant){
@@ -18,6 +19,10 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             var lastX;
             var lastY;
 
+            var nextBoardElementId = -1;
+            var minBoardElementId = AuthenticationService.getUserId() * 10000;
+            var maxBoardElementId = (AuthenticationService.getUserId() + 1) * 10000 - 1;
+
             function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
                 this.eventType = "FreeHandEvent";
                 this.boardElementId = boardElementId;
@@ -26,7 +31,6 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                 this.xEnd = xEnd;
                 this.yEnd = yEnd;
             }
-            var freeHandLine = [];
 
             var currentX;
             var currentY;
@@ -52,6 +56,13 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
 
                 initStateEvent.drawings.forEach(function (drawing) {
+                    if (minBoardElementId <= drawing.boardElementId && drawing.boardElementId <= maxBoardElementId) {
+                        // element of this user:
+                        console.log("setting...")
+                        if (drawing.boardElementId > nextBoardElementId) {
+                            nextBoardElementId = drawing.boardElementId;
+                        }
+                    }
                     if (drawing.type === 'FreeHandDrawing') {
                         var xStart, yStart;
                         drawing.points.forEach(function (point, i) {
@@ -66,6 +77,14 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                         });
                     }// elseif type === '...'
                 });
+                if (nextBoardElementId < 0) {
+                    //no elements by this user.
+                    nextBoardElementId = minBoardElementId;
+                } else {
+                    //else: nextBoardElementId is the id of the newest object by the user
+                    // (next element must get one higher).
+                    nextBoardElementId++;
+                }
             });
 
             element.bind('mousedown', function(event){
@@ -96,8 +115,7 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
                     lastPoint.x = currentX;
                     lastPoint.y = currentY;
 
-                    var freeHandEvent = new FreeHandEvent(4711, lastX, lastY, currentX, currentY);
-                    freeHandLine.push(freeHandEvent);
+                    var freeHandEvent = new FreeHandEvent(nextBoardElementId, lastX, lastY, currentX, currentY);
 
                     WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
 
@@ -110,8 +128,7 @@ app.directive('drawing',['WhiteboardSocketService', function(WhiteboardSocketSer
             });
             element.bind('mouseup', function(event){
                 // stop drawing
-
-                console.log(JSON.stringify(freeHandLine));
+                nextBoardElementId++;
                 drawing = false;
             });
 

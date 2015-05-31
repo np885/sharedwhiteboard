@@ -15,8 +15,17 @@ app.service('AuthenticationService',
                     $sessionStorage.user = user.username.toLowerCase();
                 };
 
+                service.setUserId = function (userid) {
+                    $sessionStorage.userid = userid;
+                };
+
+                service.getUserId = function () {
+                    return $sessionStorage.userid;
+                };
+
                 service.clearCredentials = function () {
                     delete $sessionStorage.user;
+                    delete $sessionStorage.userid;
                     delete $http.defaults.headers.common.Authorization;
                 };
 

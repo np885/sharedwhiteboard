@@ -32,6 +32,14 @@ public class FreeHandDrawing extends AbstractDrawObject {
         public void setY(int y) {
             this.y = y;
         }
+
+        @Override
+        public String toString() {
+            return "FreeHandDrawingPoint{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
+        }
     }
 
     //will be persisted as blobs.

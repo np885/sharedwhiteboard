@@ -1,7 +1,7 @@
 'use strict';
 
-app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService',
-function (WhiteboardSocketService, DrawIdService) {
+app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant',
+function (WhiteboardSocketService, DrawIdService, constant) {
     var drawLine;
     var beginPath;
     var tool;
@@ -52,7 +52,7 @@ function (WhiteboardSocketService, DrawIdService) {
         DrawIdService.initId();
     });
 
-    service.onMouseMove  = function(){
+    service.freeHandMouseMove = function(){
 
         if(drawing){
             // get current mouse position
@@ -77,7 +77,8 @@ function (WhiteboardSocketService, DrawIdService) {
         }
 
     };
-    service.onMouseDown = function(event){
+    service.onMouseMove = service.freeHandMouseMove;
+    service.freeHandMouseDown = function(event){
         if(event.offsetX!==undefined){
             lastX = event.offsetX;
             lastY = event.offsetY;
@@ -90,11 +91,13 @@ function (WhiteboardSocketService, DrawIdService) {
 
         drawing = true;
     };
-    service.onMouseUp = function(event){
+    service.onMouseDown = service.freeHandMouseDown;
+    service.freeHandMouseUp = function(event){
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
     };
+    service.onMouseUp = service.freeHandMouseUp;
     service.setDrawLine = function(fkt){
         drawLine = fkt;
     };
@@ -102,6 +105,16 @@ function (WhiteboardSocketService, DrawIdService) {
         beginPath = fkt;
     };
     service.setTool = function(value){
+        switch(value){
+            case constant.DRAWTOOLS.FREEHAND:
+                this.onMouseUp = this.freeHandMouseUp;
+                this.onMouseDown = this.freeHandMouseDown;
+                this.onMouseMove = this.freeHandMouseMove;
+            default:
+                this.onMouseUp = this.freeHandMouseUp;
+                this.onMouseDown = this.freeHandMouseDown;
+                this.onMouseMove = this.freeHandMouseMove;
+        }
         tool = value;
     };
     return service;

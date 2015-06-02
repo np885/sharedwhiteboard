@@ -25,6 +25,21 @@ function (WhiteboardSocketService, DrawIdService) {
         drawLine(freeHandEvent.xStart, freeHandEvent.yStart,
             freeHandEvent.xEnd, freeHandEvent.yEnd);
     };
+    var draw = function(drawing){
+        if (drawing.type === 'FreeHandDrawing') {
+            var xStart, yStart;
+            drawing.points.forEach(function (point, i) {
+                if (i == 0) {
+                    xStart = point.x;
+                    yStart = point.y;
+                } else {
+                    drawLine(xStart, yStart, point.x, point.y);
+                    xStart = point.x;
+                    yStart = point.y;
+                }
+            });
+        }// elseif type === '...'
+    };
 
     WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLineEvent);
 
@@ -32,34 +47,13 @@ function (WhiteboardSocketService, DrawIdService) {
 
         initStateEvent.drawings.forEach(function (drawing) {
             DrawIdService.computeDrawing(drawing);
-            if (drawing.type === 'FreeHandDrawing') {
-                var xStart, yStart;
-                drawing.points.forEach(function (point, i) {
-                    if (i == 0) {
-                        xStart = point.x;
-                        yStart = point.y;
-                    } else {
-                        drawLine(xStart, yStart, point.x, point.y);
-                        xStart = point.x;
-                        yStart = point.y;
-                    }
-                });
-            }// elseif type === '...'
+            draw(drawing);
         });
         DrawIdService.initId();
     });
 
-    service.setDrawLine = function(fkt){
-        drawLine = fkt;
-    };
-    service.setBeginPath = function(fkt){
-        beginPath = fkt;
-    };
-    service.setTool = function(value){
-        tool = value;
-    };
-
     service.onMouseMove  = function(){
+
         if(drawing){
             // get current mouse position
             if(event.offsetX!==undefined){
@@ -80,7 +74,6 @@ function (WhiteboardSocketService, DrawIdService) {
             // set current coordinates to last one
             lastX = currentX;
             lastY = currentY;
-            console.log(tool);
         }
 
     };
@@ -102,6 +95,14 @@ function (WhiteboardSocketService, DrawIdService) {
         DrawIdService.incrementId();
         drawing = false;
     };
-
+    service.setDrawLine = function(fkt){
+        drawLine = fkt;
+    };
+    service.setBeginPath = function(fkt){
+        beginPath = fkt;
+    };
+    service.setTool = function(value){
+        tool = value;
+    };
     return service;
 }]);

@@ -1,10 +1,7 @@
 'use strict';
 
-app.service('DrawService',[ 'WhiteboardSocketService', 'AuthenticationService',
-function (WhiteboardSocketService, AuthenticationService) {
-    var nextBoardElementId = -1;
-    var minBoardElementId = AuthenticationService.getUserId() * 10000;
-    var maxBoardElementId = (AuthenticationService.getUserId() + 1) * 10000 - 1;
+app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService',
+function (WhiteboardSocketService, DrawIdService) {
     var drawLine;
     var beginPath;
     var tool;
@@ -34,12 +31,7 @@ function (WhiteboardSocketService, AuthenticationService) {
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
 
         initStateEvent.drawings.forEach(function (drawing) {
-            if (minBoardElementId <= drawing.boardElementId && drawing.boardElementId <= maxBoardElementId) {
-                // element of this user:
-                if (drawing.boardElementId > nextBoardElementId) {
-                    nextBoardElementId = drawing.boardElementId;
-                }
-            }
+            DrawIdService.computeDrawing(drawing);
             if (drawing.type === 'FreeHandDrawing') {
                 var xStart, yStart;
                 drawing.points.forEach(function (point, i) {
@@ -54,14 +46,7 @@ function (WhiteboardSocketService, AuthenticationService) {
                 });
             }// elseif type === '...'
         });
-        if (nextBoardElementId < 0) {
-            //no elements by this user.
-            nextBoardElementId = minBoardElementId;
-        } else {
-            //else: nextBoardElementId is the id of the newest object by the user
-            // (next element must get one higher).
-            nextBoardElementId++;
-        }
+        DrawIdService.initId();
     });
 
     service.setDrawLine = function(fkt){
@@ -88,7 +73,7 @@ function (WhiteboardSocketService, AuthenticationService) {
             lastPoint.x = currentX;
             lastPoint.y = currentY;
 
-            var freeHandEvent = new FreeHandEvent(nextBoardElementId, lastX, lastY, currentX, currentY);
+            var freeHandEvent = new FreeHandEvent(DrawIdService.getCurrent(), lastX, lastY, currentX, currentY);
 
             WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
 
@@ -107,7 +92,6 @@ function (WhiteboardSocketService, AuthenticationService) {
             lastX = event.layerX - event.currentTarget.offsetLeft;
             lastY = event.layerY - event.currentTarget.offsetTop;
         }
-
         // begins new line
         beginPath();
 
@@ -115,7 +99,7 @@ function (WhiteboardSocketService, AuthenticationService) {
     };
     service.onMouseUp = function(event){
         // stop drawing
-        nextBoardElementId++;
+        DrawIdService.incrementId();
         drawing = false;
     };
 

@@ -7,11 +7,14 @@ import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.boardstate.BoardStateSerializationUtil;
 import actors.events.socket.boardstate.Collab;
 import actors.events.socket.boardstate.InitialBoardStateEvent;
+import actors.events.socket.draw.DrawEvent;
 import actors.events.socket.draw.FreeHandEvent;
+import actors.events.socket.draw.SingleLineEvent;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import model.whiteboards.entities.AbstractDrawObject;
 import model.whiteboards.entities.FreeHandDrawing;
+import model.whiteboards.entities.SingleLineDrawing;
 import model.whiteboards.entities.Whiteboard;
 import model.whiteboards.repositories.WhiteboardRepo;
 import play.Logger;
@@ -52,8 +55,11 @@ public class WhiteboardActor extends UntypedActor {
             onBoardUserClosed((BoardUserCloseEvent) message);
         } else if (message instanceof FreeHandEvent) {
             onFreeHandEvent((FreeHandEvent) message);
+        } else if (message instanceof SingleLineEvent) {
+            onSingleLineEvent((SingleLineEvent) message);
         }
     }
+
 
     private void onBoardUserOpen(BoardUserOpenEvent message) {
         BoardUserOpenEvent event = message;
@@ -77,11 +83,7 @@ public class WhiteboardActor extends UntypedActor {
 
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(fhe.getBoardElementId());
         if (drawObjForElementId == null) {
-            drawObjForElementId = new FreeHandDrawing();
-            drawObjForElementId.setBoardElementId(fhe.getBoardElementId());
-            drawObjForElementId.setWhiteboard(currentState); //<-- this should actually be done by jpa cascade? todo.
-            currentState.getDrawObjects().put(fhe.getBoardElementId(), drawObjForElementId);
-
+            drawObjForElementId = initDrawObjectAndAddToState(new FreeHandDrawing(), fhe);
             ((FreeHandDrawing)drawObjForElementId).getPoints()
                     .add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxStart(), fhe.getyStart()));
         } else {
@@ -96,6 +98,32 @@ public class WhiteboardActor extends UntypedActor {
             c.getOut().tell(Json.stringify(Json.toJson(fhe)), self());
         }
     }
+
+    private void onSingleLineEvent(SingleLineEvent sle) {
+        AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(sle.getBoardElementId());
+        if (drawObjForElementId == null) {
+            //new line:
+            drawObjForElementId = initDrawObjectAndAddToState(new SingleLineDrawing(), sle);
+        }
+        SingleLineDrawing slDrawing = (SingleLineDrawing) drawObjForElementId;
+        slDrawing.setX1(sle.getxStart());
+        slDrawing.setY1(sle.getyStart());
+        slDrawing.setX2(sle.getxEnd());
+        slDrawing.setY2(sle.getyEnd());
+
+        for (WebSocketConnection c : socketConnections) {
+            c.getOut().tell(Json.stringify(Json.toJson(sle)), self());
+        }
+    }
+
+    private AbstractDrawObject initDrawObjectAndAddToState(AbstractDrawObject drawObject, DrawEvent event) {
+        drawObject.setBoardElementId(event.getBoardElementId());
+        drawObject.setWhiteboard(currentState);
+        currentState.getDrawObjects().put(event.getBoardElementId(), drawObject);
+
+        return drawObject;
+    }
+
 
     private void onBoardUserClosed(BoardUserCloseEvent message) {
         BoardUserCloseEvent event = message;

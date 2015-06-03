@@ -5,6 +5,7 @@ import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.SocketEvent;
 import actors.events.socket.draw.FreeHandEvent;
+import actors.events.socket.draw.SingleLineEvent;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,6 +50,10 @@ public class WebSocketInActor extends UntypedActor {
             case "FreeHandEvent":
                 FreeHandEvent freeHandEvent = Json.fromJson(parsedMessage, FreeHandEvent.class);
                 tellMyWhiteboardActor(freeHandEvent);
+                break;
+            case "LineEvent":
+                SingleLineEvent lineEvent = Json.fromJson(parsedMessage, SingleLineEvent.class);
+                tellMyWhiteboardActor(lineEvent);
                 break;
         }
     }

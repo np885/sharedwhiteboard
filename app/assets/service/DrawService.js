@@ -5,6 +5,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var drawLine;
     var clearCanvas;
     var beginPath;
+    var closePath;
     var tool;
     var service = {};
     var currentX;
@@ -100,9 +101,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     });
 
     var repaint = function(){
-
+        closePath();
+        clearCanvas();
+        beginPath();
         for(var boardElementId in drawings){
-            clearCanvas();
             if(drawings.hasOwnProperty(boardElementId)){
                 draw(drawings[boardElementId]);
             }
@@ -146,7 +148,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             lastY = event.layerY - event.currentTarget.offsetTop;
         }
         // begins new line
-        beginPath();
 
         drawing = true;
     };
@@ -168,20 +169,25 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing = false;
     };
     service.lineMouseDown = function(event){
-        if(event.offsetX!==undefined){
-            startX = event.offsetX;
-            startY = event.offsetY;
-        } else {
-            startX = event.layerX - event.currentTarget.offsetLeft;
-            startY = event.layerY - event.currentTarget.offsetTop;
-        }
-        // begins new line
-        beginPath();
+        if (!drawing) {
+            if(event.offsetX!==undefined){
+                startX = event.offsetX;
+                startY = event.offsetY;
+            } else {
+                startX = event.layerX - event.currentTarget.offsetLeft;
+                startY = event.layerY - event.currentTarget.offsetTop;
+            }
+            // begins new line
 
-        drawing = true;
+            drawing = true;
+
+        }
     };
     service.lineMouseMove = function(event){
         if(drawing){
+            event.stopPropagation();
+            event.preventDefault();
+
             // get current mouse position
             if(event.offsetX!==undefined){
                 currentX = event.offsetX;
@@ -200,6 +206,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.setBeginPath = function(fkt){
         beginPath = fkt;
+    };
+    service.setClosePath = function(fkt){
+        closePath = fkt;
     };
     service.setClear = function(fkt){
         clearCanvas = fkt;

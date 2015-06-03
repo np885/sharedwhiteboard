@@ -31,6 +31,9 @@ app.directive('drawing',[ 'DrawService',
             DrawService.setBeginPath(function(){
                 ctx.beginPath();
             });
+            DrawService.setClosePath(function(){
+                ctx.closePath();
+            });
 
             element.bind('mousedown', DrawService.onMouseDown);
             element.bind('mousemove', DrawService.onMouseMove);

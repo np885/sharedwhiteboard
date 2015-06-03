@@ -36,6 +36,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     }
 
     var drawLineEvent = function(freeHandEvent){
+        var t0  = new Date().getTime();
         if(drawings.hasOwnProperty(freeHandEvent.boardElementId)){
             drawings[freeHandEvent.boardElementId].points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
         }else {
@@ -45,7 +46,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawing.points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
             drawings[drawing.boardElementId] = drawing;
         }
+        var t1 = new Date().getTime();
+        console.log(t1 - t0);
         repaint();
+        console.log(new Date().getTime() - t1);
     };
     var draw = function(drawing){
         if (drawing.type === 'FreeHandDrawing') {
@@ -66,7 +70,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLineEvent);
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
-
+        drawings = {};
         initStateEvent.drawings.forEach(function (drawing) {
             DrawIdService.computeDrawing(drawing);
             drawings[drawing.boardElementId] = drawing;

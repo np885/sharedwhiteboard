@@ -20,10 +20,17 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var drawings = {};
     var startX;
     var startY;
-
+    function LineEvent(boardElementId, xStart, yStart, xEnd, yEnd){
+        this.eventType = 'LineEvent';
+        this.boardElementId = boardElementId;
+        this.xStart = xStart;
+        this.yStart = yStart;
+        this.xEnd = xEnd;
+        this.yEnd = yEnd;
+    }
 
     function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
-        this.eventType = "FreeHandEvent";
+        this.eventType = 'FreeHandEvent';
         this.boardElementId = boardElementId;
         this.xStart = xStart;
         this.yStart = yStart;
@@ -35,11 +42,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.boardElementId = boardElementId;
     }
 
-    var drawLineEvent = function(freeHandEvent){
+    var drawFreeHandEvent = function(freeHandEvent){
         var t0  = new Date().getTime();
         if(drawings.hasOwnProperty(freeHandEvent.boardElementId)){
             drawings[freeHandEvent.boardElementId].points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
-        }else {
+        } else {
             var drawing = new Drawing('FreeHandDrawing', freeHandEvent.boardElementId);
             drawing.points = [];
             drawing.points.push({x : freeHandEvent.xStart, y: freeHandEvent.yStart});
@@ -51,6 +58,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         repaint();
         console.log(new Date().getTime() - t1);
     };
+    var drawLineEvent = function(lineEvent){
+        if(drawings.hasOwnProperty(lineEvent.boardElementId)){
+            drawings[lineEvent.boardElementId].points.pop();
+            drawings[lineEvent.boardElementId].points.push({x : lineEvent.xEnd, y: lineEvent.yEnd});
+        } else {
+            var drawing = new Drawing('LineDrawing', lineEvent.boardElementId);
+            drawing.points = [];
+            drawing.points.push({x : lineEvent.xStart, y: lineEvent.yStart});
+            drawing.points.push({x : lineEvent.xEnd, y: lineEvent.yEnd});
+            drawings[drawing.boardElementId] = drawing;
+        }
+        repaint();
+    };
+
     var draw = function(drawing){
         if (drawing.type === 'FreeHandDrawing') {
             var xStart, yStart;
@@ -64,10 +85,21 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     yStart = point.y;
                 }
             });
-        }// elseif type === '...'
+        } else if(drawing.type === 'LineDrawing'){
+            var xStart, yStart;
+            drawing.points.forEach(function (point, i) {
+                if (i == 0) {
+                    xStart = point.x;
+                    yStart = point.y;
+                } else {
+                    drawLine(xStart, yStart, point.x, point.y);
+                }
+            });
+        }
     };
 
-    WhiteboardSocketService.registerForSocketEvent('FreeHandEvent',drawLineEvent);
+    WhiteboardSocketService.registerForSocketEvent('FreeHandEvent', drawFreeHandEvent);
+    WhiteboardSocketService.registerForSocketEvent('LineEvent', drawLineEvent);
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         drawings = {};
@@ -143,8 +175,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     service.lineMouseUp = function(event){
         // stop drawing
-        //DrawIdService.incrementId();
-        //drawLine(startX, startY, currentX, currentY);
+        DrawIdService.incrementId();
         drawing = false;
     };
     service.lineMouseDown = function(event){
@@ -156,7 +187,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             startY = event.layerY - event.currentTarget.offsetTop;
         }
         // begins new line
-        //beginPath();
+        beginPath();
 
         drawing = true;
     };
@@ -170,12 +201,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 currentX = event.layerX - event.currentTarget.offsetLeft;
                 currentY = event.layerY - event.currentTarget.offsetTop;
             }
-            var lastPoint = {};
-            lastPoint.x = currentX;
-            lastPoint.y = currentY;
-            //var freeHandEvent = new FreeHandEvent(DrawIdService.getCurrent(), lastX, lastY, currentX, currentY);
-            //
-            //WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
+            var freeHandEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
+
+            WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
         }
     };
     service.setDrawLine = function(fkt){
@@ -188,8 +216,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         clearCanvas = fkt;
     };
     service.setTool = function(value){
-        console.log(value);
-        tool = value;
         switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
                 onMouseMoveWrapper = this.freeHandMouseMove;

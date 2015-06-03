@@ -15,7 +15,8 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         'BoardUserOpenEvent' : new SocketServerEvent('BoardUserOpenEvent'),
         'BoardUserCloseEvent' : new SocketServerEvent('BoardUserCloseEvent'),
         'InitialBoardStateEvent' : new SocketServerEvent('InitialBoardStateEvent'),
-        'FreeHandEvent' : new SocketServerEvent('FreeHandEvent')
+        'FreeHandEvent' : new SocketServerEvent('FreeHandEvent'),
+        'LineEvent' : new SocketServerEvent('LineEvent')
     };
 
     var service = {};
@@ -55,7 +56,6 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
                 connection.onmessage = function (e) {
                     var event = JSON.parse(e.data);
-                    console.log(event);
                     service.dispatchServerEvent(event);
                 };
 
@@ -76,9 +76,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
     service.setFkt = function(fktCallback){
         drawFunction = fktCallback;
-    }
-
-
+    };
 
     return service;
 }]);

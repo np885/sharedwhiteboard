@@ -43,7 +43,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     }
 
     var drawFreeHandEvent = function(freeHandEvent){
-        var t0  = new Date().getTime();
         if(drawings.hasOwnProperty(freeHandEvent.boardElementId)){
             drawings[freeHandEvent.boardElementId].points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
         } else {
@@ -53,10 +52,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawing.points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
             drawings[drawing.boardElementId] = drawing;
         }
-        var t1 = new Date().getTime();
-        console.log(t1 - t0);
         repaint();
-        console.log(new Date().getTime() - t1);
     };
     var drawLineEvent = function(lineEvent){
         if(drawings.hasOwnProperty(lineEvent.boardElementId)){
@@ -86,15 +82,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 }
             });
         } else if(drawing.type === 'LineDrawing'){
-            var xStart, yStart;
-            drawing.points.forEach(function (point, i) {
-                if (i == 0) {
-                    xStart = point.x;
-                    yStart = point.y;
-                } else {
-                    drawLine(xStart, yStart, point.x, point.y);
-                }
-            });
+            drawLine(drawing.points[0].x, drawing.points[0].y, drawing.points[1].x, drawing.points[1].y);
         }
     };
 
@@ -112,8 +100,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     });
 
     var repaint = function(){
-        clearCanvas();
+
         for(var boardElementId in drawings){
+            clearCanvas();
             if(drawings.hasOwnProperty(boardElementId)){
                 draw(drawings[boardElementId]);
             }
@@ -215,7 +204,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     service.setClear = function(fkt){
         clearCanvas = fkt;
     };
+
+
+
+
+
     service.setTool = function(value){
+        tool = value;
         switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
                 onMouseMoveWrapper = this.freeHandMouseMove;

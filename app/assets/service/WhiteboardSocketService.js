@@ -56,6 +56,9 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
                 connection.onmessage = function (e) {
                     var event = JSON.parse(e.data);
+
+                    console.log(event);
+
                     service.dispatchServerEvent(event);
                 };
 

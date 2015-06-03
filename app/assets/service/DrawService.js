@@ -13,6 +13,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     // the last coordinates before the current move
     var lastX;
     var lastY;
+    var onMouseUpWrapper;
+    var onMouseDownWrapper;
+    var onMouseMoveWrapper;
     function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
         this.eventType = "FreeHandEvent";
         this.boardElementId = boardElementId;
@@ -78,17 +81,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     };
     service.onMouseMove = function(event){
-        switch(tool){
-            case constant.DRAWTOOLS.FREEHAND:
-                return service.freeHandMouseMove(event);
-                break;
-            case constant.DRAWTOOLS.LINE:
-                return service.lineMouseMove(event);
-                break;
-            default:
-                return service.freeHandMouseMove(event);
-        }
+      return onMouseMoveWrapper(event);
     };
+
     service.freeHandMouseDown = function(event){
         if(event.offsetX!==undefined){
             lastX = event.offsetX;
@@ -102,34 +97,16 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
         drawing = true;
     };
-    service.onMouseDown = function(event){
-        switch(tool){
-            case constant.DRAWTOOLS.FREEHAND:
-                return service.freeHandMouseDown(event);
-                break;
-            case constant.DRAWTOOLS.LINE:
-                return service.lineMouseDown(event);
-                break;
-            default:
-                return service.freeHandMouseDown(event);
-        }
+    service.onMouseDown = function(event) {
+        return onMouseDownWrapper(event);
     };
     service.freeHandMouseUp = function(event){
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
     };
-    service.onMouseUp = function(event){
-        switch(tool){
-            case constant.DRAWTOOLS.FREEHAND:
-                return service.freeHandMouseUp(event);
-                break;
-            case constant.DRAWTOOLS.LINE:
-                return service.lineMouseUp(event);
-                break;
-            default:
-                return service.freeHandMouseUp(event);
-        }
+    service.onMouseUp = function(event) {
+        return onMouseUpWrapper(event);
     };
 
     service.lineMouseUp = function(event){
@@ -150,7 +127,22 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     service.setTool = function(value){
         console.log(value);
         tool = value;
-        console.log(this.onMouseDown.toString());
+        switch(tool){
+            case constant.DRAWTOOLS.FREEHAND:
+                onMouseMoveWrapper = this.freeHandMouseMove;
+                onMouseDownWrapper = this.freeHandMouseDown;
+                onMouseUpWrapper = this.freeHandMouseUp;
+                break;
+            case constant.DRAWTOOLS.LINE:
+                onMouseMoveWrapper = this.lineMouseMove;
+                onMouseDownWrapper = this.lineMouseDown;
+                onMouseUpWrapper = this.lineMouseUp;
+                break;
+            default:
+                onMouseMoveWrapper = this.freeHandMouseMove;
+                onMouseDownWrapper = this.freeHandMouseDown;
+                onMouseUpWrapper = this.freeHandMouseUp;
+        }
     };
     return service;
 }]);

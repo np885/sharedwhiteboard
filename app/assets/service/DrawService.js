@@ -3,6 +3,7 @@
 app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant',
 function (WhiteboardSocketService, DrawIdService, constant) {
     var drawLine;
+    var clearCanvas;
     var beginPath;
     var tool;
     var service = {};
@@ -16,6 +17,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var onMouseUpWrapper;
     var onMouseDownWrapper;
     var onMouseMoveWrapper;
+    var drawings = {};
+    var startX;
+    var startY;
+
+
     function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
         this.eventType = "FreeHandEvent";
         this.boardElementId = boardElementId;
@@ -24,9 +30,22 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.xEnd = xEnd;
         this.yEnd = yEnd;
     }
+    function Drawing(type, boardElementId){
+        this.type = type;
+        this.boardElementId = boardElementId;
+    }
+
     var drawLineEvent = function(freeHandEvent){
-        drawLine(freeHandEvent.xStart, freeHandEvent.yStart,
-            freeHandEvent.xEnd, freeHandEvent.yEnd);
+        if(drawings.hasOwnProperty(freeHandEvent.boardElementId)){
+            drawings[freeHandEvent.boardElementId].points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
+        }else {
+            var drawing = new Drawing('FreeHandDrawing', freeHandEvent.boardElementId);
+            drawing.points = [];
+            drawing.points.push({x : freeHandEvent.xStart, y: freeHandEvent.yStart});
+            drawing.points.push({x : freeHandEvent.xEnd, y: freeHandEvent.yEnd});
+            drawings[drawing.boardElementId] = drawing;
+        }
+        repaint();
     };
     var draw = function(drawing){
         if (drawing.type === 'FreeHandDrawing') {
@@ -50,11 +69,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
         initStateEvent.drawings.forEach(function (drawing) {
             DrawIdService.computeDrawing(drawing);
-            draw(drawing);
+            drawings[drawing.boardElementId] = drawing;
         });
         DrawIdService.initId();
+        repaint();
     });
 
+    var repaint = function(){
+        clearCanvas();
+        for(var boardElementId in drawings){
+            if(drawings.hasOwnProperty(boardElementId)){
+                draw(drawings[boardElementId]);
+            }
+        }
+    };
     service.freeHandMouseMove = function(event){
 
         if(drawing){
@@ -110,19 +138,50 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     service.lineMouseUp = function(event){
-        console.log("line -> MouseUP");
+        // stop drawing
+        //DrawIdService.incrementId();
+        //drawLine(startX, startY, currentX, currentY);
+        drawing = false;
     };
     service.lineMouseDown = function(event){
-        console.log("line -> MouseDown");
+        if(event.offsetX!==undefined){
+            startX = event.offsetX;
+            startY = event.offsetY;
+        } else {
+            startX = event.layerX - event.currentTarget.offsetLeft;
+            startY = event.layerY - event.currentTarget.offsetTop;
+        }
+        // begins new line
+        //beginPath();
+
+        drawing = true;
     };
     service.lineMouseMove = function(event){
-        console.log("line -> MouseMove");
+        if(drawing){
+            // get current mouse position
+            if(event.offsetX!==undefined){
+                currentX = event.offsetX;
+                currentY = event.offsetY;
+            } else {
+                currentX = event.layerX - event.currentTarget.offsetLeft;
+                currentY = event.layerY - event.currentTarget.offsetTop;
+            }
+            var lastPoint = {};
+            lastPoint.x = currentX;
+            lastPoint.y = currentY;
+            //var freeHandEvent = new FreeHandEvent(DrawIdService.getCurrent(), lastX, lastY, currentX, currentY);
+            //
+            //WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
+        }
     };
     service.setDrawLine = function(fkt){
         drawLine = fkt;
     };
     service.setBeginPath = function(fkt){
         beginPath = fkt;
+    };
+    service.setClear = function(fkt){
+        clearCanvas = fkt;
     };
     service.setTool = function(value){
         console.log(value);

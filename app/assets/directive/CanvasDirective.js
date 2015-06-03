@@ -22,7 +22,12 @@ app.directive('drawing',[ 'DrawService',
                 ctx.stroke();
             };
 
+            var clear = function(){
+                ctx.clearRect(0, 0, element[0].width, element[0].height);
+            };
+
             DrawService.setDrawLine(drawLine);
+            DrawService.setClear(clear);
             DrawService.setBeginPath(function(){
                 ctx.beginPath();
             });

@@ -104,7 +104,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     });
 
     var repaint = function(){
-        //var start = new Date().getTime();
+        var start = new Date().getTime();
 
         clearCanvas();
         beginPath();
@@ -115,7 +115,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
         closePath();
 
-        //console.log( new Date().getTime() - start);
+        console.log( new Date().getTime() - start);
     };
     service.freeHandMouseMove = function(event){
 
@@ -142,8 +142,16 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
 
     };
+
+    var iter = 0;
     service.onMouseMove = function(event){
-      return onMouseMoveWrapper(event);
+        //ignore 3 of 4 events as Performance-Hack (will do for the demo)
+        if (iter >= 3) {
+            iter = 0;
+            return onMouseMoveWrapper(event);
+        } else {
+            iter++;
+        }
     };
 
     service.freeHandMouseDown = function(event){

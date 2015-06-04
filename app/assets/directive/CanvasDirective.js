@@ -19,7 +19,7 @@ app.directive('drawing',[ 'DrawService',
                 // color
                 ctx.strokeStyle = '#4bf';
                 // draw it
-                ctx.stroke();
+                //ctx.stroke();
             };
 
             var clear = function(){
@@ -32,6 +32,7 @@ app.directive('drawing',[ 'DrawService',
                 ctx.beginPath();
             });
             DrawService.setClosePath(function(){
+                ctx.stroke();
                 ctx.closePath();
             });
 

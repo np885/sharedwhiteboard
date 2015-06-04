@@ -18,7 +18,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var onMouseUpWrapper;
     var onMouseDownWrapper;
     var onMouseMoveWrapper;
+
     var drawings = {};
+
+
     var startX;
     var startY;
     function LineEvent(boardElementId, xStart, yStart, xEnd, yEnd){
@@ -101,7 +104,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     });
 
     var repaint = function(){
-        closePath();
+        //var start = new Date().getTime();
+
         clearCanvas();
         beginPath();
         for(var boardElementId in drawings){
@@ -109,6 +113,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 draw(drawings[boardElementId]);
             }
         }
+        closePath();
+
+        //console.log( new Date().getTime() - start);
     };
     service.freeHandMouseMove = function(event){
 

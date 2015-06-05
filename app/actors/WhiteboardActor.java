@@ -12,6 +12,7 @@ import actors.events.socket.draw.FreeHandEvent;
 import actors.events.socket.draw.SingleLineEvent;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
+import model.user.entities.User;
 import model.whiteboards.entities.AbstractDrawObject;
 import model.whiteboards.entities.FreeHandDrawing;
 import model.whiteboards.entities.SingleLineDrawing;
@@ -22,7 +23,9 @@ import play.libs.Akka;
 import play.libs.Json;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WhiteboardActor extends UntypedActor {
     private WhiteboardRepo whiteboardRepo = new WhiteboardRepo();
@@ -39,6 +42,12 @@ public class WhiteboardActor extends UntypedActor {
 
         //load whiteboard state from database:
         currentState = whiteboardRepo.getWhiteboardForId(boardId);
+
+        //add to collabs if not already done:
+        User connectingUser = connection.getUser();
+        if (! currentState.getCollaborators().contains(connectingUser)) {
+            currentState.getCollaborators().add(connectingUser);
+        }
 
         //add first connection to connections:
         socketConnections.add(connection);
@@ -61,13 +70,17 @@ public class WhiteboardActor extends UntypedActor {
     }
 
 
-    private void onBoardUserOpen(BoardUserOpenEvent message) {
-        BoardUserOpenEvent event = message;
-        WebSocketConnection connection = event.getConnection();
+    private void onBoardUserOpen(BoardUserOpenEvent userOpenEvent) {
+        WebSocketConnection connection = userOpenEvent.getConnection();
+
+        User connectingUser = userOpenEvent.getConnection().getUser();
+        if (! currentState.getCollaborators().contains(connectingUser)) {
+            currentState.getCollaborators().add(connectingUser);
+        }
 
         //Tell everyone about the new connection:
         for (WebSocketConnection c : socketConnections) {
-            String outputJSON = SessionEventSerializationUtil.serialize(event);
+            String outputJSON = SessionEventSerializationUtil.serialize(userOpenEvent);
             c.getOut().tell(outputJSON, self());
         }
 
@@ -151,12 +164,19 @@ public class WhiteboardActor extends UntypedActor {
 
     private String produceCurrentStateRepresentation() {
         InitialBoardStateEvent dto = new InitialBoardStateEvent();
-        //add collabs to dto:
-        for (WebSocketConnection c : socketConnections) {
-            dto.getColaborators().add(new Collab(c.getUser().getId(), c.getUser().getUsername()));
-        }
         //add drawings etc dto:
         BoardStateSerializationUtil.mapToEvent(currentState, dto);
+        //add online status to collabs:
+        Set<Long> onlineIds = new HashSet<>();
+        for (WebSocketConnection c : socketConnections) {
+            onlineIds.add(c.getUser().getId());
+        }
+        for (Collab c : dto.getColaborators()) {
+            if (onlineIds.contains(c.getUserId())) {
+                c.setOnline(true);
+            }
+        }
+
         return Json.stringify(Json.toJson(dto));
     }
 }

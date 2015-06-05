@@ -38,7 +38,7 @@ function($scope, whiteboardSocketService){
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
-                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, true, true, true));
+                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, true, collab.online, true));
             });
         });
     });

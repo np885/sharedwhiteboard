@@ -117,7 +117,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     });
 
     var repaint = function(){
-        var start = new Date().getTime();
+        //var start = new Date().getTime();
 
         clearCanvas();
         beginPath();
@@ -128,7 +128,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
         closePath();
 
-        console.log( new Date().getTime() - start);
+        //console.log( new Date().getTime() - start);
     };
     service.freeHandMouseMove = function(event){
 

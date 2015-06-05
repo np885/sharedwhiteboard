@@ -5,10 +5,7 @@ import model.whiteboards.entities.Whiteboard;
 //import play.db.jpa.JPA;
 //import play.libs.F;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,8 +20,7 @@ public class User extends AbstractEntity {
 
     private String password;
 
-    @ManyToMany
-    @JoinTable(name = "whiteboard_collaborators")
+    @ManyToMany(mappedBy = "collaborators")
     private Set<Whiteboard> whiteboards = new HashSet<>();
 
     public String getUsername() {

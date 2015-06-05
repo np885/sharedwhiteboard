@@ -4,6 +4,7 @@ import actors.events.socket.boardstate.drawings.DrawingDTO;
 import actors.events.socket.boardstate.drawings.FreeHandDrawingDTO;
 import actors.events.socket.boardstate.drawings.PointDTO;
 import actors.events.socket.boardstate.drawings.SingleLineDrawingDTO;
+import model.user.entities.User;
 import model.whiteboards.entities.*;
 
 /**
@@ -15,7 +16,11 @@ public class BoardStateSerializationUtil {
             AbstractDrawObject drawObject = entity.getDrawObjects().get(drawObjectId);
             event.getDrawings().add(mapAbstractDrawing(drawObject));
         }
-        //...
+        //members:
+        for (User u : entity.getCollaborators()) {
+            event.getColaborators().add(new Collab(u.getId(), u.getUsername()));
+        }
+
     }
 
     private static DrawingDTO mapAbstractDrawing(AbstractDrawObject drawObject) {

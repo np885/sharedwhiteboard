@@ -20,7 +20,8 @@ public class Whiteboard extends AbstractEntity {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @ManyToMany(mappedBy = "whiteboards")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "whiteboard_collaborators")
     private Set<User> collaborators = new HashSet<>();
 
     @OneToMany(mappedBy = "whiteboard", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

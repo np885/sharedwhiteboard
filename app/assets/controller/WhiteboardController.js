@@ -8,7 +8,9 @@ function($scope, $routeParams, WhiteboardSocketService, constant){
         constant.DRAWTOOLS.CIRCLE,
         constant.DRAWTOOLS.RECTANGLE,
         constant.DRAWTOOLS.LINE,
-        constant.DRAWTOOLS.TEXT];
+        constant.DRAWTOOLS.TEXT,
+        constant.DRAWTOOLS.MOVE
+    ];
     $scope.tooling = $scope.tools[0];
 
     $scope.selectTool = function(tool){

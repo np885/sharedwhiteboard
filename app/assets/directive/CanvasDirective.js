@@ -17,7 +17,6 @@ app.directive('drawing',[ 'DrawService',
                 // to
                 ctx.lineTo(xEnd, yEnd);
                 // color
-                ctx.strokeStyle = '#4bf';
                 // draw it
                 //ctx.stroke();
             };
@@ -28,10 +27,16 @@ app.directive('drawing',[ 'DrawService',
 
             DrawService.setDrawLine(drawLine);
             DrawService.setClear(clear);
-            DrawService.setBeginPath(function(){
+            DrawService.setBeginPath(function(pathColor){
                 ctx.beginPath();
+                if (typeof pathColor === 'undefined') {
+                    ctx.strokeStyle = '#4bf'; //default color.
+                } else {
+                    ctx.strokeStyle = pathColor;
+                }
             });
             DrawService.setClosePath(function(){
+                //console.log("stroking..." + ctx.strokeStyle);
                 ctx.stroke();
                 ctx.closePath();
             });

@@ -7,7 +7,8 @@ app.constant(
             'LINE': 'Linie',
             'RECTANGLE': 'Rechteck',
             'CIRCLE': 'Kreis',
-            'TEXT': 'Text'
+            'TEXT': 'Text',
+            'MOVE' : 'Verschieben'
         }
     }
 );

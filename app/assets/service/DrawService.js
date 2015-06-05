@@ -60,7 +60,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     var drawLineEvent = function(lineEvent){
         if(drawings.hasOwnProperty(lineEvent.boardElementId)){
+            //update first point too, if it is a movement.
             drawings[lineEvent.boardElementId].points.pop();
+            drawings[lineEvent.boardElementId].points.pop();
+            drawings[lineEvent.boardElementId].points.push({x : lineEvent.xStart, y: lineEvent.yStart});
             drawings[lineEvent.boardElementId].points.push({x : lineEvent.xEnd, y: lineEvent.yEnd});
         } else {
             var drawing = new Drawing('LineDrawing', lineEvent.boardElementId);
@@ -73,6 +76,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     var draw = function(drawing){
+        if (drawing === selectedDrawing) {
+            closePath();
+            beginPath('#ff0000');
+        }
+
         if (drawing.type === 'FreeHandDrawing') {
             var xStart, yStart;
             drawing.points.forEach(function (point, i) {
@@ -87,6 +95,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             });
         } else if(drawing.type === 'LineDrawing'){
             drawLine(drawing.points[0].x, drawing.points[0].y, drawing.points[1].x, drawing.points[1].y);
+        }
+
+        if (drawing === selectedDrawing) {
+            closePath();
+            beginPath();
         }
     };
 
@@ -216,6 +229,103 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
         }
     };
+
+    var moving = false;
+    var selectedDrawing = null;
+    service.moveMouseDown= function(event){
+        if (!moving) {
+            event.stopPropagation();
+            event.preventDefault();
+            // get current mouse position
+            if(event.offsetX!==undefined){
+                currentX = event.offsetX;
+                currentY = event.offsetY;
+            } else {
+                currentX = event.layerX - event.currentTarget.offsetLeft;
+                currentY = event.layerY - event.currentTarget.offsetTop;
+            }
+
+            //select element:
+            for(var boardElementId in drawings){
+                if(drawings.hasOwnProperty(boardElementId)){
+
+                    var leDrawing = drawings[boardElementId];
+                    if (leDrawing.type === 'LineDrawing') {
+                        //linear form: ((y2-y1)/(x2-x1))*( _x_ - x1)+y1 = _y_
+                        var x1 = leDrawing.points[0].x;
+                        var y1 = leDrawing.points[0].y;
+                        var x2 = leDrawing.points[1].x;
+                        var y2 = leDrawing.points[1].y;
+
+                        //in range?
+                        var minX, maxX, minY, maxY;
+                        if (x1 >= x2) { minX = x2; maxX = x1; } else {minX = x1; maxX = x2}
+                        if (y1 >= y2) { minY = y2; maxY = y1; } else {minY = y1; maxY = y2}
+                        if (currentX <= (minX-2) || currentX >= (maxX+2)
+                            || currentY <= (minY-2) || currentY >= (maxY+2)) {
+                            continue;
+                        }
+                        //on line?
+                        var y = Math.floor(((y2-y1)/(x2-x1))*( currentX - x1)+y1);
+
+                        if (currentY <= (y+4) && currentY >= (y-4)) {
+                            selectedDrawing = leDrawing;
+                            //console.log("found drawing:");
+                            //console.log(selectedDrawing);
+                            moving = true;
+                            startX = currentX;
+                            startY = currentY;
+                            repaint();
+                            return;
+                        }
+                        //else {
+                        //    console.log('y should be ' + y + ' but is ' + currentY);
+                        //}
+                    }
+                }
+            }
+            //didnt found anything:
+            selectedDrawing = null;
+            repaint();
+        }
+    }
+    service.moveMouseMove= function(event){
+        if (moving) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            // get current mouse position
+            if(event.offsetX!==undefined){
+                currentX = event.offsetX;
+                currentY = event.offsetY;
+            } else {
+                currentX = event.layerX - event.currentTarget.offsetLeft;
+                currentY = event.layerY - event.currentTarget.offsetTop;
+            }
+
+            var deltaX =  currentX - startX;
+            var deltaY =  currentY - startY;
+
+            console.log(deltaX + ', ' + deltaY);
+
+            var lineEvent = new LineEvent(
+                selectedDrawing.boardElementId,
+                selectedDrawing.points[0].x + deltaX,
+                selectedDrawing.points[0].y + deltaY,
+                selectedDrawing.points[1].x + deltaX,
+                selectedDrawing.points[1].y + deltaY
+            );
+
+            startX = currentX;
+            startY = currentY;
+
+            WhiteboardSocketService.send(JSON.stringify(lineEvent));
+        }
+    }
+    service.moveMouseUp = function(event){
+        moving = false;
+    }
+
     service.setDrawLine = function(fkt){
         drawLine = fkt;
     };
@@ -245,6 +355,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseMoveWrapper = this.lineMouseMove;
                 onMouseDownWrapper = this.lineMouseDown;
                 onMouseUpWrapper = this.lineMouseUp;
+                break;
+            case constant.DRAWTOOLS.MOVE:
+                onMouseMoveWrapper = this.moveMouseMove;
+                onMouseDownWrapper = this.moveMouseDown;
+                onMouseUpWrapper = this.moveMouseUp;
                 break;
             default:
                 onMouseMoveWrapper = this.freeHandMouseMove;

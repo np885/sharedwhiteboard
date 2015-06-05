@@ -32,7 +32,17 @@ function($scope, whiteboardSocketService){
     whiteboardSocketService.registerForSocketEvent('BoardUserOpenEvent', function(boardUserOpenEvent) {
         $scope.$apply(function() {
             //need scope-apply cause we are out of angular digest cycle, when the server sends events and calls this callback
-            $scope.collaborators.push(new Collaborator(boardUserOpenEvent.userId, boardUserOpenEvent.username, true, true, true));
+            var alreadyMember = false;
+            $scope.collaborators.forEach(function(collab) {
+                if (collab.id === boardUserOpenEvent.userId) {
+                    collab.online = true;
+                    console.log('online: ' + collab.name);
+                    alreadyMember = true;
+                }
+            });
+            if (!alreadyMember) {
+                $scope.collaborators.push(new Collaborator(boardUserOpenEvent.userId, boardUserOpenEvent.username, true, true, true));
+            }
         });
     });
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {

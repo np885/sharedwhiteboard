@@ -30,13 +30,13 @@ function($scope, whiteboardSocketService){
     });
 
     whiteboardSocketService.registerForSocketEvent('BoardUserOpenEvent', function(boardUserOpenEvent) {
+        //-> user joining...
         $scope.$apply(function() {
             //need scope-apply cause we are out of angular digest cycle, when the server sends events and calls this callback
             var alreadyMember = false;
             $scope.collaborators.forEach(function(collab) {
                 if (collab.id === boardUserOpenEvent.userId) {
-                    collab.online = true;
-                    console.log('online: ' + collab.name);
+                    collab.join = true;
                     alreadyMember = true;
                 }
             });
@@ -48,16 +48,16 @@ function($scope, whiteboardSocketService){
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
-                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, true, collab.online, true));
+                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, collab.joined, true, true));
             });
         });
     });
     whiteboardSocketService.registerForSocketEvent('BoardUserCloseEvent', function(boardUserCloseEvent) {
         $scope.$apply(function() {
-            $scope.collaborators = $scope.collaborators.filter(function (colab) {
-                //filter function: return true if element should sty in array
-                //  => delete the disco-User:
-                return colab.name !== boardUserCloseEvent.username;
+            $scope.collaborators.forEach(function(collab) {
+                if (collab.id === boardUserCloseEvent.userId) {
+                    collab.join = false;
+                }
             });
         });
     });

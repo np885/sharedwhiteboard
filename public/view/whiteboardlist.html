@@ -14,8 +14,8 @@
         <a ng-href="#/whiteboard/{{whiteboard.id}}" ng-click="openWhiteboardSocket(whiteboard)" class="list-group-item" ng-hide="myown && currentUser !== whiteboard.owner">
             <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>
             <div class="list-group list-group-horizontal">
-                <!--<div class="list-group-item" ng-class="{'list-group-item-success' : user.online}" ng-repeat="user in whiteboard.collaborators">-->
-                <div class="list-group-item" ng-class="{'list-group-item-success' : user.online}" ng-repeat="user in dummyCollabs">
+                <!--<div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in whiteboard.collaborators">-->
+                <div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in dummyCollabs">
                     {{user.name}}<span ng-class="{'glyphicon glyphicon-star-empty' : whiteboard.owner === user.name}"></span> <span ng-class="{'glyphicon glyphicon-eye-open': user.join }" ></span>
                 </div>
             </div>

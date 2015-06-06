@@ -3,19 +3,19 @@ package actors.events.socket.boardstate;
 public class Collab {
     private long userId;
     private String username;
-    private boolean online = false;
+    private boolean joined = false;
 
     public Collab(long userId, String username) {
         this.userId = userId;
         this.username = username;
     }
 
-    public boolean isOnline() {
-        return online;
+    public boolean isJoined() {
+        return joined;
     }
 
-    public void setOnline(boolean online) {
-        this.online = online;
+    public void setJoined(boolean joined) {
+        this.joined = joined;
     }
 
     public long getUserId() {

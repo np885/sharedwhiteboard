@@ -167,13 +167,13 @@ public class WhiteboardActor extends UntypedActor {
         //add drawings etc dto:
         BoardStateSerializationUtil.mapToEvent(currentState, dto);
         //add online status to collabs:
-        Set<Long> onlineIds = new HashSet<>();
+        Set<Long> joinedIds = new HashSet<>();
         for (WebSocketConnection c : socketConnections) {
-            onlineIds.add(c.getUser().getId());
+            joinedIds.add(c.getUser().getId());
         }
         for (Collab c : dto.getColaborators()) {
-            if (onlineIds.contains(c.getUserId())) {
-                c.setOnline(true);
+            if (joinedIds.contains(c.getUserId())) {
+                c.setJoined(true);
             }
         }
 

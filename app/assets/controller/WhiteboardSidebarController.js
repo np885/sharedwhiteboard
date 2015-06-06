@@ -24,7 +24,7 @@ function($scope, whiteboardSocketService){
 
     whiteboardSocketService.registerForDrawEvent(function(drawEvent){
         $scope.$apply(function(){
-            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, "test", drawEvent.eventType));
+            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.eventType));
         });
     });
 
@@ -34,27 +34,27 @@ function($scope, whiteboardSocketService){
             //need scope-apply cause we are out of angular digest cycle, when the server sends events and calls this callback
             var alreadyMember = false;
             $scope.collaborators.forEach(function(collab) {
-                if (collab.id === boardUserOpenEvent.userId) {
+                if (collab.id === boardUserOpenEvent.user.userId) {
                     collab.join = true;
                     alreadyMember = true;
                 }
             });
             if (!alreadyMember) {
-                $scope.collaborators.push(new Collaborator(boardUserOpenEvent.userId, boardUserOpenEvent.username, true, true, true));
+                $scope.collaborators.push(new Collaborator(boardUserOpenEvent.user.userId, boardUserOpenEvent.user.username, true, true, true));
             }
         });
     });
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
-                $scope.collaborators.push(new Collaborator(collab.userId, collab.username, collab.joined, true, true));
+                $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, true, true));
             });
         });
     });
     whiteboardSocketService.registerForSocketEvent('BoardUserCloseEvent', function(boardUserCloseEvent) {
         $scope.$apply(function() {
             $scope.collaborators.forEach(function(collab) {
-                if (collab.id === boardUserCloseEvent.userId) {
+                if (collab.id === boardUserCloseEvent.user.userId) {
                     collab.join = false;
                 }
             });

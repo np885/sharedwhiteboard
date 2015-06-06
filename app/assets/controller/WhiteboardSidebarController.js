@@ -22,10 +22,9 @@ function($scope, whiteboardSocketService){
     $scope.collaborators = [];
     $scope.whiteboardlog = [];
 
-    //TODO: Not a FreeHandEvent, instead it should be finished Lines-/circles-/recktangle-Event etc..
-    whiteboardSocketService.registerForSocketEvent('FreeHandEvent', function(freeHandEvent){
+    whiteboardSocketService.registerForDrawEvent(function(drawEvent){
         $scope.$apply(function(){
-            //$scope.whiteboardlog.push(new WhiteboardLog());
+            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, "test", drawEvent.eventType));
         });
     });
 

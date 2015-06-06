@@ -26,12 +26,18 @@
     margin-top: 56px;
 }
 .whiteboardsidebarlist{
-    max-height: 250px;
+    max-height: 220px;
     overflow-y: scroll;
+    margin: 0px !important;
 }
-.panelnobottom{
-    margin-bottom: 0px !important;
+.sidebarpanelbody{
+    margin: 0px !important;
+    padding: 0px !important;
 }
+.custom-sidebar-item{
+    padding: 5px 8px !important;
+}
+
 .list-group-horizontal .list-group-item {
     display: inline-block;
 }

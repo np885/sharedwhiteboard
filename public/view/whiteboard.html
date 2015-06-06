@@ -17,9 +17,9 @@
             <div class="panel-heading">
                 <h3 class="panel-title">Aktivitäten:</h3>
             </div>
-            <div class="panel-body">
+            <div class="panel-body sidebarpanelbody" >
                 <ul class="list-group whiteboardsidebarlist">
-                    <li class="list-group-item" ng-repeat="log in whiteboardlog">
+                    <li class="list-group-item custom-sidebar-item" ng-repeat="log in whiteboardlog">
                         {{log.id}} - {{log.name}} zeichnete {{log.typ}}
                     </li>
                 </ul>
@@ -29,7 +29,7 @@
             <div class="panel-heading">
                 <h3 class="panel-title">Nutzer Online:</h3>
             </div>
-            <div class="panel-body">
+            <div class="panel-body sidebarpanelbody">
                 <ul class="list-group whiteboardsidebarlist">
                     <li class="list-group-item" ng-class="{'list-group-item-success' : collab.joined}" ng-repeat="collab in collaborators" title="User ID: {{collab.id}}">
                         {{collab.name}}<div class="pull-right"><span ng-class="{'glyphicon glyphicon-star-empty' : collab.owner}"></span> <span ng-class="{'glyphicon glyphicon-eye-open': collab.join }" ></span></div>

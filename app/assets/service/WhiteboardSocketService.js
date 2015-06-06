@@ -30,8 +30,11 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
     service.registerForSocketEvent = function(eventName, theCallback) {
         handledServerEvents[eventName].callbacks.push(theCallback);
-    }
-
+    };
+    service.registerForDrawEvent = function(theCallback) {
+        handledServerEvents['FreeHandEvent'].callbacks.push(theCallback);
+        handledServerEvents['LineEvent'].callbacks.push(theCallback);
+    };
     service.dispatchServerEvent = function(e) {
         if (e.eventType != null) {
             //execute all callbacks that are registered for that type of server event:

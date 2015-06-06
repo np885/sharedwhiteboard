@@ -1,6 +1,7 @@
 package actors;
 
 import actors.events.SWBEvent;
+import actors.events.SimpleUser;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.SocketEvent;
@@ -49,10 +50,14 @@ public class WebSocketInActor extends UntypedActor {
         switch (eventType) {
             case "FreeHandEvent":
                 FreeHandEvent freeHandEvent = Json.fromJson(parsedMessage, FreeHandEvent.class);
+                //Adding User that Draws Line
+                freeHandEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
                 tellMyWhiteboardActor(freeHandEvent);
                 break;
             case "LineEvent":
                 SingleLineEvent lineEvent = Json.fromJson(parsedMessage, SingleLineEvent.class);
+                //Adding User that Draws Line
+                lineEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
                 tellMyWhiteboardActor(lineEvent);
                 break;
         }

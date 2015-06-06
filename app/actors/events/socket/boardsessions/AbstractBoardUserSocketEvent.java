@@ -1,26 +1,18 @@
 package actors.events.socket.boardsessions;
 
+import actors.events.SimpleUser;
 import actors.events.SocketEvent;
 
 /**
  */
 public abstract class AbstractBoardUserSocketEvent extends SocketEvent {
-    private long userId;
-    private String username;
+    private SimpleUser user;
 
-    public long getUserId() {
-        return userId;
+    public SimpleUser getUser() {
+        return user;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUser(SimpleUser user) {
+        this.user = user;
     }
 }

@@ -172,7 +172,7 @@ public class WhiteboardActor extends UntypedActor {
             joinedIds.add(c.getUser().getId());
         }
         for (Collab c : dto.getColaborators()) {
-            if (joinedIds.contains(c.getUserId())) {
+            if (joinedIds.contains(c.getUser().getUserId())) {
                 c.setJoined(true);
             }
         }

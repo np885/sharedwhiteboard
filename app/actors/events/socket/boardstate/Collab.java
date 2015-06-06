@@ -1,13 +1,21 @@
 package actors.events.socket.boardstate;
 
+import actors.events.SimpleUser;
+
 public class Collab {
-    private long userId;
-    private String username;
+    private SimpleUser user;
     private boolean joined = false;
 
     public Collab(long userId, String username) {
-        this.userId = userId;
-        this.username = username;
+        user = new SimpleUser(userId, username);
+    }
+
+    public SimpleUser getUser() {
+        return user;
+    }
+
+    public void setUser(SimpleUser user) {
+        this.user = user;
     }
 
     public boolean isJoined() {
@@ -18,19 +26,4 @@ public class Collab {
         this.joined = joined;
     }
 
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 }

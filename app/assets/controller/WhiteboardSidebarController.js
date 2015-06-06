@@ -1,7 +1,7 @@
 'use strict';
 
-app.controller('WhiteboardSidebarController', ['$scope', 'WhiteboardSocketService',
-function($scope, whiteboardSocketService){
+app.controller('WhiteboardSidebarController', ['$scope', 'WhiteboardSocketService', 'constant',
+function($scope, whiteboardSocketService, constant){
     function Collaborator(id, name, join, online, owner) {
         this.id = id;
         this.name = name;
@@ -21,13 +21,15 @@ function($scope, whiteboardSocketService){
         this.typForHtml = "";
         switch (this.typ){
             case "FreeHandEvent":
-                this.typForHtml = "freihand";
+                this.typForHtml = "zeichnete freihand";
                 break;
             case "LineEvent":
-                this.typForHtml = "eine Linie";
+                this.typForHtml = "zeichnete eine Linie";
                 break;
+            case "MoveEvent":
+                this.typForHtml = "verschob ein Objekt";
         }
-        this.forHTML = "[" + this.dateForHtml + "] " + this.name + " zeichnete " + this.typForHtml;
+        this.forHTML = "[" + this.dateForHtml + "] " + this.name + " " + this.typForHtml;
     }
 
     $scope.collaborators = [];

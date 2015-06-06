@@ -334,7 +334,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
     };
     service.moveMouseUp = function(event){
-        var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', selectedDrawing.boardElementId);
+        var drawFinishedEvent  = new DrawFinishedEvent('MoveEvent', selectedDrawing.boardElementId);
         WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         moving = false;
     };

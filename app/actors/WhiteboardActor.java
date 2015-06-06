@@ -23,10 +23,7 @@ import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class WhiteboardActor extends UntypedActor {
     private WhiteboardRepo whiteboardRepo = new WhiteboardRepo();
@@ -35,6 +32,8 @@ public class WhiteboardActor extends UntypedActor {
     private List<WebSocketConnection> socketConnections = new ArrayList<>();
 
     private Whiteboard currentState;
+
+    private LinkedList<DrawFinishedEvent> sessionLog = new LinkedList<>();
 
     public WhiteboardActor(WebSocketConnection connection) {
         Logger.info("Creating Whiteboard Actor: " + self().path());
@@ -73,6 +72,8 @@ public class WhiteboardActor extends UntypedActor {
     }
 
     private void onDrawFinishedEvent(DrawFinishedEvent drawFinishedEvent) {
+        //Adding to sessionLog for initialState
+        sessionLog.addFirst(drawFinishedEvent);
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(Json.stringify(Json.toJson(drawFinishedEvent)), self());
         }
@@ -185,7 +186,8 @@ public class WhiteboardActor extends UntypedActor {
                 c.setJoined(true);
             }
         }
-
+        //Add complete sessionLog
+        dto.getSessionLog().addAll(sessionLog);
         return Json.stringify(Json.toJson(dto));
     }
 }

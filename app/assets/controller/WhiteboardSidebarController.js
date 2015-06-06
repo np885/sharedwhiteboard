@@ -62,6 +62,9 @@ function($scope, whiteboardSocketService, constant){
             initStateEvent.colaborators.forEach(function (collab) {
                 $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, true, true));
             });
+            initStateEvent.sessionLog.forEach(function(drawEvent){
+                $scope.whiteboardlog.push(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.drawType, drawEvent.logDate));
+            });
         });
     });
     whiteboardSocketService.registerForSocketEvent('BoardUserCloseEvent', function(boardUserCloseEvent) {

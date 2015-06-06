@@ -4,7 +4,7 @@ import actors.events.SWBEvent;
 import actors.events.SimpleUser;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
-import actors.events.SocketEvent;
+import actors.events.socket.draw.DrawFinishedEvent;
 import actors.events.socket.draw.FreeHandEvent;
 import actors.events.socket.draw.SingleLineEvent;
 import akka.actor.ActorRef;
@@ -14,6 +14,8 @@ import model.user.entities.User;
 import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
+
+import java.util.Date;
 
 public class WebSocketInActor extends UntypedActor {
     private final long boardId;
@@ -60,6 +62,11 @@ public class WebSocketInActor extends UntypedActor {
                 lineEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
                 tellMyWhiteboardActor(lineEvent);
                 break;
+            case "DrawFinishEvent":
+                DrawFinishedEvent drawFinishedEvent = Json.fromJson(parsedMessage, DrawFinishedEvent.class);
+                drawFinishedEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
+                drawFinishedEvent.setLogDate(new Date());
+                tellMyWhiteboardActor(drawFinishedEvent);
         }
     }
 

@@ -8,6 +8,7 @@ import actors.events.socket.boardstate.BoardStateSerializationUtil;
 import actors.events.socket.boardstate.Collab;
 import actors.events.socket.boardstate.InitialBoardStateEvent;
 import actors.events.socket.draw.DrawEvent;
+import actors.events.socket.draw.DrawFinishedEvent;
 import actors.events.socket.draw.FreeHandEvent;
 import actors.events.socket.draw.SingleLineEvent;
 import akka.actor.PoisonPill;
@@ -66,6 +67,14 @@ public class WhiteboardActor extends UntypedActor {
             onFreeHandEvent((FreeHandEvent) message);
         } else if (message instanceof SingleLineEvent) {
             onSingleLineEvent((SingleLineEvent) message);
+        } else if (message instanceof DrawFinishedEvent) {
+            onDrawFinishedEvent((DrawFinishedEvent) message);
+        }
+    }
+
+    private void onDrawFinishedEvent(DrawFinishedEvent drawFinishedEvent) {
+        for (WebSocketConnection c : socketConnections) {
+            c.getOut().tell(Json.stringify(Json.toJson(drawFinishedEvent)), self());
         }
     }
 

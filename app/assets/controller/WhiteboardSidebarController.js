@@ -12,19 +12,30 @@ function($scope, whiteboardSocketService){
         this.owner = (typeof owner != 'undefined') ? owner : false;
         this.toString = function() {return "{" + this.id + "," + this.name + "}";}
     }
-    function WhiteboardLog(id, name, typ){
+    function WhiteboardLog(id, name, typ, logDate){
         this.id = id;
         this.name = name;
         this.typ = typ;
-        this.toString = function(){return "{" + this.id + ", " + this.name + ", " + this.typ + "}";}
+        this.logDate = new Date(logDate);
+        this.dateForHtml = this.logDate.getHours() + ":" + this.logDate.getMinutes() + ":" + this.logDate.getSeconds();
+        this.typForHtml = "";
+        switch (this.typ){
+            case "FreeHandEvent":
+                this.typForHtml = "freihand";
+                break;
+            case "LineEvent":
+                this.typForHtml = "eine Linie";
+                break;
+        }
+        this.forHTML = "[" + this.dateForHtml + "] " + this.name + " zeichnete " + this.typForHtml;
     }
 
     $scope.collaborators = [];
     $scope.whiteboardlog = [];
 
-    whiteboardSocketService.registerForDrawEvent(function(drawEvent){
+    whiteboardSocketService.registerForSocketEvent('DrawFinishEvent', function(drawEvent){
         $scope.$apply(function(){
-            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.eventType));
+            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.drawType, drawEvent.logDate));
         });
     });
 

@@ -33,6 +33,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.yEnd = yEnd;
     }
 
+
     function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
         this.eventType = 'FreeHandEvent';
         this.boardElementId = boardElementId;
@@ -43,6 +44,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     }
     function Drawing(type, boardElementId){
         this.type = type;
+        this.boardElementId = boardElementId;
+    }
+    function DrawFinishedEvent(drawType, boardElementId){
+        this.eventType = 'DrawFinishEvent';
+        this.drawType = drawType;
         this.boardElementId = boardElementId;
     }
 
@@ -183,6 +189,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         return onMouseDownWrapper(event);
     };
     service.freeHandMouseUp = function(event){
+        //Finished painting object
+        var drawFinishedEvent  = new DrawFinishedEvent('FreeHandEvent', DrawIdService.getCurrent());
+        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
@@ -192,6 +201,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     service.lineMouseUp = function(event){
+        var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', DrawIdService.getCurrent());
+        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
@@ -288,7 +299,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             selectedDrawing = null;
             repaint();
         }
-    }
+    };
     service.moveMouseMove= function(event){
         if (moving) {
             event.stopPropagation();
@@ -321,10 +332,12 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             WhiteboardSocketService.send(JSON.stringify(lineEvent));
         }
-    }
+    };
     service.moveMouseUp = function(event){
+        var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', selectedDrawing.boardElementId);
+        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         moving = false;
-    }
+    };
 
     service.setDrawLine = function(fkt){
         drawLine = fkt;

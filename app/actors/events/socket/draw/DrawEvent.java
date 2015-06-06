@@ -1,6 +1,5 @@
 package actors.events.socket.draw;
 
-import actors.events.SimpleUser;
 import actors.events.socket.boardsessions.AbstractBoardUserSocketEvent;
 
 public abstract class DrawEvent extends AbstractBoardUserSocketEvent {

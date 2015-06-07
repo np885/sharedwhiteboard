@@ -1,5 +1,6 @@
 package controllers.whiteboards.dto;
 
+import actors.events.SimpleUser;
 import controllers.common.dto.XHref;
 import model.user.entities.User;
 import model.whiteboards.entities.Whiteboard;
@@ -46,12 +47,15 @@ class TestDataUtil {
 
         User owner = new User();
         owner.setUsername(OWNER_NAME);
+        owner.setId(1L);
 
         User collab1 = new User();
         collab1.setUsername(COLLAB1_NAME);
+        collab1.setId(2L);
 
         User collab2 = new User();
         collab2.setUsername(COLLAB2_NAME);
+        collab2.setId(3L);
 
         fullWhiteboard.setOwner(owner);
         fullWhiteboard.getCollaborators().add(owner);
@@ -65,11 +69,11 @@ class TestDataUtil {
         Assert.assertEquals("Whiteboard ID", ID_WHITEBOARD, dto.getId());
 
         Assert.assertEquals("Connection-Rel Attribute of Socket Link", "connect", dto.getSocket().getRel());
-        Assert.assertEquals(OWNER_NAME, ((WhiteboardMapper.UserDescription) dto.getOwner().getDescription()).getUsername());
+        Assert.assertEquals(OWNER_NAME, ((SimpleUser) dto.getOwner().getDescription()).getUsername());
 
         List<String> collaboratorNames = new ArrayList<>();
         for (XHref ref : dto.getCollaborators()) {
-            collaboratorNames.add(((WhiteboardMapper.UserDescription) ref.getDescription()).getUsername());
+            collaboratorNames.add(((SimpleUser) ref.getDescription()).getUsername());
         }
 
         Assert.assertTrue("collaborator with name '" + COLLAB1_NAME + "' not mapped", collaboratorNames.contains(COLLAB1_NAME));

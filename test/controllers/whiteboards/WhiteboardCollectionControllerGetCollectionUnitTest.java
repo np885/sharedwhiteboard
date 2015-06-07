@@ -67,10 +67,15 @@ class TestDataUtil {
     static {
         USER_A = new User();
         USER_A.setUsername("Brad Hard");
+        USER_A.setId(1L);
         USER_B = new User();
         USER_B.setUsername("Alf A. Romeo");
+        USER_B.setId(2L);
+
         USER_C = new User();
         USER_C.setUsername("Arno Nühm");
+        USER_C.setId(3L);
+
     }
 
     private Whiteboard wb1;

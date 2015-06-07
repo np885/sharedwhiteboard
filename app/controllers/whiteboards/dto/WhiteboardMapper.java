@@ -1,5 +1,6 @@
 package controllers.whiteboards.dto;
 
+import actors.events.SimpleUser;
 import controllers.common.Paths;
 import controllers.common.dto.XHref;
 import model.user.entities.User;
@@ -52,9 +53,9 @@ public class WhiteboardMapper {
         dto.setId(whiteboard.getId());
         dto.setSocket(new XHref("connect", Paths.TicketPathForSockets(whiteboard), XHref.POST, null));
 
-        dto.setOwner(new XHref(null, Paths.USERS_FULL, null, new UserDescription(whiteboard.getOwner().getUsername())));
+        dto.setOwner(new XHref(null, Paths.USERS_FULL, null, new SimpleUser(whiteboard.getOwner().getId(), whiteboard.getOwner().getUsername())));
         for (User u : whiteboard.getCollaborators()) {
-            dto.getCollaborators().add(new XHref(null, Paths.USERS_FULL, null, new UserDescription(u.getUsername())));
+            dto.getCollaborators().add(new XHref(null, Paths.USERS_FULL, null, new SimpleUser(u.getId(), u.getUsername())));
         }
     }
 

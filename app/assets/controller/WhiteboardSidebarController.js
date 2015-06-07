@@ -2,14 +2,13 @@
 
 app.controller('WhiteboardSidebarController', ['$scope', 'WhiteboardSocketService', 'constant',
 function($scope, whiteboardSocketService, constant){
-    function Collaborator(id, name, join, online, owner) {
+    function Collaborator(id, name, join, online) {
         this.id = id;
         this.name = name;
         //TODO: online != join. online -> logged-in in App. join -> logged-in Whiteboard.
         this.online = (typeof online != 'undefined') ? online : false;
         this.join = (typeof join != 'undefined') ? join : false;
-        //TODO: Adding owner flag for special STAR ;-)
-        this.owner = (typeof owner != 'undefined') ? owner : false;
+        this.owner = whiteboardSocketService.checkOwner(id);
         this.toString = function() {return "{" + this.id + "," + this.name + "}";}
     }
     function WhiteboardLog(id, name, typ, logDate){
@@ -53,14 +52,14 @@ function($scope, whiteboardSocketService, constant){
                 }
             });
             if (!alreadyMember) {
-                $scope.collaborators.push(new Collaborator(boardUserOpenEvent.user.userId, boardUserOpenEvent.user.username, true, true, true));
+                $scope.collaborators.push(new Collaborator(boardUserOpenEvent.user.userId, boardUserOpenEvent.user.username, true, true));
             }
         });
     });
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
-                $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, true, true));
+                $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, true));
             });
             initStateEvent.sessionLog.forEach(function(drawEvent){
                 $scope.whiteboardlog.push(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.drawType, drawEvent.logDate));

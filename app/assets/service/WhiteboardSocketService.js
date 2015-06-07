@@ -8,7 +8,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
     }
     SocketServerEvent.prototype.registerCallback = function(callback){
         this.callbacks.push(callback);
-    }
+    };
 
     //List of hanlded Events:
     var handledServerEvents = {
@@ -21,21 +21,14 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
     };
 
     var service = {};
-    var websocketTicketPath;
     var connection;
     var drawFunction;
-
-    service.setWebsocketPath = function(path){
-        websocketTicketPath = path;
-    };
+    var whiteboard;
 
     service.registerForSocketEvent = function(eventName, theCallback) {
         handledServerEvents[eventName].callbacks.push(theCallback);
     };
-    service.registerForDrawEvent = function(theCallback) {
-        handledServerEvents['FreeHandEvent'].callbacks.push(theCallback);
-        handledServerEvents['LineEvent'].callbacks.push(theCallback);
-    };
+
     service.dispatchServerEvent = function(e) {
         if (e.eventType != null) {
             //execute all callbacks that are registered for that type of server event:
@@ -45,11 +38,11 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         } else {
             drawFunction(e.xStart, e.yStart, e.currentX, e.currentY);
         }
-    }
+    };
 
     service.openSocketConnection = function(){
         //try to create a connection ticket:
-        $http.post(websocketTicketPath)
+        $http.post(whiteboard.socket)
             .success(function(data, status, headers, config) {
                 //on success: connect to socket. Path of ticket will be send by server in Location Header.
                 connection = new WebSocket(headers('Location'));
@@ -83,6 +76,17 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
     service.setFkt = function(fktCallback){
         drawFunction = fktCallback;
+    };
+
+    service.setWhiteboard = function(board){
+        whiteboard = board;
+    };
+    service.getWhiteboard = function(){
+        return whiteboard;
+    };
+
+    service.checkOwner = function(id){
+        return whiteboard.owner.userId === id;
     };
 
     return service;

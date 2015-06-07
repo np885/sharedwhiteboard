@@ -1,5 +1,7 @@
 package controllers.users;
 
+import actors.events.intern.app.AppUserLoginEvent;
+import actors.events.intern.app.AppUserLogoutEvent;
 import controllers.common.Paths;
 import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
@@ -9,6 +11,7 @@ import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
+import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -23,7 +26,30 @@ public class UserManagementController extends Controller {
     @Transactional
     public static Result checkLoginCredentials() {
         User currentuser = (User) ctx().args.get("currentuser");
+        //Send UserLoginEvent
+        sendUserLoginEvent(currentuser);
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
+    }
+
+    @AuthRequired
+    @Transactional
+    public static Result logout() {
+        User currentuser = (User) ctx().args.get("currentuser");
+        //Send UserLoginEvent
+        sendUserLogoutEvent(currentuser);
+        return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
+    }
+
+    private static void sendUserLogoutEvent(User currentuser) {
+        AppUserLogoutEvent appUserLogoutEvent = new AppUserLogoutEvent();
+        appUserLogoutEvent.setUser(currentuser);
+        Akka.system().eventStream().publish(appUserLogoutEvent);
+    }
+
+    private static void sendUserLoginEvent(User currentuser) {
+        AppUserLoginEvent appUserLoginEvent = new AppUserLoginEvent();
+        appUserLoginEvent.setUser(currentuser);
+        Akka.system().eventStream().publish(appUserLoginEvent);
     }
 
     @ConsumesJSON

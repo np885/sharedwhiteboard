@@ -1,4 +1,4 @@
-package actors.events;
+package actors.events.socket.boardstate;
 
 
 public class SimpleUser {

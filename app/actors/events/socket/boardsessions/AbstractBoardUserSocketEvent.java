@@ -1,6 +1,6 @@
 package actors.events.socket.boardsessions;
 
-import actors.events.SimpleUser;
+import actors.events.socket.boardstate.SimpleUser;
 import actors.events.SocketEvent;
 
 /**

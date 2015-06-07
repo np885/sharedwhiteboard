@@ -31,7 +31,7 @@
             </div>
             <div class="panel-body sidebarpanelbody">
                 <ul class="list-group whiteboardsidebarlist">
-                    <li class="list-group-item" ng-class="{'list-group-item-success' : collab.join}" ng-repeat="collab in collaborators" title="User ID: {{collab.id}}">
+                    <li class="list-group-item" ng-class="{'list-group-item-success' : collab.online}" ng-repeat="collab in collaborators" title="User ID: {{collab.id}}">
                         {{collab.name}}<div class="pull-right"><span ng-class="{'glyphicon glyphicon-star-empty' : collab.owner}"></span> <span ng-class="{'glyphicon glyphicon-eye-open': collab.join }" ></span></div>
                     </li>
                 </ul>

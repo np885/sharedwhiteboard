@@ -1,7 +1,7 @@
 package actors;
 
 import actors.events.SWBEvent;
-import actors.events.SimpleUser;
+import actors.events.socket.boardstate.SimpleUser;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.draw.DrawFinishedEvent;

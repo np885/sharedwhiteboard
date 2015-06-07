@@ -1,12 +1,11 @@
 package actors.events.socket.boardstate;
 
-import actors.events.SimpleUser;
-
-public class Collab {
+public class CollabState {
     private SimpleUser user;
     private boolean joined = false;
+    private boolean online = false;
 
-    public Collab(long userId, String username) {
+    public CollabState(long userId, String username) {
         user = new SimpleUser(userId, username);
     }
 
@@ -26,4 +25,11 @@ public class Collab {
         this.joined = joined;
     }
 
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
 }

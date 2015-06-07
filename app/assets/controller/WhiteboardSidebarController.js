@@ -40,6 +40,27 @@ function($scope, whiteboardSocketService, constant){
         });
     });
 
+    whiteboardSocketService.registerForSocketEvent('BoardUserOfflineEvent', function(userOfflineEvent){
+        $scope.$apply(function(){
+            $scope.collaborators.forEach(function(collab) {
+                if(collab.id === userOfflineEvent.user.userId){
+                    collab.online = false;
+                    collab.join = false;
+                }
+            });
+        });
+    });
+
+    whiteboardSocketService.registerForSocketEvent('BoardUserOnlineEvent', function(userOnlineEvent){
+        $scope.$apply(function(){
+            $scope.collaborators.forEach(function(collab) {
+                if(collab.id === userOnlineEvent.user.userId){
+                    collab.online = true;
+                }
+            });
+        });
+    });
+
     whiteboardSocketService.registerForSocketEvent('BoardUserOpenEvent', function(boardUserOpenEvent) {
         //-> user joining...
         $scope.$apply(function() {
@@ -59,9 +80,9 @@ function($scope, whiteboardSocketService, constant){
     whiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         $scope.$apply(function() {
             initStateEvent.colaborators.forEach(function (collab) {
-                $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, true));
+                $scope.collaborators.push(new Collaborator(collab.user.userId, collab.user.username, collab.joined, collab.online));
             });
-            initStateEvent.sessionLog.forEach(function(drawEvent){
+            initStateEvent.activityLog.forEach(function(drawEvent){
                 $scope.whiteboardlog.push(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.drawType, drawEvent.logDate));
             });
         });

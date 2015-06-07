@@ -7,20 +7,31 @@ import actors.events.socket.boardstate.drawings.SingleLineDrawingDTO;
 import model.user.entities.User;
 import model.whiteboards.entities.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  */
 public class BoardStateSerializationUtil {
-    public static void mapToEvent(Whiteboard entity, InitialBoardStateEvent event) {
+
+    public static List<CollabState> mapToCollabState(Whiteboard whiteboard){
+        List<CollabState> collabStateList = new ArrayList<>();
+        for(User user : whiteboard.getCollaborators()){
+            collabStateList.add(mapToCollabState(user));
+        }
+        return collabStateList;
+    }
+
+    public static CollabState mapToCollabState(User user){
+        return new CollabState(user.getId(), user.getUsername());
+    }
+
+    public static void mapDrawingsToEvent(Whiteboard entity, InitialBoardStateEvent event) {
         //drawings:
         for (int drawObjectId : entity.getDrawObjects().keySet()) {
             AbstractDrawObject drawObject = entity.getDrawObjects().get(drawObjectId);
             event.getDrawings().add(mapAbstractDrawing(drawObject));
         }
-        //members:
-        for (User u : entity.getCollaborators()) {
-            event.getColaborators().add(new Collab(u.getId(), u.getUsername()));
-        }
-
     }
 
     private static DrawingDTO mapAbstractDrawing(AbstractDrawObject drawObject) {
@@ -54,4 +65,5 @@ public class BoardStateSerializationUtil {
 
         return dto;
     }
+
 }

@@ -1,8 +1,8 @@
 'use strict';
 
 app.service('AuthenticationService',
-        ['Base64', '$http', '$sessionStorage',
-            function (Base64, $http, $sessionStorage) {
+        ['Base64', '$http', '$sessionStorage', '$location',
+            function (Base64, $http, $sessionStorage, $location) {
                 var service = {};
 
                 service.login = function (user) {
@@ -24,9 +24,14 @@ app.service('AuthenticationService',
                 };
 
                 service.clearCredentials = function () {
-                    delete $sessionStorage.user;
-                    delete $sessionStorage.userid;
-                    delete $http.defaults.headers.common.Authorization;
+                    $http.get('/logout')
+                        .success(function(data, status, headers, config) {
+                            delete $sessionStorage.user;
+                            delete $sessionStorage.userid;
+                            delete $http.defaults.headers.common.Authorization;
+                            $location.path('/login');
+                        });
+
                 };
 
                 service.getUser = function(){

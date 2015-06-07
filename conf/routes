@@ -8,6 +8,7 @@ GET         /                                       controllers.Application.inde
 
 #User Management:
 GET         /login                                  controllers.users.UserManagementController.checkLoginCredentials()
+GET         /logout                                  controllers.users.UserManagementController.logout()
 POST        /register                               controllers.users.UserManagementController.registerUser()
 GET         /users                                  controllers.users.UserCollectionController.getAllUsers()
 

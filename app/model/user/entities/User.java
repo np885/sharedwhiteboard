@@ -20,7 +20,7 @@ public class User extends AbstractEntity {
 
     private String password;
 
-    @ManyToMany(mappedBy = "collaborators")
+    @ManyToMany(mappedBy = "collaborators", fetch = FetchType.EAGER)
     private Set<Whiteboard> whiteboards = new HashSet<>();
 
     public String getUsername() {

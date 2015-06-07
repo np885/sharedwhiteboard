@@ -1,6 +1,6 @@
 package controllers.whiteboards.dto;
 
-import actors.events.SimpleUser;
+import actors.events.socket.boardstate.SimpleUser;
 import controllers.common.Paths;
 import controllers.common.dto.XHref;
 import model.user.entities.User;

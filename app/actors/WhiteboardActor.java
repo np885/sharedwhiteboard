@@ -1,16 +1,20 @@
 package actors;
 
+import actors.events.intern.app.AbstractAppUserEvent;
+import actors.events.intern.app.AppUserLoginEvent;
+import actors.events.intern.app.AppUserLogoutEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.boardstate.BoardStateSerializationUtil;
-import actors.events.socket.boardstate.Collab;
+import actors.events.socket.boardstate.CollabState;
 import actors.events.socket.boardstate.InitialBoardStateEvent;
 import actors.events.socket.draw.DrawEvent;
 import actors.events.socket.draw.DrawFinishedEvent;
 import actors.events.socket.draw.FreeHandEvent;
 import actors.events.socket.draw.SingleLineEvent;
+import actors.events.socket.boardstate.WhiteboardSessionState;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
@@ -33,9 +37,10 @@ public class WhiteboardActor extends UntypedActor {
 
     private Whiteboard currentState;
 
-    private LinkedList<DrawFinishedEvent> sessionLog = new LinkedList<>();
+    //Only available when actor exists
+    private WhiteboardSessionState sessionState = new WhiteboardSessionState();
 
-    public WhiteboardActor(WebSocketConnection connection) {
+    public WhiteboardActor(WebSocketConnection connection, List<User> onlineUsers) {
         Logger.info("Creating Whiteboard Actor: " + self().path());
 
         this.boardId = connection.getBoardId();
@@ -51,6 +56,11 @@ public class WhiteboardActor extends UntypedActor {
 
         //add first connection to connections:
         socketConnections.add(connection);
+
+        //Init the SessionState of all Collaborators
+        sessionState.initCollabStates(currentState, onlineUsers);
+        //Change state of current user
+        sessionState.changeCollabState(connectingUser.getId(), true, true);
 
         //tell new connection initial state:
         connection.getOut().tell(produceCurrentStateRepresentation(), self());
@@ -68,12 +78,28 @@ public class WhiteboardActor extends UntypedActor {
             onSingleLineEvent((SingleLineEvent) message);
         } else if (message instanceof DrawFinishedEvent) {
             onDrawFinishedEvent((DrawFinishedEvent) message);
+        } else if (message instanceof AbstractAppUserEvent) {
+            onAppUserEvent((AbstractAppUserEvent) message);
+        }
+    }
+
+    private void onAppUserEvent(AbstractAppUserEvent event) {
+        //Change online Status of Collabs
+        if (event instanceof AppUserLoginEvent) {
+            sessionState.changeCollabStateOnline(event.getUser().getId(), true);
+        } else if (event instanceof AppUserLogoutEvent) {
+            sessionState.changeCollabState(event.getUser().getId(), false, false);
+        }
+        //Tell everyone about the online Event
+        for (WebSocketConnection c : socketConnections) {
+            String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
+            c.getOut().tell(outputJSON, self());
         }
     }
 
     private void onDrawFinishedEvent(DrawFinishedEvent drawFinishedEvent) {
         //Adding to sessionLog for initialState
-        sessionLog.addFirst(drawFinishedEvent);
+        sessionState.getActivityLog().addFirst(drawFinishedEvent);
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(Json.stringify(Json.toJson(drawFinishedEvent)), self());
         }
@@ -86,7 +112,11 @@ public class WhiteboardActor extends UntypedActor {
         User connectingUser = userOpenEvent.getConnection().getUser();
         if (! currentState.getCollaborators().contains(connectingUser)) {
             currentState.getCollaborators().add(connectingUser);
+            //Adding to sessionState
+            sessionState.getCollabs().add(new CollabState(connectingUser.getId(), connectingUser.getUsername()));
         }
+        //Changing state
+        sessionState.changeCollabStateJoin(connectingUser.getId(), true);
 
         //Tell everyone about the new connection:
         for (WebSocketConnection c : socketConnections) {
@@ -96,6 +126,8 @@ public class WhiteboardActor extends UntypedActor {
 
         //Add connection to list:
         socketConnections.add(connection);
+
+
 
         //tell the new connection the initial State:
         connection.getOut().tell(produceCurrentStateRepresentation(), self());
@@ -158,6 +190,8 @@ public class WhiteboardActor extends UntypedActor {
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(SessionEventSerializationUtil.serialize(event), self());
         }
+        //Change join State of Collab
+        sessionState.changeCollabStateJoin(event.getConnection().getUser().getId(), false);
 
         //No connections left: persist and kill self:
         if (socketConnections.isEmpty()) {
@@ -175,19 +209,11 @@ public class WhiteboardActor extends UntypedActor {
     private String produceCurrentStateRepresentation() {
         InitialBoardStateEvent dto = new InitialBoardStateEvent();
         //add drawings etc dto:
-        BoardStateSerializationUtil.mapToEvent(currentState, dto);
-        //add online status to collabs:
-        Set<Long> joinedIds = new HashSet<>();
-        for (WebSocketConnection c : socketConnections) {
-            joinedIds.add(c.getUser().getId());
-        }
-        for (Collab c : dto.getColaborators()) {
-            if (joinedIds.contains(c.getUser().getUserId())) {
-                c.setJoined(true);
-            }
-        }
-        //Add complete sessionLog
-        dto.getSessionLog().addAll(sessionLog);
+        BoardStateSerializationUtil.mapDrawingsToEvent(currentState, dto);
+        //Add complete activityLog
+        dto.getActivityLog().addAll(sessionState.getActivityLog());
+        //Add CollabState from Session
+        dto.getColaborators().addAll(sessionState.getCollabs());
         return Json.stringify(Json.toJson(dto));
     }
 }

@@ -11,18 +11,18 @@ import java.util.List;
 /**
  */
 public class InitialBoardStateEvent extends SocketEvent {
-    private List<Collab> colaborators = new ArrayList<>();
+    private List<CollabState> colaborators = new ArrayList<>();
 
     private List<DrawingDTO> drawings = new LinkedList<>();
 
-    private List<DrawFinishedEvent> sessionLog = new ArrayList<>();
+    private List<DrawFinishedEvent> activityLog = new ArrayList<>();
 
     @Override
     public String getEventType() {
         return "InitialBoardStateEvent";
     }
 
-    public List<Collab> getColaborators() {
+    public List<CollabState> getColaborators() {
         return colaborators;
     }
 
@@ -30,8 +30,8 @@ public class InitialBoardStateEvent extends SocketEvent {
         return drawings;
     }
 
-    public List<DrawFinishedEvent> getSessionLog() {
-        return sessionLog;
+    public List<DrawFinishedEvent> getActivityLog() {
+        return activityLog;
     }
 }
 

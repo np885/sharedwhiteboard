@@ -17,7 +17,9 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         'InitialBoardStateEvent' : new SocketServerEvent('InitialBoardStateEvent'),
         'FreeHandEvent' : new SocketServerEvent('FreeHandEvent'),
         'LineEvent' : new SocketServerEvent('LineEvent'),
-        'DrawFinishEvent' : new SocketServerEvent('DrawFinishEvent')
+        'DrawFinishEvent' : new SocketServerEvent('DrawFinishEvent'),
+        'BoardUserOnlineEvent' : new SocketServerEvent('BoardUserOnlineEvent'),
+        'BoardUserOfflineEvent' : new SocketServerEvent('BoardUserOfflineEvent')
     };
 
     var service = {};

@@ -178,6 +178,8 @@ public class WhiteboardActor extends UntypedActor {
         rectDrawing.setY(re.getyStart());
         rectDrawing.setWidth(re.getWidth());
         rectDrawing.setHeight(re.getHeight());
+        rectDrawing.normalize();
+        re.normalize();
 
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(Json.stringify(Json.toJson(re)), self());

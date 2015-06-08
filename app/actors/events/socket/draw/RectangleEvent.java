@@ -45,6 +45,18 @@ public class RectangleEvent extends DrawEvent {
         return "RectangleEvent";
     }
 
+    public void normalize() {
+        if (width < 0) {
+            width = -1 * width;
+            xStart -= width;
+        }
+        if (height < 0) {
+            System.out.println("normalizing height.");
+            height = -1 * height;
+            yStart -= height;
+        }
+    }
+
 //    this.eventType = 'RectangleEvent';
 //    this.boardElementId = boardElementId;
 //    this.xStart = xStart;

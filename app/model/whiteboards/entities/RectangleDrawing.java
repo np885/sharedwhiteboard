@@ -40,4 +40,16 @@ public class RectangleDrawing extends AbstractDrawObject {
     public void setHeight(int height) {
         this.height = height;
     }
+
+    public void normalize() {
+        if (width < 0) {
+            width = -1 * width;
+            x -= width;
+        }
+        if (height < 0) {
+            System.out.println("normalizing height.");
+            height = -1 * height;
+            y -= height;
+        }
+    }
 }

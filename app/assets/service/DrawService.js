@@ -283,6 +283,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
     };
 
+
+    //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
+    function inRect(cx,cy,x,y,w,h) {
+        return cx >= x && cx <= (x+w)   //proper horizontal area
+            && cy >= y && cy <= y+h     //proper vertical area
+    }
+
     var moving = false;
     var selectedDrawing = null;
     service.moveMouseDown= function(event){
@@ -328,6 +335,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         //else {
                         //    console.log('y should be ' + y + ' but is ' + currentY);
                         //}
+                    } else if (leDrawing.type === 'RectangleDrawing') {
+                        var d = 5;//delta so that you dont have to hit exactly to the pixel.
+                        if (inRect(currentX, currentY,
+                                leDrawing.x - d, leDrawing.y - d, leDrawing.width + 2*d, leDrawing.height + 2*d)
+                            && !inRect(currentX,currentY,
+                                leDrawing.x + d,leDrawing.y + d, leDrawing.width - 2*d, leDrawing.height - 2*d)
+                        ) {
+                            selectedDrawing = leDrawing;
+                            moving = true;
+                            startX = currentX;
+                            startY = currentY;
+                            repaint();
+                            return;
+                        }
                     }
                 }
             }
@@ -349,25 +370,38 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var deltaX =  currentX - startX;
             var deltaY =  currentY - startY;
 
-            //console.log(deltaX + ', ' + deltaY);
-
-            var lineEvent = new LineEvent(
-                selectedDrawing.boardElementId,
-                selectedDrawing.points[0].x + deltaX,
-                selectedDrawing.points[0].y + deltaY,
-                selectedDrawing.points[1].x + deltaX,
-                selectedDrawing.points[1].y + deltaY
-            );
+            var event;
+            if (selectedDrawing.type === 'LineDrawing') {
+                event = new LineEvent(
+                    selectedDrawing.boardElementId,
+                    selectedDrawing.points[0].x + deltaX,
+                    selectedDrawing.points[0].y + deltaY,
+                    selectedDrawing.points[1].x + deltaX,
+                    selectedDrawing.points[1].y + deltaY
+                );
+            } else if (selectedDrawing.type === 'RectangleDrawing') {
+                event = new RectangleEvent(
+                    selectedDrawing.boardElementId,
+                    selectedDrawing.x + deltaX,
+                    selectedDrawing.y + deltaY,
+                    selectedDrawing.width,
+                    selectedDrawing.height
+                );
+            }
 
             startX = currentX;
             startY = currentY;
 
-            WhiteboardSocketService.send(JSON.stringify(lineEvent));
+            if (event != null) {
+                WhiteboardSocketService.send(JSON.stringify(event));
+            }
         }
     };
     service.moveMouseUp = function(event){
-        var drawFinishedEvent  = new DrawFinishedEvent('MoveEvent', selectedDrawing.boardElementId);
-        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+        if (selectedDrawing !== null) {
+            var drawFinishedEvent  = new DrawFinishedEvent('MoveEvent', selectedDrawing.boardElementId);
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+        }
         moving = false;
     };
 

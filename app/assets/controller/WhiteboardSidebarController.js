@@ -31,6 +31,9 @@ function($scope, whiteboardSocketService, constant){
             case "RectangleEvent":
                 this.typForHtml = "zeichnete ein Rechteck";
                 break;
+            case "CircleEvent":
+                this.typForHtml = "zeichnete einen Kreis";
+                break;
             case "BoardUserOnlineEvent":
                 this.typForHtml = "ist online!";
                 break;

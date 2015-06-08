@@ -18,6 +18,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         'FreeHandEvent' : new SocketServerEvent('FreeHandEvent'),
         'LineEvent' : new SocketServerEvent('LineEvent'),
         'RectangleEvent' : new SocketServerEvent('RectangleEvent'),
+        'CircleEvent' : new SocketServerEvent('CircleEvent'),
         'DrawFinishEvent' : new SocketServerEvent('DrawFinishEvent'),
         'BoardUserOnlineEvent' : new SocketServerEvent('BoardUserOnlineEvent'),
         'BoardUserOfflineEvent' : new SocketServerEvent('BoardUserOfflineEvent')

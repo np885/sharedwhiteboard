@@ -72,12 +72,15 @@ public class WhiteboardActor extends UntypedActor {
             onSingleLineEvent((SingleLineEvent) message);
         } else if (message instanceof RectangleEvent) {
             onRectangleEvent((RectangleEvent) message);
+        } else if (message instanceof CircleEvent) {
+            onCircleEvent((CircleEvent) message);
         } else if (message instanceof DrawFinishedEvent) {
             onDrawFinishedEvent((DrawFinishedEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
             onAppUserEvent((AbstractAppUserEvent) message);
         }
     }
+
 
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
@@ -170,7 +173,7 @@ public class WhiteboardActor extends UntypedActor {
     private void onRectangleEvent(RectangleEvent re) {
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(re.getBoardElementId());
         if (drawObjForElementId == null) {
-            //new line:
+            //new rectangle:
             drawObjForElementId = initDrawObjectAndAddToState(new RectangleDrawing(), re);
         }
         RectangleDrawing rectDrawing = (RectangleDrawing) drawObjForElementId;
@@ -183,6 +186,22 @@ public class WhiteboardActor extends UntypedActor {
 
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(Json.stringify(Json.toJson(re)), self());
+        }
+    }
+
+    private void onCircleEvent(CircleEvent ce) {
+        AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(ce.getBoardElementId());
+        if (drawObjForElementId == null) {
+            //new circle:
+            drawObjForElementId = initDrawObjectAndAddToState(new CircleDrawing(), ce);
+        }
+        CircleDrawing rectDrawing = (CircleDrawing) drawObjForElementId;
+        rectDrawing.setCenterX(ce.getCenterX());
+        rectDrawing.setCenterY(ce.getCenterY());
+        rectDrawing.setRadius(ce.getRadius());
+
+        for (WebSocketConnection c : socketConnections) {
+            c.getOut().tell(Json.stringify(Json.toJson(ce)), self());
         }
     }
 

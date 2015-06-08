@@ -4,10 +4,7 @@ import actors.events.SWBEvent;
 import actors.events.socket.boardstate.SimpleUser;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
-import actors.events.socket.draw.DrawFinishedEvent;
-import actors.events.socket.draw.FreeHandEvent;
-import actors.events.socket.draw.RectangleEvent;
-import actors.events.socket.draw.SingleLineEvent;
+import actors.events.socket.draw.*;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -68,6 +65,12 @@ public class WebSocketInActor extends UntypedActor {
                 //Adding User that Draws Line
                 rectangleEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
                 tellMyWhiteboardActor(rectangleEvent);
+                break;
+            case "CircleEvent":
+                CircleEvent circleEvent = Json.fromJson(parsedMessage, CircleEvent.class);
+                //Adding User that Draws Line
+                circleEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
+                tellMyWhiteboardActor(circleEvent);
                 break;
             case "DrawFinishEvent":
                 DrawFinishedEvent drawFinishedEvent = Json.fromJson(parsedMessage, DrawFinishedEvent.class);

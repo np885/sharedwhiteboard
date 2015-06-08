@@ -38,8 +38,16 @@ public class BoardStateSerializationUtil {
             return mapDrawing((SingleLineDrawing) drawObject);
         } else if (drawObject instanceof RectangleDrawing) {
             return mapDrawing((RectangleDrawing) drawObject);
+        } else if (drawObject instanceof CircleDrawing) {
+            return mapDrawing((CircleDrawing) drawObject);
         }
         throw new IllegalArgumentException("No a mappable drawobject.");
+    }
+
+    private static DrawingDTO mapDrawing(CircleDrawing cd) {
+        CircleDrawingDTO dto = new CircleDrawingDTO(cd.getCenterX(), cd.getCenterY(), cd.getRadius());
+        dto.setBoardElementId(cd.getBoardElementId());
+        return dto;
     }
 
     private static DrawingDTO mapDrawing(RectangleDrawing rd) {

@@ -4,6 +4,7 @@ app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constan
 function (WhiteboardSocketService, DrawIdService, constant) {
     var drawLine;
     var drawRectangle;
+    var drawCircle;
     var clearCanvas;
     var beginPath;
     var closePath;
@@ -51,6 +52,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.yStart = y;
         this.width = w;
         this.height = h;
+    }
+    function CircleEvent(boardElementId, centerX, centerY, r){
+        this.eventType = 'CircleEvent';
+        this.boardElementId = boardElementId;
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.radius = r;
     }
 
     function DrawFinishedEvent(drawType, boardElementId){
@@ -112,6 +120,21 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
         repaint();
     }
+    var drawCircleEvent = function(circleEvent){
+        var drawing;
+        if(drawings.hasOwnProperty(circleEvent.boardElementId)){
+            //existingDrawing.
+            drawing = drawings[circleEvent.boardElementId];
+        } else {
+            drawing = new Drawing('CircleDrawing', circleEvent.boardElementId);
+            drawings[drawing.boardElementId] = drawing;
+        }
+        drawing.centerX = circleEvent.centerX;
+        drawing.centerY = circleEvent.centerY;
+        drawing.radius = circleEvent.radius;
+
+        repaint();
+    }
 
     //generic draw method, delegating to specific drawing methods:
     var draw = function(drawing){
@@ -136,6 +159,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawLine(drawing.points[0].x, drawing.points[0].y, drawing.points[1].x, drawing.points[1].y);
         } else if(drawing.type === 'RectangleDrawing'){
             drawRectangle(drawing.x, drawing.y, drawing.width, drawing.height);
+        } else if(drawing.type === 'CircleDrawing'){
+            drawCircle(drawing.centerX, drawing.centerY, drawing.radius);
         }
 
         if (drawing === selectedDrawing) {
@@ -151,6 +176,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     WhiteboardSocketService.registerForSocketEvent('FreeHandEvent', drawFreeHandEvent);
     WhiteboardSocketService.registerForSocketEvent('LineEvent', drawLineEvent);
     WhiteboardSocketService.registerForSocketEvent('RectangleEvent', drawRectangleEvent);
+    WhiteboardSocketService.registerForSocketEvent('CircleEvent', drawCircleEvent);
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         drawings = {};
@@ -370,9 +396,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var deltaX =  currentX - startX;
             var deltaY =  currentY - startY;
 
-            var event;
+            var socketEvent;
             if (selectedDrawing.type === 'LineDrawing') {
-                event = new LineEvent(
+                socketEvent = new LineEvent(
                     selectedDrawing.boardElementId,
                     selectedDrawing.points[0].x + deltaX,
                     selectedDrawing.points[0].y + deltaY,
@@ -380,7 +406,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.points[1].y + deltaY
                 );
             } else if (selectedDrawing.type === 'RectangleDrawing') {
-                event = new RectangleEvent(
+                socketEvent = new RectangleEvent(
                     selectedDrawing.boardElementId,
                     selectedDrawing.x + deltaX,
                     selectedDrawing.y + deltaY,
@@ -392,8 +418,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             startX = currentX;
             startY = currentY;
 
-            if (event != null) {
-                WhiteboardSocketService.send(JSON.stringify(event));
+            if (socketEvent != null) {
+                WhiteboardSocketService.send(JSON.stringify(socketEvent));
             }
         }
     };
@@ -418,7 +444,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             // get current mouse position
             getCurrentMouse(event);
-            var rectWidth = currentX - startX; //TODO
+            var rectWidth = currentX - startX;
             var rectHeight = currentY - startY;
             var rectangleEvent = new RectangleEvent(DrawIdService.getCurrent(), startX, startY, rectWidth, rectHeight);
 
@@ -434,6 +460,36 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing = false;
     }
 
+    service.circleMouseDown = function(event){
+        if (!drawing) {
+            getStartMouse(event);
+            drawing = true;
+        }
+    }
+    service.circleMouseMove = function(event){
+        if (drawing) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            // get current mouse position
+            getCurrentMouse(event);
+            var dx = currentX - startX;
+            var dy = currentY - startY;
+            var radius = Math.sqrt(dx*dx + dy*dy);
+            var circleEvent = new CircleEvent(DrawIdService.getCurrent(), startX, startY, radius);
+
+            WhiteboardSocketService.send(JSON.stringify(circleEvent));
+        }
+    }
+    service.circleMouseUp = function(event){
+        var drawFinishedEvent  = new DrawFinishedEvent('CircleEvent', DrawIdService.getCurrent());
+        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+
+        // stop drawing
+        DrawIdService.incrementId();
+        drawing = false;
+    }
+
 
 
 
@@ -442,6 +498,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.setDrawRectangle = function(fkt){
         drawRectangle = fkt;
+    };
+    service.setDrawCircle = function(fkt){
+        drawCircle = fkt;
     };
     service.setBeginPath = function(fkt){
         beginPath = fkt;
@@ -479,6 +538,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseMoveWrapper = this.moveMouseMove;
                 onMouseDownWrapper = this.moveMouseDown;
                 onMouseUpWrapper = this.moveMouseUp;
+                break;
+            case constant.DRAWTOOLS.CIRCLE:
+                onMouseMoveWrapper = this.circleMouseMove;
+                onMouseDownWrapper = this.circleMouseDown;
+                onMouseUpWrapper = this.circleMouseUp;
                 break;
             default:
                 onMouseMoveWrapper = this.freeHandMouseMove;

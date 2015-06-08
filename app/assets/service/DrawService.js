@@ -136,17 +136,22 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
         //console.log( new Date().getTime() - start);
     };
+
+    var getCurrentMouse = function(event) {
+        if(event.offsetX !== undefined){
+            currentX = event.offsetX;
+            currentY = event.offsetY;
+        } else {
+            currentX = event.layerX - event.currentTarget.offsetLeft;
+            currentY = event.layerY - event.currentTarget.offsetTop;
+        }
+    }
+
     service.freeHandMouseMove = function(event){
 
         if(drawing){
             // get current mouse position
-            if(event.offsetX!==undefined){
-                currentX = event.offsetX;
-                currentY = event.offsetY;
-            } else {
-                currentX = event.layerX - event.currentTarget.offsetLeft;
-                currentY = event.layerY - event.currentTarget.offsetTop;
-            }
+            getCurrentMouse(event);
             var lastPoint = {};
             lastPoint.x = currentX;
             lastPoint.y = currentY;
@@ -228,13 +233,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             event.preventDefault();
 
             // get current mouse position
-            if(event.offsetX!==undefined){
-                currentX = event.offsetX;
-                currentY = event.offsetY;
-            } else {
-                currentX = event.layerX - event.currentTarget.offsetLeft;
-                currentY = event.layerY - event.currentTarget.offsetTop;
-            }
+            getCurrentMouse(event);
             var freeHandEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
 
             WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
@@ -248,13 +247,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             event.stopPropagation();
             event.preventDefault();
             // get current mouse position
-            if(event.offsetX!==undefined){
-                currentX = event.offsetX;
-                currentY = event.offsetY;
-            } else {
-                currentX = event.layerX - event.currentTarget.offsetLeft;
-                currentY = event.layerY - event.currentTarget.offsetTop;
-            }
+            getCurrentMouse(event);
 
             //select element:
             for(var boardElementId in drawings){
@@ -300,19 +293,15 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             repaint();
         }
     };
+
+
     service.moveMouseMove= function(event){
         if (moving) {
             event.stopPropagation();
             event.preventDefault();
 
             // get current mouse position
-            if(event.offsetX!==undefined){
-                currentX = event.offsetX;
-                currentY = event.offsetY;
-            } else {
-                currentX = event.layerX - event.currentTarget.offsetLeft;
-                currentY = event.layerY - event.currentTarget.offsetTop;
-            }
+            getCurrentMouse(event);
 
             var deltaX =  currentX - startX;
             var deltaY =  currentY - startY;
@@ -369,6 +358,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseDownWrapper = this.lineMouseDown;
                 onMouseUpWrapper = this.lineMouseUp;
                 break;
+            //case constant.DRAWTOOLS.RECTANGLE:
+            //    onMouseMoveWrapper = this.rectMosueMove;
+            //    onMouseDownWrapper = this.rectMouseDown;
+            //    onMouseUpWrapper = this.rectMouseUp;
+            //    break;
             case constant.DRAWTOOLS.MOVE:
                 onMouseMoveWrapper = this.moveMouseMove;
                 onMouseDownWrapper = this.moveMouseDown;

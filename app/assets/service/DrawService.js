@@ -316,6 +316,12 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             && cy >= y && cy <= y+h     //proper vertical area
     }
 
+    function inCircle(cx,cy, centerX, centerY, r) {
+        var dx = centerX - cx;
+        var dy = centerY - cy;
+        return Math.sqrt(dx*dx + dy*dy) <= r;
+    }
+
     var moving = false;
     var selectedDrawing = null;
     service.moveMouseDown= function(event){
@@ -375,6 +381,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             repaint();
                             return;
                         }
+                    } else if (leDrawing.type === 'CircleDrawing') {
+                        var d = 4;//delta so that you dont have to hit exactly to the pixel.
+                        if (inCircle(currentX, currentY,
+                                leDrawing.centerX, leDrawing.centerY, leDrawing.radius + d)
+                            && !inCircle(currentX, currentY,
+                                leDrawing.centerX, leDrawing.centerY, leDrawing.radius - d)
+                        ) {
+                            selectedDrawing = leDrawing;
+                            moving = true;
+                            startX = currentX;
+                            startY = currentY;
+                            repaint();
+                            return;
+                        }
                     }
                 }
             }
@@ -412,6 +432,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.y + deltaY,
                     selectedDrawing.width,
                     selectedDrawing.height
+                );
+            } else if (selectedDrawing.type === 'CircleDrawing') {
+                socketEvent = new CircleEvent(
+                    selectedDrawing.boardElementId,
+                    selectedDrawing.centerX + deltaX,
+                    selectedDrawing.centerY + deltaY,
+                    selectedDrawing.radius
                 );
             }
 

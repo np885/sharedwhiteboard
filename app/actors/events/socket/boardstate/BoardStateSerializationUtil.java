@@ -1,9 +1,6 @@
 package actors.events.socket.boardstate;
 
-import actors.events.socket.boardstate.drawings.DrawingDTO;
-import actors.events.socket.boardstate.drawings.FreeHandDrawingDTO;
-import actors.events.socket.boardstate.drawings.PointDTO;
-import actors.events.socket.boardstate.drawings.SingleLineDrawingDTO;
+import actors.events.socket.boardstate.drawings.*;
 import model.user.entities.User;
 import model.whiteboards.entities.*;
 
@@ -39,8 +36,16 @@ public class BoardStateSerializationUtil {
             return mapAbstractDrawing((FreeHandDrawing) drawObject);
         } else if (drawObject instanceof SingleLineDrawing) {
             return mapDrawing((SingleLineDrawing) drawObject);
+        } else if (drawObject instanceof RectangleDrawing) {
+            return mapDrawing((RectangleDrawing) drawObject);
         }
         throw new IllegalArgumentException("No a mappable drawobject.");
+    }
+
+    private static DrawingDTO mapDrawing(RectangleDrawing rd) {
+        RectangleDrawingDTO dto = new RectangleDrawingDTO(rd.getX(), rd.getY(), rd.getWidth(), rd.getHeight());
+        dto.setBoardElementId(rd.getBoardElementId());
+        return dto;
     }
 
 

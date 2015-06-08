@@ -27,16 +27,56 @@ function($scope, whiteboardSocketService, constant){
                 break;
             case "MoveEvent":
                 this.typForHtml = "verschob ein Objekt";
+                break;
+            case "RectangleEvent":
+                this.typForHtml = "zeichnete ein Rechteck";
+                break;
+            case "BoardUserOnlineEvent":
+                this.typForHtml = "ist online!";
+                break;
+            case "BoardUserOfflineEvent":
+                this.typForHtml = "ist offline!";
+                break;
+            case "BoardUserOpenEvent":
+                this.typForHtml = "ist der Session beigetreten!";
+                break;
+            case "BoardUserCloseEvent":
+                this.typForHtml = "ist aus der Session ausgetreten!";
+                break;
         }
         this.forHTML = "[" + this.dateForHtml + "] " + this.name + " " + this.typForHtml;
     }
+
+
+    //logs everything, that is not a draw event.
+    function genericLogFunction(event) {
+        $scope.$apply(function(){
+            $scope.whiteboardlog.unshift(new WhiteboardLog(
+                null,
+                event.user.username,
+                event.eventType,
+                new Date()
+            ));
+        });
+    }
+    whiteboardSocketService.registerForSocketEvent('BoardUserOnlineEvent', genericLogFunction);
+    whiteboardSocketService.registerForSocketEvent('BoardUserOfflineEvent', genericLogFunction);
+    whiteboardSocketService.registerForSocketEvent('BoardUserOpenEvent', genericLogFunction);
+    whiteboardSocketService.registerForSocketEvent('BoardUserCloseEvent', genericLogFunction);
+
+
 
     $scope.collaborators = [];
     $scope.whiteboardlog = [];
 
     whiteboardSocketService.registerForSocketEvent('DrawFinishEvent', function(drawEvent){
         $scope.$apply(function(){
-            $scope.whiteboardlog.unshift(new WhiteboardLog(drawEvent.boardElementId, drawEvent.user.username, drawEvent.drawType, drawEvent.logDate));
+            $scope.whiteboardlog.unshift(new WhiteboardLog(
+                drawEvent.boardElementId,
+                drawEvent.user.username,
+                drawEvent.drawType,
+                drawEvent.logDate
+            ));
         });
     });
 

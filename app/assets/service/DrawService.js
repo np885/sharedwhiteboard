@@ -246,8 +246,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     var iter = 0;
     service.onMouseMove = function(event){
-        //ignore 3 of 4 events as Performance-Hack (will do for the demo)
-        if (iter >= 3) {
+        //ignore 2 of 3 events as Performance-Hack (will do for the demo)
+        if (iter >= 2) {
             iter = 0;
             return onMouseMoveWrapper(event);
         } else {
@@ -267,9 +267,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
         drawing = true;
     };
+
     service.onMouseDown = function(event) {
         return onMouseDownWrapper(event);
     };
+
     service.freeHandMouseUp = function(event){
         //Finished painting object
         var drawFinishedEvent  = new DrawFinishedEvent('FreeHandEvent', DrawIdService.getCurrent());
@@ -343,18 +345,22 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         var x2 = leDrawing.points[1].x;
                         var y2 = leDrawing.points[1].y;
 
+                        var d = 5; //delta so that you dont have to hit pixel perfect.
+
                         //in range?
                         var minX, maxX, minY, maxY;
                         if (x1 >= x2) { minX = x2; maxX = x1; } else {minX = x1; maxX = x2}
                         if (y1 >= y2) { minY = y2; maxY = y1; } else {minY = y1; maxY = y2}
-                        if (currentX <= (minX-2) || currentX >= (maxX+2)
-                            || currentY <= (minY-2) || currentY >= (maxY+2)) {
-                            continue;
+                        if (!inRect(currentX, currentY, minX-d, minY-d, maxX-minX + 2*d, maxY-minY + 2*d)) {
+                            continue; //not in range, go to next element.
                         }
-                        //on line?
-                        var y = Math.floor(((y2-y1)/(x2-x1))*( currentX - x1)+y1);
 
-                        if (currentY <= (y+4) && currentY >= (y-4)) {
+                        //on line? distance between point and line:
+                        // see http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+                        var dist = Math.abs((y2-y1)*currentX - (x2-x1)*currentY + x2*y1-y2*x1)
+                            / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
+                        console.log(dist);
+                        if (dist <= 7) {
                             selectedDrawing = leDrawing;
                             //console.log("found drawing:");
                             //console.log(selectedDrawing);

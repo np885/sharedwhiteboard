@@ -3,6 +3,7 @@
 app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant',
 function (WhiteboardSocketService, DrawIdService, constant) {
     var drawLine;
+    var drawRectangle;
     var clearCanvas;
     var beginPath;
     var closePath;
@@ -24,6 +25,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     var startX;
     var startY;
+
+    //Draw Events:
     function LineEvent(boardElementId, xStart, yStart, xEnd, yEnd){
         this.eventType = 'LineEvent';
         this.boardElementId = boardElementId;
@@ -33,7 +36,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.yEnd = yEnd;
     }
 
-
     function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
         this.eventType = 'FreeHandEvent';
         this.boardElementId = boardElementId;
@@ -42,15 +44,28 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.xEnd = xEnd;
         this.yEnd = yEnd;
     }
-    function Drawing(type, boardElementId){
-        this.type = type;
+    function RectangleEvent(boardElementId, x, y, w, h){
+        this.eventType = 'RectangleEvent';
         this.boardElementId = boardElementId;
+        this.xStart = x;
+        this.yStart = y;
+        this.width = w;
+        this.height = h;
     }
+
     function DrawFinishedEvent(drawType, boardElementId){
         this.eventType = 'DrawFinishEvent';
         this.drawType = drawType;
         this.boardElementId = boardElementId;
     }
+
+    //Draw Objects:
+    function Drawing(type, boardElementId){
+        this.type = type;
+        this.boardElementId = boardElementId;
+    }
+
+    //Event-Handler:
 
     var drawFreeHandEvent = function(freeHandEvent){
         if(drawings.hasOwnProperty(freeHandEvent.boardElementId)){
@@ -81,6 +96,24 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         repaint();
     };
 
+    var drawRectangleEvent = function(rectEvent){
+        var drawing;
+        if(drawings.hasOwnProperty(rectEvent.boardElementId)){
+            //existingDrawing.
+            drawing = drawings[rectEvent.boardElementId];
+        } else {
+            drawing = new Drawing('RectangleDrawing', rectEvent.boardElementId);
+            drawings[drawing.boardElementId] = drawing;
+        }
+        drawing.x = rectEvent.xStart;
+        drawing.y = rectEvent.yStart;
+        drawing.width = rectEvent.width;
+        drawing.height = rectEvent.height;
+
+        repaint();
+    }
+
+    //generic draw method, delegating to specific drawing methods:
     var draw = function(drawing){
         if (drawing === selectedDrawing) {
             closePath();
@@ -101,6 +134,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             });
         } else if(drawing.type === 'LineDrawing'){
             drawLine(drawing.points[0].x, drawing.points[0].y, drawing.points[1].x, drawing.points[1].y);
+        } else if(drawing.type === 'RectangleDrawing'){
+            drawRectangle(drawing.x, drawing.y, drawing.width, drawing.height);
         }
 
         if (drawing === selectedDrawing) {
@@ -109,8 +144,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
     };
 
+    //
+    // Event registration:
+    //
+
     WhiteboardSocketService.registerForSocketEvent('FreeHandEvent', drawFreeHandEvent);
     WhiteboardSocketService.registerForSocketEvent('LineEvent', drawLineEvent);
+    WhiteboardSocketService.registerForSocketEvent('RectangleEvent', drawRectangleEvent);
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         drawings = {};
@@ -121,6 +161,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         DrawIdService.initId();
         repaint();
     });
+
+
 
     var repaint = function(){
         //var start = new Date().getTime();
@@ -144,6 +186,15 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         } else {
             currentX = event.layerX - event.currentTarget.offsetLeft;
             currentY = event.layerY - event.currentTarget.offsetTop;
+        }
+    }
+    var getStartMouse = function(event) {
+        if(event.offsetX!==undefined){
+            startX = event.offsetX;
+            startY = event.offsetY;
+        } else {
+            startX = event.layerX - event.currentTarget.offsetLeft;
+            startY = event.layerY - event.currentTarget.offsetTop;
         }
     }
 
@@ -214,17 +265,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.lineMouseDown = function(event){
         if (!drawing) {
-            if(event.offsetX!==undefined){
-                startX = event.offsetX;
-                startY = event.offsetY;
-            } else {
-                startX = event.layerX - event.currentTarget.offsetLeft;
-                startY = event.layerY - event.currentTarget.offsetTop;
-            }
+            getStartMouse(event);
             // begins new line
-
             drawing = true;
-
         }
     };
     service.lineMouseMove = function(event){
@@ -306,7 +349,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var deltaX =  currentX - startX;
             var deltaY =  currentY - startY;
 
-            console.log(deltaX + ', ' + deltaY);
+            //console.log(deltaX + ', ' + deltaY);
 
             var lineEvent = new LineEvent(
                 selectedDrawing.boardElementId,
@@ -328,8 +371,43 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         moving = false;
     };
 
+    service.rectMouseDown = function(event){
+        if (!drawing) {
+            getStartMouse(event);
+            drawing = true;
+        }
+    }
+    service.rectMouseMove = function(event){
+        if (drawing) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            // get current mouse position
+            getCurrentMouse(event);
+            var rectWidth = currentX - startX; //TODO
+            var rectHeight = currentY - startY;
+            var rectangleEvent = new RectangleEvent(DrawIdService.getCurrent(), startX, startY, rectWidth, rectHeight);
+
+            WhiteboardSocketService.send(JSON.stringify(rectangleEvent));
+        }
+    }
+    service.rectMouseUp = function(event){
+        var drawFinishedEvent  = new DrawFinishedEvent('RectangleEvent', DrawIdService.getCurrent());
+        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+
+        // stop drawing
+        DrawIdService.incrementId();
+        drawing = false;
+    }
+
+
+
+
     service.setDrawLine = function(fkt){
         drawLine = fkt;
+    };
+    service.setDrawRectangle = function(fkt){
+        drawRectangle = fkt;
     };
     service.setBeginPath = function(fkt){
         beginPath = fkt;
@@ -358,11 +436,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseDownWrapper = this.lineMouseDown;
                 onMouseUpWrapper = this.lineMouseUp;
                 break;
-            //case constant.DRAWTOOLS.RECTANGLE:
-            //    onMouseMoveWrapper = this.rectMosueMove;
-            //    onMouseDownWrapper = this.rectMouseDown;
-            //    onMouseUpWrapper = this.rectMouseUp;
-            //    break;
+            case constant.DRAWTOOLS.RECTANGLE:
+                onMouseMoveWrapper = this.rectMouseMove;
+                onMouseDownWrapper = this.rectMouseDown;
+                onMouseUpWrapper = this.rectMouseUp;
+                break;
             case constant.DRAWTOOLS.MOVE:
                 onMouseMoveWrapper = this.moveMouseMove;
                 onMouseDownWrapper = this.moveMouseDown;

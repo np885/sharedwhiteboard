@@ -21,11 +21,16 @@ app.directive('drawing',[ 'DrawService',
                 //ctx.stroke();
             };
 
+            var drawRectangle = function(x, y, w, h) {
+                ctx.rect(x, y, w, h);
+            }
+
             var clear = function(){
                 ctx.clearRect(0, 0, element[0].width, element[0].height);
             };
 
             DrawService.setDrawLine(drawLine);
+            DrawService.setDrawRectangle(drawRectangle);
             DrawService.setClear(clear);
             DrawService.setBeginPath(function(pathColor){
                 ctx.beginPath();

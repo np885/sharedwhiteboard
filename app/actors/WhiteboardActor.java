@@ -10,18 +10,12 @@ import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.boardstate.BoardStateSerializationUtil;
 import actors.events.socket.boardstate.CollabState;
 import actors.events.socket.boardstate.InitialBoardStateEvent;
-import actors.events.socket.draw.DrawEvent;
-import actors.events.socket.draw.DrawFinishedEvent;
-import actors.events.socket.draw.FreeHandEvent;
-import actors.events.socket.draw.SingleLineEvent;
+import actors.events.socket.draw.*;
 import actors.events.socket.boardstate.WhiteboardSessionState;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
-import model.whiteboards.entities.AbstractDrawObject;
-import model.whiteboards.entities.FreeHandDrawing;
-import model.whiteboards.entities.SingleLineDrawing;
-import model.whiteboards.entities.Whiteboard;
+import model.whiteboards.entities.*;
 import model.whiteboards.repositories.WhiteboardRepo;
 import play.Logger;
 import play.libs.Akka;
@@ -76,12 +70,15 @@ public class WhiteboardActor extends UntypedActor {
             onFreeHandEvent((FreeHandEvent) message);
         } else if (message instanceof SingleLineEvent) {
             onSingleLineEvent((SingleLineEvent) message);
+        } else if (message instanceof RectangleEvent) {
+            onRectangleEvent((RectangleEvent) message);
         } else if (message instanceof DrawFinishedEvent) {
             onDrawFinishedEvent((DrawFinishedEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
             onAppUserEvent((AbstractAppUserEvent) message);
         }
     }
+
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
         //Change online Status of Collabs
@@ -168,6 +165,22 @@ public class WhiteboardActor extends UntypedActor {
 
         for (WebSocketConnection c : socketConnections) {
             c.getOut().tell(Json.stringify(Json.toJson(sle)), self());
+        }
+    }
+    private void onRectangleEvent(RectangleEvent re) {
+        AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(re.getBoardElementId());
+        if (drawObjForElementId == null) {
+            //new line:
+            drawObjForElementId = initDrawObjectAndAddToState(new RectangleDrawing(), re);
+        }
+        RectangleDrawing rectDrawing = (RectangleDrawing) drawObjForElementId;
+        rectDrawing.setX(re.getxStart());
+        rectDrawing.setY(re.getyStart());
+        rectDrawing.setWidth(re.getWidth());
+        rectDrawing.setHeight(re.getHeight());
+
+        for (WebSocketConnection c : socketConnections) {
+            c.getOut().tell(Json.stringify(Json.toJson(re)), self());
         }
     }
 

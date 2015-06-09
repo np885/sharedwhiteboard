@@ -1,9 +1,10 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-var app = angular.module('sharedwhiteboard', ['ngRoute', 'ui.bootstrap', 'ngStorage']);
+var app = angular.module('sharedwhiteboard', ['ngRoute', 'ui.bootstrap']);
 
-app.config(['$routeProvider', function($routeProvider) {
+app.config(['$routeProvider', '$httpProvider',
+function($routeProvider, $httpProvider) {
     $routeProvider.
         when('/login', {
             templateUrl: 'assets/view/login.html',
@@ -29,6 +30,20 @@ app.config(['$routeProvider', function($routeProvider) {
         otherwise({
             redirectTo: '/login'
         });
+    $httpProvider.interceptors.push(function() {
+        return {
+            'request': function (config) {
+                if (sessionStorage.authData != null) {
+                    config.headers['Authorization'] = 'Basic ' + sessionStorage.authData.replace('"', '');
+                }
+                return config;
+            },
+
+            'response': function (response) {
+                return response;
+            }
+        };
+    });
 }]);
 
 app.run(['$rootScope', '$location', 'AuthenticationService', 'WhiteboardSocketService',

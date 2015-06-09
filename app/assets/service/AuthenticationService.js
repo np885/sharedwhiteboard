@@ -1,41 +1,41 @@
 'use strict';
 
 app.service('AuthenticationService',
-        ['Base64', '$http', '$sessionStorage', '$location',
-            function (Base64, $http, $sessionStorage, $location) {
+        ['Base64', '$http', '$location',
+            function (Base64, $http, $location) {
                 var service = {};
 
                 service.login = function (user) {
                     var authdata = Base64.encode(user.username + ':' + user.password);
-                    $http.defaults.headers.common['Authorization'] = 'Basic ' + authdata;
+                    sessionStorage.authData = authdata;
                     return $http.get('/login');
                 };
 
                 service.setCredentials = function (user) {
-                    $sessionStorage.user = user.username.toLowerCase();
+                    sessionStorage.user = user.username.toLowerCase();
                 };
 
                 service.setUserId = function (userid) {
-                    $sessionStorage.userid = userid;
+                    sessionStorage.userid = userid;
                 };
 
                 service.getUserId = function () {
-                    return $sessionStorage.userid;
+                    return sessionStorage.userid;
                 };
 
                 service.clearCredentials = function () {
                     $http.get('/logout')
                         .success(function(data, status, headers, config) {
-                            delete $sessionStorage.user;
-                            delete $sessionStorage.userid;
-                            delete $http.defaults.headers.common.Authorization;
+                            delete sessionStorage.user;
+                            delete sessionStorage.userid;
+                            delete sessionStorage.authData;
                             $location.path('/login');
                         });
 
                 };
 
                 service.getUser = function(){
-                    return $sessionStorage.user;
+                    return sessionStorage.user;
                 };
 
                 service.registerUser = function(user){
@@ -43,7 +43,7 @@ app.service('AuthenticationService',
                 };
 
                 service.isAuthenticated = function(){
-                    return $sessionStorage.user != null;
+                    return sessionStorage.user != null;
                 };
 
                 return service;

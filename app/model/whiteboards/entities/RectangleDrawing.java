@@ -47,7 +47,6 @@ public class RectangleDrawing extends AbstractDrawObject {
             x -= width;
         }
         if (height < 0) {
-            System.out.println("normalizing height.");
             height = -1 * height;
             y -= height;
         }

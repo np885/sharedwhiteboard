@@ -8,7 +8,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var clearCanvas;
     var beginPath;
     var closePath;
-    var tool;
     var service = {};
     var currentX;
     var currentY;
@@ -470,7 +469,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             getStartMouse(event);
             drawing = true;
         }
-    }
+    };
     service.rectMouseMove = function(event){
         if (drawing) {
             event.stopPropagation();
@@ -484,7 +483,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             WhiteboardSocketService.send(JSON.stringify(rectangleEvent));
         }
-    }
+    };
     service.rectMouseUp = function(event){
         var drawFinishedEvent  = new DrawFinishedEvent('RectangleEvent', DrawIdService.getCurrent());
         WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
@@ -492,14 +491,14 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
-    }
+    };
 
     service.circleMouseDown = function(event){
         if (!drawing) {
             getStartMouse(event);
             drawing = true;
         }
-    }
+    };
     service.circleMouseMove = function(event){
         if (drawing) {
             event.stopPropagation();
@@ -514,7 +513,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             WhiteboardSocketService.send(JSON.stringify(circleEvent));
         }
-    }
+    };
     service.circleMouseUp = function(event){
         var drawFinishedEvent  = new DrawFinishedEvent('CircleEvent', DrawIdService.getCurrent());
         WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
@@ -522,7 +521,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
-    }
+    };
 
 
 
@@ -551,8 +550,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
     service.setTool = function(value){
-        tool = value;
-        switch(tool){
+        switch(value){
             case constant.DRAWTOOLS.FREEHAND:
                 onMouseMoveWrapper = this.freeHandMouseMove;
                 onMouseDownWrapper = this.freeHandMouseDown;

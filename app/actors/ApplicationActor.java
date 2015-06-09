@@ -50,12 +50,8 @@ public class ApplicationActor extends UntypedActor {
         } else if (event instanceof AppUserLogoutEvent) {
             onlineUser.remove(event.getUser());
         }
-        for(Whiteboard whiteboard : event.getUser().getWhiteboards()){
-            for(long boardId : boardActors.keySet()){
-                if(boardId == whiteboard.getId()){
-                    boardActors.get(boardId).tell(event, self());
-                }
-            }
+        for(long boardId : boardActors.keySet()){
+            boardActors.get(boardId).tell(event, self());
         }
     }
 

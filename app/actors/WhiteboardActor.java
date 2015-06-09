@@ -85,15 +85,17 @@ public class WhiteboardActor extends UntypedActor {
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
         //Change online Status of Collabs
-        if (event instanceof AppUserLoginEvent) {
-            sessionState.changeCollabStateOnline(event.getUser().getId(), true);
-        } else if (event instanceof AppUserLogoutEvent) {
-            sessionState.changeCollabState(event.getUser().getId(), false, false);
-        }
-        //Tell everyone about the online Event
-        for (WebSocketConnection c : socketConnections) {
-            String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
-            c.getOut().tell(outputJSON, self());
+        if(currentState.getCollaborators().contains(event.getUser())) {
+            if (event instanceof AppUserLoginEvent) {
+                sessionState.changeCollabStateOnline(event.getUser().getId(), true);
+            } else if (event instanceof AppUserLogoutEvent) {
+                sessionState.changeCollabState(event.getUser().getId(), false, false);
+            }
+            //Tell everyone about the online Event
+            for (WebSocketConnection c : socketConnections) {
+                String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
+                c.getOut().tell(outputJSON, self());
+            }
         }
     }
 

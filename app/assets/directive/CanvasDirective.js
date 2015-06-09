@@ -23,14 +23,14 @@ app.directive('drawing',[ 'DrawService',
 
             var drawRectangle = function(x, y, w, h) {
                 ctx.rect(x, y, w, h);
-            }
+            };
 
             var drawCircle = function(centerX, centerY, radius) {
                 ctx.rect(centerX-2, centerY, 5, 1);
                 ctx.rect(centerX, centerY-2, 1, 5);
                 ctx.moveTo(centerX+radius, centerY);
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            }
+            };
 
             var clear = function(){
                 ctx.clearRect(0, 0, element[0].width, element[0].height);

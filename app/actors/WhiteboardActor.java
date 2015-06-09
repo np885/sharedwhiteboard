@@ -54,7 +54,7 @@ public class WhiteboardActor extends UntypedActor {
         //Init the SessionState of all Collaborators
         sessionState.initCollabStates(currentState, onlineUsers);
         //Change state of current user
-        sessionState.changeCollabState(connectingUser.getId(), true, true);
+        sessionState.changeCollabStateJoin(connectingUser.getId(), true);
 
         //tell new connection initial state:
         connection.getOut().tell(produceCurrentStateRepresentation(), self());
@@ -114,6 +114,7 @@ public class WhiteboardActor extends UntypedActor {
             currentState.getCollaborators().add(connectingUser);
             //Adding to sessionState
             sessionState.getCollabs().add(new CollabState(connectingUser.getId(), connectingUser.getUsername()));
+            sessionState.changeCollabStateOnline(connectingUser.getId(), true);
         }
         //Changing state
         sessionState.changeCollabStateJoin(connectingUser.getId(), true);

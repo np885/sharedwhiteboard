@@ -47,14 +47,9 @@ public class ApplicationActor extends UntypedActor {
     private void onAppUserEvent(AbstractAppUserEvent event) {
         if(event instanceof AppUserLoginEvent){
             onlineUser.add(event.getUser());
-            tellWhiteboards(event);
         } else if (event instanceof AppUserLogoutEvent) {
             onlineUser.remove(event.getUser());
-            tellWhiteboards(event);
         }
-    }
-
-    private void tellWhiteboards(AbstractAppUserEvent event) {
         for(Whiteboard whiteboard : event.getUser().getWhiteboards()){
             for(long boardId : boardActors.keySet()){
                 if(boardId == whiteboard.getId()){

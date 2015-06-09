@@ -308,6 +308,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var freeHandEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
 
             WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
+
         }
     };
 
@@ -315,7 +316,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
     function inRect(cx,cy,x,y,w,h) {
         return cx >= x && cx <= (x+w)   //proper horizontal area
-            && cy >= y && cy <= y+h     //proper vertical area
+            && cy >= y && cy <= y+h;     //proper vertical area
     }
 
     function inCircle(cx,cy, centerX, centerY, r) {
@@ -345,7 +346,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         var x2 = leDrawing.points[1].x;
                         var y2 = leDrawing.points[1].y;
 
-                        var d = 5; //delta so that you dont have to hit pixel perfect.
+                        var d = 7; //delta so that you dont have to hit pixel perfect.
 
                         //in range?
                         var minX, maxX, minY, maxY;
@@ -360,7 +361,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         var dist = Math.abs((y2-y1)*currentX - (x2-x1)*currentY + x2*y1-y2*x1)
                             / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
                         console.log(dist);
-                        if (dist <= 7) {
+                        if (dist <= d) {
                             selectedDrawing = leDrawing;
                             //console.log("found drawing:");
                             //console.log(selectedDrawing);

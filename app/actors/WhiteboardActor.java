@@ -66,21 +66,32 @@ public class WhiteboardActor extends UntypedActor {
             onBoardUserOpen((BoardUserOpenEvent) message);
         } else if (message instanceof BoardUserCloseEvent) {
             onBoardUserClosed((BoardUserCloseEvent) message);
-        } else if (message instanceof FreeHandEvent) {
-            onFreeHandEvent((FreeHandEvent) message);
-        } else if (message instanceof SingleLineEvent) {
-            onSingleLineEvent((SingleLineEvent) message);
-        } else if (message instanceof RectangleEvent) {
-            onRectangleEvent((RectangleEvent) message);
-        } else if (message instanceof CircleEvent) {
-            onCircleEvent((CircleEvent) message);
-        } else if (message instanceof DrawFinishedEvent) {
-            onDrawFinishedEvent((DrawFinishedEvent) message);
+        } else if (message instanceof DrawEvent) {
+            onDrawEvent((DrawEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
             onAppUserEvent((AbstractAppUserEvent) message);
         }
     }
 
+    private void onDrawEvent(DrawEvent drawEvent) {
+        if (drawEvent instanceof FreeHandEvent) {
+            onFreeHandEvent((FreeHandEvent) drawEvent);
+        } else if (drawEvent instanceof SingleLineEvent) {
+            onSingleLineEvent((SingleLineEvent) drawEvent);
+        } else if (drawEvent instanceof RectangleEvent) {
+            onRectangleEvent((RectangleEvent) drawEvent);
+        } else if (drawEvent instanceof CircleEvent) {
+            onCircleEvent((CircleEvent) drawEvent);
+        } else if (drawEvent instanceof DrawFinishedEvent) {
+            onDrawFinishedEvent((DrawFinishedEvent) drawEvent);
+        }
+
+        for (WebSocketConnection c : socketConnections) {
+            if (c.getUser().getId() != drawEvent.getUser().getUserId()) {
+                c.getOut().tell(Json.stringify(Json.toJson(drawEvent)), self());
+            }
+        }
+    }
 
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
@@ -102,9 +113,6 @@ public class WhiteboardActor extends UntypedActor {
     private void onDrawFinishedEvent(DrawFinishedEvent drawFinishedEvent) {
         //Adding to sessionLog for initialState
         sessionState.getActivityLog().addFirst(drawFinishedEvent);
-        for (WebSocketConnection c : socketConnections) {
-            c.getOut().tell(Json.stringify(Json.toJson(drawFinishedEvent)), self());
-        }
     }
 
 
@@ -151,10 +159,6 @@ public class WhiteboardActor extends UntypedActor {
         }
         FreeHandDrawing fhd = (FreeHandDrawing) drawObjForElementId;
         fhd.getPoints().add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxEnd(), fhe.getyEnd()));
-
-        for (WebSocketConnection c : socketConnections) {
-            c.getOut().tell(Json.stringify(Json.toJson(fhe)), self());
-        }
     }
 
     private void onSingleLineEvent(SingleLineEvent sle) {
@@ -168,10 +172,6 @@ public class WhiteboardActor extends UntypedActor {
         slDrawing.setY1(sle.getyStart());
         slDrawing.setX2(sle.getxEnd());
         slDrawing.setY2(sle.getyEnd());
-
-        for (WebSocketConnection c : socketConnections) {
-            c.getOut().tell(Json.stringify(Json.toJson(sle)), self());
-        }
     }
     private void onRectangleEvent(RectangleEvent re) {
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(re.getBoardElementId());
@@ -186,10 +186,6 @@ public class WhiteboardActor extends UntypedActor {
         rectDrawing.setHeight(re.getHeight());
         rectDrawing.normalize();
         re.normalize();
-
-        for (WebSocketConnection c : socketConnections) {
-            c.getOut().tell(Json.stringify(Json.toJson(re)), self());
-        }
     }
 
     private void onCircleEvent(CircleEvent ce) {
@@ -202,10 +198,6 @@ public class WhiteboardActor extends UntypedActor {
         rectDrawing.setCenterX(ce.getCenterX());
         rectDrawing.setCenterY(ce.getCenterY());
         rectDrawing.setRadius(ce.getRadius());
-
-        for (WebSocketConnection c : socketConnections) {
-            c.getOut().tell(Json.stringify(Json.toJson(ce)), self());
-        }
     }
 
     private AbstractDrawObject initDrawObjectAndAddToState(AbstractDrawObject drawObject, DrawEvent event) {

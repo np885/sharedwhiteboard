@@ -234,7 +234,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             var freeHandEvent = new FreeHandEvent(DrawIdService.getCurrent(), lastX, lastY, currentX, currentY);
 
-            WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
+            drawFreeHandEvent(freeHandEvent);
+            sendMoveEvent(freeHandEvent);
 
             // set current coordinates to last one
             lastX = currentX;
@@ -245,14 +246,19 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     var iter = 0;
     service.onMouseMove = function(event){
+            return onMouseMoveWrapper(event);
+    };
+
+    var sendMoveEvent = function(e) {
         //ignore 2 of 3 events as Performance-Hack (will do for the demo)
         if (iter >= 2) {
             iter = 0;
-            return onMouseMoveWrapper(event);
+            WhiteboardSocketService.send(JSON.stringify(e));
         } else {
             iter++;
         }
-    };
+    }
+
 
     service.freeHandMouseDown = function(event){
         if(event.offsetX!==undefined){
@@ -304,9 +310,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
             // get current mouse position
             getCurrentMouse(event);
-            var freeHandEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
+            var lineEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
 
-            WhiteboardSocketService.send(JSON.stringify(freeHandEvent));
+            drawLineEvent(lineEvent);
+            sendMoveEvent(lineEvent);
 
         }
     };
@@ -431,6 +438,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.points[1].x + deltaX,
                     selectedDrawing.points[1].y + deltaY
                 );
+                drawLineEvent(socketEvent);
             } else if (selectedDrawing.type === 'RectangleDrawing') {
                 socketEvent = new RectangleEvent(
                     selectedDrawing.boardElementId,
@@ -439,6 +447,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.width,
                     selectedDrawing.height
                 );
+                drawRectangleEvent(socketEvent);
             } else if (selectedDrawing.type === 'CircleDrawing') {
                 socketEvent = new CircleEvent(
                     selectedDrawing.boardElementId,
@@ -446,13 +455,14 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.centerY + deltaY,
                     selectedDrawing.radius
                 );
+                drawCircleEvent(socketEvent);
             }
 
             startX = currentX;
             startY = currentY;
 
             if (socketEvent != null) {
-                WhiteboardSocketService.send(JSON.stringify(socketEvent));
+                sendMoveEvent(socketEvent);
             }
         }
     };
@@ -481,7 +491,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var rectHeight = currentY - startY;
             var rectangleEvent = new RectangleEvent(DrawIdService.getCurrent(), startX, startY, rectWidth, rectHeight);
 
-            WhiteboardSocketService.send(JSON.stringify(rectangleEvent));
+            drawRectangleEvent(rectangleEvent);
+            sendMoveEvent(rectangleEvent);
         }
     };
     service.rectMouseUp = function(event){
@@ -511,7 +522,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var radius = Math.sqrt(dx*dx + dy*dy);
             var circleEvent = new CircleEvent(DrawIdService.getCurrent(), startX, startY, radius);
 
-            WhiteboardSocketService.send(JSON.stringify(circleEvent));
+            drawCircleEvent(circleEvent);
+            sendMoveEvent(circleEvent);
         }
     };
     service.circleMouseUp = function(event){

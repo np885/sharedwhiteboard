@@ -51,6 +51,7 @@ public class AbstractEntity {
         return hash;
     }
 
+
     @Override
     public boolean equals(Object object) {
         if (!(object instanceof AbstractEntity)) {

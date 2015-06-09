@@ -2,7 +2,7 @@ import sbt.Keys._
 
 name := "sharedwhiteboard"
 
-version := "1.0"
+version := "0.1"
 
 lazy val `sharedwhiteboard` = (project in file(".")).enablePlugins(PlayJava)
 
@@ -11,6 +11,7 @@ scalaVersion := "2.11.1"
 libraryDependencies ++= Seq( javaJdbc , cache , javaWs )
 
 libraryDependencies += "org.mariadb.jdbc" % "mariadb-java-client" % "1.1.8"
+//libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
 
 
 

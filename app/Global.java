@@ -2,6 +2,7 @@ import actors.ApplicationActor;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
+import controllers.common.Paths;
 import play.*;
 import play.Application;
 import play.libs.Akka;
@@ -16,6 +17,7 @@ public class Global extends GlobalSettings{
     @Override
     public void onStart(Application application) {
         Logger.info("Application started :-) Global Object active!");
+        Logger.info("root path is set to: " + Paths.ROOT);
         applicationActorRef = Akka.system().actorOf(Props.create(ApplicationActor.class), ApplicationActor.NAME);
     }
 

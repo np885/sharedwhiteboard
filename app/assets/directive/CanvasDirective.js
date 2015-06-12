@@ -31,8 +31,13 @@ app.directive('drawing',[ 'DrawService',
                 ctx.moveTo(centerX+radius, centerY);
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             };
-            var drawText = function(x, y, text){
+            var drawText = function(x, y, text, cursorPos) {
+                if (typeof cursorPos !== 'undefined') {
+                    text = [text.slice(0, cursorPos), '|', text.slice(cursorPos)].join('');
+                }
+
                 ctx.fillText(text, x, y);
+
             };
 
             var clear = function(){

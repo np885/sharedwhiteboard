@@ -12,9 +12,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,14 +20,8 @@ import java.util.Map;
   *
   */
 public class WhiteboardSessionController extends Controller {
-    private static class TicketInformation {
-        private User user;
-        private Calendar timestamp;
-        private long boardId;
-    }
 
-    private static Map<String, TicketInformation> tickets = new HashMap<>();
-    private static SecureRandom random = new SecureRandom();
+    private static SocketTicketSystem ticketSystem = new SocketTicketSystem();
 
     @AuthRequired
     public static Result createTicket(long boardId) {
@@ -38,12 +29,14 @@ public class WhiteboardSessionController extends Controller {
         //TODO test
         //Authenticated User can create ticket for websocket connection.
 
-        TicketInformation ticket = new TicketInformation();
-        ticket.user = (User) ctx().args.get("currentuser");
-        ticket.boardId = boardId;
-        ticket.timestamp = Calendar.getInstance();
-        String ticketNumber = new BigInteger(130, random).toString(32);
-        tickets.put(ticketNumber, ticket);
+//        TicketInformation ticket = new TicketInformation();
+//        ticket.user = (User) ctx().args.get("currentuser");
+//        ticket.boardId = boardId;
+//        ticket.timestamp = Calendar.getInstance();
+        HashMap<String, String> properties = new HashMap<>();
+        properties.put("boardId", boardId + "");
+        String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), properties);
+//        tickets.put(ticketNumber, ticket);
 
         response().setHeader(
                 Http.HeaderNames.LOCATION,
@@ -53,21 +46,22 @@ public class WhiteboardSessionController extends Controller {
     }
 
     //TODO doc
-    public static WebSocket<String> connectToWhiteboard(final long boardId, String ticketNumber) {
+    public static WebSocket<String> connectToWhiteboard(final long boardId, final String ticketNumber) {
         //TODO test
 
-        final TicketInformation requestedTicket = tickets.get(ticketNumber);
-        if (requestedTicket == null || requestedTicket.boardId != boardId) {
+         //tickets.get(ticketNumber);
+        Map<String, String> desiredProperties = new HashMap<>();
+        desiredProperties.put("boardId", boardId + "");
+        if (! ticketSystem.validate(ticketNumber, desiredProperties)){
             //TODO timestamp expiration would be necessary for real system.
             return WebSocket.reject(forbidden());
         }
 
-        tickets.remove(ticketNumber);
-
         return WebSocket.withActor(new F.Function<ActorRef, Props>() {
             @Override
             public Props apply(ActorRef outActor) throws Throwable {
-                return Props.create(BoardSocketInActor.class, outActor, boardId, requestedTicket.user);
+                User userForValidTicket = ticketSystem.invalidate(ticketNumber);
+                return Props.create(BoardSocketInActor.class, outActor, boardId, userForValidTicket);
             }
         });
     }

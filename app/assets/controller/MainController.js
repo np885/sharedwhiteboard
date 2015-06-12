@@ -19,6 +19,5 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
         };
 
 
-
     }]);
 

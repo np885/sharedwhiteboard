@@ -247,6 +247,7 @@ public class WhiteboardActor extends UntypedActor {
     @Override
     public void postStop() throws Exception {
         persistCurrentState();
+        super.postStop();
     }
 
     private void persistCurrentState() {

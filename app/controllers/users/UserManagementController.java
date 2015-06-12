@@ -26,8 +26,6 @@ public class UserManagementController extends Controller {
     @Transactional
     public static Result checkLoginCredentials() {
         User currentuser = (User) ctx().args.get("currentuser");
-        //Send UserLoginEvent
-        sendUserLoginEvent(currentuser);
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
     }
 
@@ -35,21 +33,7 @@ public class UserManagementController extends Controller {
     @Transactional
     public static Result logout() {
         User currentuser = (User) ctx().args.get("currentuser");
-        //Send UserLoginEvent
-        sendUserLogoutEvent(currentuser);
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
-    }
-
-    private static void sendUserLogoutEvent(User currentuser) {
-        AppUserLogoutEvent appUserLogoutEvent = new AppUserLogoutEvent();
-        appUserLogoutEvent.setUser(currentuser);
-        Akka.system().eventStream().publish(appUserLogoutEvent);
-    }
-
-    private static void sendUserLoginEvent(User currentuser) {
-        AppUserLoginEvent appUserLoginEvent = new AppUserLoginEvent();
-        appUserLoginEvent.setUser(currentuser);
-        Akka.system().eventStream().publish(appUserLoginEvent);
     }
 
     @ConsumesJSON

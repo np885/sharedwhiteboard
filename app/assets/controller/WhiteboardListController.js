@@ -15,7 +15,6 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
     $scope.whiteboards = [];
     $scope.whitboardWithMeta = {};
 
-    //TODO: We have to rework something here. At the end this should also be reactive with Socket connection.
     $scope.dummyCollabs = [
         {name: 'niclas', online: true, join: true},
         {name: 'peter', online: false, join: true},
@@ -41,11 +40,8 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
         for(var i = 0; i < data.boards.length; i++){
             var collaborators = [];
             var whiteboard = data.boards[i];
-            for(var j = 0; j < whiteboard.collaborators.length; j++){
-                var user = whiteboard.collaborators[j];
-                collaborators.push({name: user.description.username});
-            }
-            $scope.whiteboards.push(new Whiteboard(whiteboard.id, whiteboard.name, whiteboard.owner.description.username, collaborators, whiteboard.socket.href));
+            var mappedWhiteboard = new Whiteboard(whiteboard.id, whiteboard.name, whiteboard.owner.description.username, whiteboard.collaborators, whiteboard.socket.href);
+            $scope.whiteboards.push(mappedWhiteboard);
         }
     };
 

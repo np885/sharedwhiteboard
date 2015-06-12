@@ -1,4 +1,4 @@
-package actors;
+package actors.board;
 
 import actors.events.SWBEvent;
 import actors.events.socket.boardstate.SimpleUser;
@@ -15,14 +15,14 @@ import play.libs.Json;
 
 import java.util.Date;
 
-public class WebSocketInActor extends UntypedActor {
+public class BoardSocketInActor extends UntypedActor {
     private final long boardId;
     private final ActorRef out;
     private final BoardSocketConnection socketConnection;
 
     private ActorRef boardActorRef;
 
-    public WebSocketInActor(ActorRef out, long boardId, User user) {
+    public BoardSocketInActor(ActorRef out, long boardId, User user) {
         this.boardId = boardId;
         this.out = out;
 

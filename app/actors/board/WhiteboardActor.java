@@ -1,4 +1,4 @@
-package actors;
+package actors.board;
 
 import actors.events.intern.app.AbstractAppUserEvent;
 import actors.events.intern.app.AppUserLoginEvent;

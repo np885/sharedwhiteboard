@@ -1,6 +1,6 @@
 package actors.events.intern.boardsessions;
 
-import actors.BoardSocketConnection;
+import actors.board.BoardSocketConnection;
 
 public class BoardUserOpenEvent extends BoardSessionEvent {
 

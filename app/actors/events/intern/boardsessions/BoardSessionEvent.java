@@ -1,6 +1,6 @@
 package actors.events.intern.boardsessions;
 
-import actors.BoardSocketConnection;
+import actors.board.BoardSocketConnection;
 import actors.events.ServerInternEvent;
 
 public abstract class BoardSessionEvent implements ServerInternEvent {

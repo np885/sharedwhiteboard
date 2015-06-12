@@ -1,5 +1,6 @@
-package actors;
+package actors.board;
 
+import actors.AbstractSocketConnection;
 import akka.actor.ActorRef;
 import model.user.entities.User;
 

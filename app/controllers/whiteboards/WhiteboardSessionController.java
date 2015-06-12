@@ -1,9 +1,8 @@
 package controllers.whiteboards;
 
-import actors.WebSocketInActor;
+import actors.board.BoardSocketInActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import com.fasterxml.jackson.databind.JsonNode;
 import controllers.common.Paths;
 import controllers.common.security.AuthRequired;
 import model.user.entities.User;
@@ -18,7 +17,6 @@ import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 /**
   * Handles API Requests for Socket-Connections to Whiteboards.
@@ -69,7 +67,7 @@ public class WhiteboardSessionController extends Controller {
         return WebSocket.withActor(new F.Function<ActorRef, Props>() {
             @Override
             public Props apply(ActorRef outActor) throws Throwable {
-                return Props.create(WebSocketInActor.class, outActor, boardId, requestedTicket.user);
+                return Props.create(BoardSocketInActor.class, outActor, boardId, requestedTicket.user);
             }
         });
     }

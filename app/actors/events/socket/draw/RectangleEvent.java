@@ -51,7 +51,6 @@ public class RectangleEvent extends DrawEvent {
             xStart -= width;
         }
         if (height < 0) {
-            System.out.println("normalizing height.");
             height = -1 * height;
             yStart -= height;
         }

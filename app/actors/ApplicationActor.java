@@ -1,5 +1,6 @@
 package actors;
 
+import actors.board.WhiteboardActor;
 import actors.events.intern.app.AbstractAppUserEvent;
 import actors.events.intern.app.AppUserLoginEvent;
 import actors.events.intern.app.AppUserLogoutEvent;
@@ -10,7 +11,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
-import model.whiteboards.entities.Whiteboard;
 import play.Logger;
 import play.libs.Akka;
 

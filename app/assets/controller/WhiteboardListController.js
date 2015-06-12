@@ -14,12 +14,7 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
 
     $scope.whiteboards = [];
 
-    $scope.dummyCollabs = [
-        {name: 'niclas', online: true, join: true},
-        {name: 'peter', online: false, join: true},
-        {name: 'hans', online: false, join: false}];
-
-    $scope.openWhiteboardSocket = function(whiteboard){
+    $scope.prepareOpening = function(whiteboard){
         WhiteboardSocketService.setWhiteboard(whiteboard);
     };
 

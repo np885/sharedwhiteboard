@@ -5,6 +5,7 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
 
         $scope.isLoggedIn = function(){
             //Check if User is logged in
+            $scope.currentUser = AuthenticationService.getUser();
             return AuthenticationService.isAuthenticated();
         };
 
@@ -18,7 +19,6 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
         };
 
 
-        $scope.currentUser = AuthenticationService.getUser();
 
     }]);
 

@@ -6,7 +6,7 @@ app.directive('drawing',[ 'DrawService',
         restrict: 'A',
         link: function(scope, element, attrs){
             var ctx = element[0].getContext('2d');
-
+            ctx.font = '30px Arial';
             scope.$watch(attrs.drawing, function(value) {
                 DrawService.setTool(value);
             });
@@ -31,12 +31,20 @@ app.directive('drawing',[ 'DrawService',
                 ctx.moveTo(centerX+radius, centerY);
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             };
+            var drawText = function(x, y, text){
+                ctx.fillText(text, x, y);
+            };
 
             var clear = function(){
                 ctx.clearRect(0, 0, element[0].width, element[0].height);
             };
+            var mesureSize = function(text){
+                  return ctx.measureText(text);
+            };
 
             DrawService.setDrawLine(drawLine);
+            DrawService.setDrawText(drawText);
+            DrawService.setMesureText(mesureSize);
             DrawService.setDrawRectangle(drawRectangle);
             DrawService.setDrawCircle(drawCircle);
             DrawService.setClear(clear);

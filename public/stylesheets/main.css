@@ -54,3 +54,8 @@
     border-top-right-radius:4px;
     border-bottom-left-radius:0;
 }
+.shadowInput{
+    opacity: 0;
+    margin-left: -5000px;
+    position: absolute;
+}

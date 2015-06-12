@@ -281,9 +281,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     var iter = 0;
-    service.onMouseMove = function(event){
-            return onMouseMoveWrapper(event);
-    };
 
     var sendMoveEvent = function(e) {
         //ignore 2 of 3 events as Performance-Hack (will do for the demo)
@@ -310,7 +307,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     service.onMouseDown = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
         return onMouseDownWrapper(event);
+    };
+    service.onMouseUp = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+        return onMouseUpWrapper(event);
+    };
+    service.onMouseMove = function(event){
+        event.stopPropagation();
+        event.preventDefault();
+        return onMouseMoveWrapper(event);
     };
 
     service.freeHandMouseUp = function(event){
@@ -320,9 +330,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         // stop drawing
         DrawIdService.incrementId();
         drawing = false;
-    };
-    service.onMouseUp = function(event) {
-        return onMouseUpWrapper(event);
     };
 
     service.lineMouseUp = function(event){
@@ -341,9 +348,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.lineMouseMove = function(event){
         if(drawing){
-            event.stopPropagation();
-            event.preventDefault();
-
             // get current mouse position
             getCurrentMouse(event);
             var lineEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
@@ -371,8 +375,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var selectedDrawing = null;
     service.moveMouseDown= function(event){
         if (!moving) {
-            event.stopPropagation();
-            event.preventDefault();
             // get current mouse position
             getCurrentMouse(event);
 
@@ -402,20 +404,14 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         // see http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
                         var dist = Math.abs((y2-y1)*currentX - (x2-x1)*currentY + x2*y1-y2*x1)
                             / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
-                        console.log(dist);
                         if (dist <= d) {
                             selectedDrawing = leDrawing;
-                            //console.log("found drawing:");
-                            //console.log(selectedDrawing);
                             moving = true;
                             startX = currentX;
                             startY = currentY;
                             repaint();
                             return;
                         }
-                        //else {
-                        //    console.log('y should be ' + y + ' but is ' + currentY);
-                        //}
                     } else if (leDrawing.type === 'RectangleDrawing') {
                         var d = 5;//delta so that you dont have to hit exactly to the pixel.
                         if (inRect(currentX, currentY,
@@ -468,9 +464,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     service.moveMouseMove= function(event){
         if (moving) {
-            event.stopPropagation();
-            event.preventDefault();
-
             // get current mouse position
             getCurrentMouse(event);
 
@@ -505,7 +498,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 );
                 drawCircleEvent(socketEvent);
             } else if (selectedDrawing.type === 'TextDrawing') {
-                console.log("moving text");
                 socketEvent = new TextEvent(
                     selectedDrawing.boardElementId,
                     selectedDrawing.x + deltaX,
@@ -539,9 +531,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.rectMouseMove = function(event){
         if (drawing) {
-            event.stopPropagation();
-            event.preventDefault();
-
             // get current mouse position
             getCurrentMouse(event);
             var rectWidth = currentX - startX;
@@ -569,9 +558,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     service.circleMouseMove = function(event){
         if (drawing) {
-            event.stopPropagation();
-            event.preventDefault();
-
             // get current mouse position
             getCurrentMouse(event);
             var dx = currentX - startX;
@@ -599,8 +585,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         }
 
-        event.stopPropagation();
-        event.preventDefault();
+
+
         var id = DrawIdService.getCurrent();
         DrawIdService.incrementId();
         var input = document.getElementById('drawText');

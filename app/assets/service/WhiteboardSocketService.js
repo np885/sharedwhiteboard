@@ -50,7 +50,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         $http.post(whiteboard.socket)
             .success(function(data, status, headers, config) {
                 //on success: connect to socket. Path of ticket will be send by server in Location Header.
-                connection = new WebSocket(headers('Location'));
+                connection = new WebSocket('ws://' + window.location.host + headers('Location'));
 
                 connection.onopen = function () {
                     //connection.send('Ping'); // Send the message 'Ping' to the server

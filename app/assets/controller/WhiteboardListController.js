@@ -13,7 +13,6 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
     $scope.currentUser = AuthenticationService.getUser();
 
     $scope.whiteboards = [];
-    $scope.whitboardWithMeta = {};
 
     $scope.dummyCollabs = [
         {name: 'niclas', online: true, join: true},
@@ -24,12 +23,11 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
         WhiteboardSocketService.setWhiteboard(whiteboard);
     };
 
-    $scope.loadWhiteboard = function(){
+    $scope.loadWhiteboards = function(){
         $http.get('/whiteboards')
             .success(function(data, status, headers, config) {
                 $scope.whiteboards = [];
                 $scope.transform(data);
-                $scope.whitboardWithMeta = data;
             })
             .error(function (data, status, headers, config) {
                 //ToDO: error
@@ -53,10 +51,11 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
         });
 
         modalInstance.result.then(function () {
-            $scope.loadWhiteboard();
+            $scope.loadWhiteboards();
         }, function () {
             //Dissmiss do nothing
         });
     };
-    $scope.loadWhiteboard();
+
+    $scope.loadWhiteboards();
 }]);

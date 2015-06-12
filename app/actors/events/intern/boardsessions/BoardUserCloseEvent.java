@@ -1,11 +1,10 @@
 package actors.events.intern.boardsessions;
 
-import actors.WebSocketConnection;
-import model.user.entities.User;
+import actors.BoardSocketConnection;
 
 public class BoardUserCloseEvent extends BoardSessionEvent {
 
-    public BoardUserCloseEvent(WebSocketConnection connection) {
+    public BoardUserCloseEvent(BoardSocketConnection connection) {
         super(connection);
     }
 }

@@ -1,7 +1,5 @@
 package actors.events.intern.boardsessions;
 
-import actors.WebSocketConnection;
-
 /**
  */
 public class BoardActorClosedEvent {

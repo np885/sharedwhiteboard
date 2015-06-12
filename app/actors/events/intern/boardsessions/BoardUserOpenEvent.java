@@ -1,10 +1,10 @@
 package actors.events.intern.boardsessions;
 
-import actors.WebSocketConnection;
+import actors.BoardSocketConnection;
 
 public class BoardUserOpenEvent extends BoardSessionEvent {
 
-    public BoardUserOpenEvent(WebSocketConnection connection) {
+    public BoardUserOpenEvent(BoardSocketConnection connection) {
         super(connection);
     }
 }

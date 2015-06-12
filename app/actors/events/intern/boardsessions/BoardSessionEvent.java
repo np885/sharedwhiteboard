@@ -1,20 +1,20 @@
 package actors.events.intern.boardsessions;
 
-import actors.WebSocketConnection;
+import actors.BoardSocketConnection;
 import actors.events.ServerInternEvent;
 
 public abstract class BoardSessionEvent implements ServerInternEvent {
-    private WebSocketConnection connection;
+    private BoardSocketConnection connection;
 
-    public BoardSessionEvent(WebSocketConnection connection) {
+    public BoardSessionEvent(BoardSocketConnection connection) {
         this.connection = connection;
     }
 
-    public WebSocketConnection getConnection() {
+    public BoardSocketConnection getConnection() {
         return connection;
     }
 
-    public void setConnection(WebSocketConnection connection) {
+    public void setConnection(BoardSocketConnection connection) {
         this.connection = connection;
     }
 

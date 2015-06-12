@@ -27,14 +27,14 @@ public class WhiteboardActor extends UntypedActor {
     private WhiteboardRepo whiteboardRepo = new WhiteboardRepo();
 
     private long boardId;
-    private List<WebSocketConnection> socketConnections = new ArrayList<>();
+    private List<BoardSocketConnection> socketConnections = new ArrayList<>();
 
     private Whiteboard currentState;
 
     //Only available when actor exists
     private WhiteboardSessionState sessionState = new WhiteboardSessionState();
 
-    public WhiteboardActor(WebSocketConnection connection, List<User> onlineUsers) {
+    public WhiteboardActor(BoardSocketConnection connection, List<User> onlineUsers) {
         Logger.info("Creating Whiteboard Actor: " + self().path());
 
         this.boardId = connection.getBoardId();
@@ -88,7 +88,7 @@ public class WhiteboardActor extends UntypedActor {
             onDrawFinishedEvent((DrawFinishedEvent) drawEvent);
         }
 
-        for (WebSocketConnection c : socketConnections) {
+        for (BoardSocketConnection c : socketConnections) {
             if ((drawEvent instanceof DrawFinishedEvent) || c.getUser().getId() != drawEvent.getUser().getUserId()) {
                 c.getOut().tell(Json.stringify(Json.toJson(drawEvent)), self());
             }
@@ -104,7 +104,7 @@ public class WhiteboardActor extends UntypedActor {
                 sessionState.changeCollabState(event.getUser().getId(), false, false);
             }
             //Tell everyone about the online Event
-            for (WebSocketConnection c : socketConnections) {
+            for (BoardSocketConnection c : socketConnections) {
                 String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
                 c.getOut().tell(outputJSON, self());
             }
@@ -118,7 +118,7 @@ public class WhiteboardActor extends UntypedActor {
 
 
     private void onBoardUserOpen(BoardUserOpenEvent userOpenEvent) {
-        WebSocketConnection connection = userOpenEvent.getConnection();
+        BoardSocketConnection connection = userOpenEvent.getConnection();
 
         User connectingUser = userOpenEvent.getConnection().getUser();
         if (! currentState.getCollaborators().contains(connectingUser)) {
@@ -131,7 +131,7 @@ public class WhiteboardActor extends UntypedActor {
         sessionState.changeCollabStateJoin(connectingUser.getId(), true);
 
         //Tell everyone about the new connection:
-        for (WebSocketConnection c : socketConnections) {
+        for (BoardSocketConnection c : socketConnections) {
             String outputJSON = SessionEventSerializationUtil.serialize(userOpenEvent);
             c.getOut().tell(outputJSON, self());
         }
@@ -231,7 +231,7 @@ public class WhiteboardActor extends UntypedActor {
         if (!removedConnection) {
             Logger.error("Connection not properly removed!");
         }
-        for (WebSocketConnection c : socketConnections) {
+        for (BoardSocketConnection c : socketConnections) {
             c.getOut().tell(SessionEventSerializationUtil.serialize(event), self());
         }
         //Change join State of Collab

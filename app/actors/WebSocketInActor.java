@@ -18,7 +18,7 @@ import java.util.Date;
 public class WebSocketInActor extends UntypedActor {
     private final long boardId;
     private final ActorRef out;
-    private final WebSocketConnection socketConnection;
+    private final BoardSocketConnection socketConnection;
 
     private ActorRef boardActorRef;
 
@@ -26,7 +26,7 @@ public class WebSocketInActor extends UntypedActor {
         this.boardId = boardId;
         this.out = out;
 
-        this.socketConnection = new WebSocketConnection(boardId, user, self(), out);
+        this.socketConnection = new BoardSocketConnection(boardId, user, self(), out);
         BoardUserOpenEvent event = new BoardUserOpenEvent(socketConnection);
         Akka.system().eventStream().publish(event);
     }

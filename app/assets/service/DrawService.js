@@ -577,7 +577,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
         }
-        drawing = true;
+
         event.stopPropagation();
         event.preventDefault();
         var id = DrawIdService.getCurrent();
@@ -589,6 +589,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         var textEvent = new TextEvent(id, currentX, currentY, input.value);
         drawTextEvent(textEvent, input.selectionStart);
         input.onkeyup = function (event) {
+            drawing = true;
             var textEvent = new TextEvent(id, currentX, currentY, input.value);
             drawTextEvent(textEvent, input.selectionStart);
             WhiteboardSocketService.send(JSON.stringify(textEvent));

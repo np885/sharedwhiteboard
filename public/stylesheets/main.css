@@ -9,6 +9,11 @@
     font-weight: bold;
 }
 
+.navbar .userinfo {
+    padding: 15px 0 15px 0;
+    margin-right: 5px;
+}
+
 .my-own-board {
     background: url('../images/ownertriangle.png') top right no-repeat;
 }

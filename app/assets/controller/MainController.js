@@ -17,5 +17,8 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
             AuthenticationService.clearCredentials();
         };
 
+
+        $scope.currentUser = AuthenticationService.getUser();
+
     }]);
 

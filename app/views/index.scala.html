@@ -2,7 +2,7 @@
 
 <html ng-app="sharedwhiteboard">
     <head>
-        <title>Shardewhiteboard</title>
+        <title>Sharedwhiteboard</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-3.3.4-dist/css/bootstrap.min.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
@@ -36,6 +36,7 @@
                         <li ><a ng-href="#/whiteboardlist"><span class="glyphicon glyphicon-list"></span> Whiteboard List</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right" ng-show="isLoggedIn()">
+                        <li class="userinfo">Logged in as '{{currentUser}}'.</li>
                         <li ><a ng-href="#/login" ng-click="logout()"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Logout</a></li>
                     </ul>
                 </div>

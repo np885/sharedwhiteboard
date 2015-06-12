@@ -224,11 +224,14 @@ public class WhiteboardActor extends UntypedActor {
 
         //No connections left: persist and kill self:
         if (socketConnections.isEmpty()) {
-            persistCurrentState();
-
             Akka.system().eventStream().publish(new BoardActorClosedEvent(boardId));
             self().tell(PoisonPill.getInstance(), self());
         }
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        persistCurrentState();
     }
 
     private void persistCurrentState() {

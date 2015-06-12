@@ -5,10 +5,9 @@ function($scope, whiteboardSocketService, constant){
     function Collaborator(id, name, join, online) {
         this.id = id;
         this.name = name;
-        //TODO: online != join. online -> logged-in in App. join -> logged-in Whiteboard.
         this.online = (typeof online != 'undefined') ? online : false;
         this.join = (typeof join != 'undefined') ? join : false;
-        this.owner = whiteboardSocketService.checkOwner(id);
+        this.owner = whiteboardSocketService.checkOwner(name);
         this.toString = function() {return "{" + this.id + "," + this.name + "}";}
     }
     function WhiteboardLog(id, name, typ, logDate){

@@ -90,8 +90,8 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
         return whiteboard;
     };
 
-    service.checkOwner = function(id){
-        return whiteboard.owner.userId === id;
+    service.checkOwner = function(username){
+        return whiteboard.owner === username;
     };
 
     return service;

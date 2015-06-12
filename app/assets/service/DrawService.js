@@ -2,6 +2,7 @@
 
 app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant',
 function (WhiteboardSocketService, DrawIdService, constant) {
+    var tool;
     var drawLine;
     var drawText;
     var mesureText;
@@ -62,6 +63,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         this.radius = r;
     }
     function TextEvent(boardElementId, x, y, text){
+        this.eventType = 'TextEvent';
         this.boardElementId = boardElementId;
         this.y = y;
         this.x = x;
@@ -200,6 +202,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     WhiteboardSocketService.registerForSocketEvent('LineEvent', drawLineEvent);
     WhiteboardSocketService.registerForSocketEvent('RectangleEvent', drawRectangleEvent);
     WhiteboardSocketService.registerForSocketEvent('CircleEvent', drawCircleEvent);
+    WhiteboardSocketService.registerForSocketEvent('TextEvent', drawTextEvent);
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         drawings = {};
@@ -281,7 +284,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         } else {
             iter++;
         }
-    }
+    };
 
 
     service.freeHandMouseDown = function(event){
@@ -559,7 +562,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing = false;
     };
 
+
     service.textMouseDown = function(event){
+        if(drawing) {
+            var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+        }
+        drawing = true;
         event.stopPropagation();
         event.preventDefault();
         var id = DrawIdService.getCurrent();
@@ -568,11 +577,12 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         input.focus();
         input.value = '';
         getCurrentMouse(event);
-        input.onkeyup = function(event){
+        input.onkeyup = function (event) {
             var textEvent = new TextEvent(id, currentX, currentY, input.value);
             drawTextEvent(textEvent);
             WhiteboardSocketService.send(JSON.stringify(textEvent));
         };
+
     };
     service.textMouseMove = function(event){
         //Do Nothing
@@ -608,11 +618,14 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
 
-
-
-
     service.setTool = function(value){
-        switch(value){
+        if(tool === constant.DRAWTOOLS.TEXT){
+            var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+        }
+        tool = value;
+        drawing = false;
+        switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
                 onMouseMoveWrapper = this.freeHandMouseMove;
                 onMouseDownWrapper = this.freeHandMouseDown;

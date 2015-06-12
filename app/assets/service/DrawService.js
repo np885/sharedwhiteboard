@@ -641,6 +641,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         if(tool === constant.DRAWTOOLS.TEXT){
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            cursorPos = undefined;
         }
         selectedDrawing = null;
         repaint();

@@ -444,6 +444,18 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             repaint();
                             return;
                         }
+                    } else if (leDrawing.type === 'TextDrawing') {
+                        var h = 30;
+                        if (inRect(currentX, currentY,
+                            leDrawing.x, leDrawing.y-h, mesureText(leDrawing.text).width, h)) {
+
+                            selectedDrawing = leDrawing;
+                            moving = true;
+                            startX = currentX;
+                            startY = currentY;
+                            repaint();
+                            return;
+                        }
                     }
                 }
             }
@@ -492,6 +504,15 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     selectedDrawing.radius
                 );
                 drawCircleEvent(socketEvent);
+            } else if (selectedDrawing.type === 'TextDrawing') {
+                console.log("moving text");
+                socketEvent = new TextEvent(
+                    selectedDrawing.boardElementId,
+                    selectedDrawing.x + deltaX,
+                    selectedDrawing.y + deltaY,
+                    selectedDrawing.text
+                );
+                drawTextEvent(socketEvent);
             }
 
             startX = currentX;

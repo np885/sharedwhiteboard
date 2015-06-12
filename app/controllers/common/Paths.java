@@ -6,7 +6,7 @@ import model.whiteboards.entities.Whiteboard;
  * Behilfsloesung solange die Play-generierten "routes" Klassen rumspinnen.
  */
 public class Paths {
-    public static final String ROOT = "http://192.168.0.1:9000";
+    public static final String ROOT = "http://192.168.0.2:9000";
 //        public static final String ROOT = "http://localhost:9000";
 
     public static final String WHITEBOARDS_RELATIVE = "/whiteboards";

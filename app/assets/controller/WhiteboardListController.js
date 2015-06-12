@@ -1,7 +1,7 @@
 'use strict';
 
-app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService',
-function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
+app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService', 'ListSocketService',
+function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, listSocketService){
     function Whiteboard(id, name, owner, collaborators, socket){
         this.id = id;
         this.name = name;
@@ -53,4 +53,5 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
     };
 
     $scope.loadWhiteboards();
+    listSocketService.openSocketConnection();
 }]);

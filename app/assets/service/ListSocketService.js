@@ -35,6 +35,7 @@ app.service('ListSocketService',[ '$http', function ($http) {
 
     service.openSocketConnection = function(){
         if (connection != null && connection.readyState != 3) {
+            console.log('connection already open.')
             //connection exists and is not closed.
             return;
         }

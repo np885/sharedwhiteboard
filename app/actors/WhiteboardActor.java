@@ -82,6 +82,8 @@ public class WhiteboardActor extends UntypedActor {
             onRectangleEvent((RectangleEvent) drawEvent);
         } else if (drawEvent instanceof CircleEvent) {
             onCircleEvent((CircleEvent) drawEvent);
+        } else if (drawEvent instanceof TextEvent) {
+            onTextEvent((TextEvent) drawEvent);
         } else if (drawEvent instanceof DrawFinishedEvent) {
             onDrawFinishedEvent((DrawFinishedEvent) drawEvent);
         }
@@ -92,7 +94,6 @@ public class WhiteboardActor extends UntypedActor {
             }
         }
     }
-
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
         //Change online Status of Collabs
@@ -173,6 +174,20 @@ public class WhiteboardActor extends UntypedActor {
         slDrawing.setX2(sle.getxEnd());
         slDrawing.setY2(sle.getyEnd());
     }
+
+
+    private void onTextEvent(TextEvent txtEv) {
+        AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(txtEv.getBoardElementId());
+        if (drawObjForElementId == null) {
+            //new line:
+            drawObjForElementId = initDrawObjectAndAddToState(new TextDrawing(), txtEv);
+        }
+        TextDrawing txtDrawing = (TextDrawing) drawObjForElementId;
+        txtDrawing.setX(txtEv.getX());
+        txtDrawing.setY(txtEv.getY());
+        txtDrawing.setText(txtEv.getText());
+    }
+
     private void onRectangleEvent(RectangleEvent re) {
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(re.getBoardElementId());
         if (drawObjForElementId == null) {
@@ -224,11 +239,14 @@ public class WhiteboardActor extends UntypedActor {
 
         //No connections left: persist and kill self:
         if (socketConnections.isEmpty()) {
-            persistCurrentState();
-
             Akka.system().eventStream().publish(new BoardActorClosedEvent(boardId));
             self().tell(PoisonPill.getInstance(), self());
         }
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        persistCurrentState();
     }
 
     private void persistCurrentState() {

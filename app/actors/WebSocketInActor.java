@@ -72,6 +72,11 @@ public class WebSocketInActor extends UntypedActor {
                 circleEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
                 tellMyWhiteboardActor(circleEvent);
                 break;
+            case "TextEvent":
+                TextEvent te = Json.fromJson(parsedMessage, TextEvent.class);
+                te.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));
+                tellMyWhiteboardActor(te);
+                break;
             case "DrawFinishEvent":
                 DrawFinishedEvent drawFinishedEvent = Json.fromJson(parsedMessage, DrawFinishedEvent.class);
                 drawFinishedEvent.setUser(new SimpleUser(socketConnection.getUser().getId(), socketConnection.getUser().getUsername()));

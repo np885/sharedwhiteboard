@@ -89,7 +89,7 @@ public class WhiteboardActor extends UntypedActor {
         }
 
         for (WebSocketConnection c : socketConnections) {
-            if (c.getUser().getId() != drawEvent.getUser().getUserId()) {
+            if ((drawEvent instanceof DrawFinishedEvent) || c.getUser().getId() != drawEvent.getUser().getUserId()) {
                 c.getOut().tell(Json.stringify(Json.toJson(drawEvent)), self());
             }
         }

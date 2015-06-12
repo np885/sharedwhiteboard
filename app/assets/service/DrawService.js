@@ -118,7 +118,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing.height = rectEvent.height;
 
         repaint();
-    }
+    };
     var drawCircleEvent = function(circleEvent){
         var drawing;
         if(drawings.hasOwnProperty(circleEvent.boardElementId)){
@@ -133,7 +133,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing.radius = circleEvent.radius;
 
         repaint();
-    }
+    };
 
     //generic draw method, delegating to specific drawing methods:
     var draw = function(drawing){
@@ -212,7 +212,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             currentX = event.layerX - event.currentTarget.offsetLeft;
             currentY = event.layerY - event.currentTarget.offsetTop;
         }
-    }
+    };
     var getStartMouse = function(event) {
         if(event.offsetX!==undefined){
             startX = event.offsetX;
@@ -221,7 +221,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             startX = event.layerX - event.currentTarget.offsetLeft;
             startY = event.layerY - event.currentTarget.offsetTop;
         }
-    }
+    };
 
     service.freeHandMouseMove = function(event){
 

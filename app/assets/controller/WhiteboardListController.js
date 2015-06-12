@@ -45,7 +45,7 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
                 var user = whiteboard.collaborators[j];
                 collaborators.push({name: user.description.username});
             }
-            $scope.whiteboards.push(new Whiteboard(whiteboard.id, whiteboard.name, whiteboard.owner.description, collaborators, whiteboard.socket.href));
+            $scope.whiteboards.push(new Whiteboard(whiteboard.id, whiteboard.name, whiteboard.owner.description.username, collaborators, whiteboard.socket.href));
         }
     };
 

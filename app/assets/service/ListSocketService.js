@@ -33,9 +33,14 @@ app.service('ListSocketService',[ '$http', function ($http) {
         }
     };
 
-    service.openSocketConnection = function(ticketPath){
+    service.openSocketConnection = function(){
+        if (connection != null && connection.readyState != 3) {
+            //connection exists and is not closed.
+            return;
+        }
+
         //try to create a connection ticket:
-        $http.post(ticketPath)
+        $http.post('/login/session/ticket')
             .success(function(data, status, headers, config) {
                 //if we have a ticket, connect to it:
                 connection = new WebSocket('ws://' + window.location.host + headers('Location'));

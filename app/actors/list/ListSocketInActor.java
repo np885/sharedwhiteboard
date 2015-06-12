@@ -8,6 +8,7 @@ import actors.events.socket.boardsessions.BoardUserOnlineSocketEvent;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
+import play.Logger;
 import play.libs.Akka;
 
 /**
@@ -18,6 +19,7 @@ public class ListSocketInActor extends UntypedActor {
     private ListSocketConnection socketConnection;
 
     public ListSocketInActor(ActorRef out, User user) {
+        Logger.debug("Creating Socket Actor for Whiteboardlist for User " + user.getUsername());
         socketConnection = new ListSocketConnection(self(), out, user);
 
         //User is Online!

@@ -1,26 +1,36 @@
 package controllers.users;
 
-import actors.events.intern.app.AppUserLoginEvent;
-import actors.events.intern.app.AppUserLogoutEvent;
+import actors.board.BoardSocketInActor;
+import actors.list.ListSocketInActor;
+import akka.actor.ActorRef;
+import akka.actor.Props;
 import controllers.common.Paths;
 import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
 import controllers.users.dto.UserMapper;
+import controllers.whiteboards.SocketTicketSystem;
 import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
-import play.libs.Akka;
+import play.libs.F;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Flo on 26.04.2015.
  */
 public class UserManagementController extends Controller {
+
+    private static SocketTicketSystem ticketSystem = new SocketTicketSystem();
+
 
     @AuthRequired
     @Transactional
@@ -83,5 +93,34 @@ public class UserManagementController extends Controller {
                 && dto.getUsername() != null && !dto.getUsername().trim().isEmpty();
     }
 
+    @AuthRequired
+    public static Result createTicket() {
+        //Authenticated User can create ticket for websocket connection.
 
+        HashMap<String, String> properties = new HashMap<>();
+        String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), null);
+
+        response().setHeader(
+                Http.HeaderNames.LOCATION,
+                Paths.APPLICATION_SOCKET_TICKET + "/" + ticketNumber);
+
+        return created();
+    }
+
+    public static WebSocket<String> connectToApplication(final String ticket) {
+        //tickets.get(ticketNumber);
+        Map<String, String> desiredProperties = new HashMap<>();
+        if (! ticketSystem.validate(ticket, desiredProperties)){
+            //TODO timestamp expiration would be necessary for real system.
+            return WebSocket.reject(forbidden());
+        }
+
+        return WebSocket.withActor(new F.Function<ActorRef, Props>() {
+            @Override
+            public Props apply(ActorRef outActor) throws Throwable {
+                User userForValidTicket = ticketSystem.invalidate(ticket);
+                return Props.create(ListSocketInActor.class, outActor, userForValidTicket);
+            }
+        });
+    }
 }

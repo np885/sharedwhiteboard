@@ -68,6 +68,7 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
                 connection.onerror = function (error) {
                     console.log('WebSocket Error ' + error);
                 };
+
             });
     };
 

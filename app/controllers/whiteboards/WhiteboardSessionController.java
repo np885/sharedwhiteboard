@@ -29,14 +29,9 @@ public class WhiteboardSessionController extends Controller {
         //TODO test
         //Authenticated User can create ticket for websocket connection.
 
-//        TicketInformation ticket = new TicketInformation();
-//        ticket.user = (User) ctx().args.get("currentuser");
-//        ticket.boardId = boardId;
-//        ticket.timestamp = Calendar.getInstance();
         HashMap<String, String> properties = new HashMap<>();
         properties.put("boardId", boardId + "");
         String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), properties);
-//        tickets.put(ticketNumber, ticket);
 
         response().setHeader(
                 Http.HeaderNames.LOCATION,

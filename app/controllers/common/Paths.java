@@ -13,6 +13,7 @@ public class Paths {
     public static final String WHITEBOARDS_RELATIVE = "/whiteboards";
     public static final String WHITEBOARDS_FULL = ROOT + WHITEBOARDS_RELATIVE;
     public static final String USERS_FULL = ROOT + "/users";
+    public static final String APPLICATION_SOCKET_TICKET = "/login/session/ticket";
 
     public static String forWhiteboard(Whiteboard wb) {
         return WHITEBOARDS_FULL + "/" + wb.getId();

@@ -123,10 +123,22 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawing = new Drawing('RectangleDrawing', rectEvent.boardElementId);
             drawings[drawing.boardElementId] = drawing;
         }
+
+
         drawing.x = rectEvent.xStart;
         drawing.y = rectEvent.yStart;
         drawing.width = rectEvent.width;
         drawing.height = rectEvent.height;
+
+        //normalize:
+        if (drawing.width < 0) {
+            drawing.width *= -1;
+            drawing.x -= drawing.width;
+        }
+        if (drawing.height < 0) {
+            drawing.height *= -1;
+            drawing.y -= drawing.height;
+        }
 
         repaint();
     };
@@ -361,6 +373,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
     function inRect(cx,cy,x,y,w,h) {
+        //check in rect:
         return cx >= x && cx <= (x+w)   //proper horizontal area
             && cy >= y && cy <= y+h;     //proper vertical area
     }

@@ -2,7 +2,7 @@
 
 app.controller('WhiteboardController', ['$scope', '$routeParams', 'WhiteboardSocketService', 'constant',
 function($scope, $routeParams, WhiteboardSocketService, constant){
-    $scope.boardId = $routeParams.boardId;
+    $scope.whiteboardname = WhiteboardSocketService.getWhiteboard().name;
     $scope.tools = [
         constant.DRAWTOOLS.FREEHAND,
         constant.DRAWTOOLS.CIRCLE,

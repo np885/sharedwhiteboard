@@ -11,7 +11,7 @@
 
 <div class="list-group whiteboardlist">
     <div ng-repeat="whiteboard in whiteboards | filter:search" >
-        <a ng-href="#/whiteboard/{{whiteboard.id}}" ng-click="openWhiteboardSocket(whiteboard)" class="list-group-item" ng-hide="myown && currentUser !== whiteboard.owner">
+        <a ng-href="#/whiteboard/{{whiteboard.id}}" ng-class="{'my-own-board' : whiteboard.owner === currentUser}" ng-click="openWhiteboardSocket(whiteboard)" class="list-group-item" ng-hide="myown && currentUser !== whiteboard.owner">
             <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>
             <div class="list-group list-group-horizontal">
                 <!--<div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in whiteboard.collaborators">-->

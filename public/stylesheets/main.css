@@ -9,6 +9,10 @@
     font-weight: bold;
 }
 
+.my-own-board {
+    background: url('../images/ownertriangle.png') top right no-repeat;
+}
+
 .welcome{
     font-size: 34px;
     text-align: center;

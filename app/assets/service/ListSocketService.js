@@ -33,7 +33,7 @@ app.service('ListSocketService',[ '$http', function ($http) {
         }
     };
 
-    service.openSocketConnection = function(){
+    service.openSocketConnection = function(onConnectCallback){
         if (connection != null && connection.readyState != 3) {
             console.log('connection already open.')
             //connection exists and is not closed.
@@ -47,7 +47,7 @@ app.service('ListSocketService',[ '$http', function ($http) {
                 connection = new WebSocket('ws://' + window.location.host + headers('Location'));
 
                 connection.onopen = function () {
-                    //connection.send('Ping'); // Send the message 'Ping' to the server
+                    //onConnectCallback();
                 };
 
                 connection.onmessage = function (e) {

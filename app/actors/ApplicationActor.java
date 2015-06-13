@@ -7,6 +7,7 @@ import actors.events.intern.app.AppUserLogoutEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
+import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.liststate.ListStateChangedEvent;
 import actors.list.ListSocketConnection;
 import akka.actor.ActorRef;
@@ -71,7 +72,7 @@ public class ApplicationActor extends UntypedActor {
             }
             listSocketConnections.put(event.getUser(), ((AppUserLoginEvent) event).getSocketConnection());
 
-            Logger.debug("User is Online!");
+            Logger.debug(event.getUser().getUsername() + " is Online!");
             onlineUser.add(event.getUser());
         } else if (event instanceof AppUserLogoutEvent) {
             ListSocketConnection removed = listSocketConnections.remove(event.getUser());
@@ -80,11 +81,16 @@ public class ApplicationActor extends UntypedActor {
                         + ", probably because he was not logged in! Check why a logout event appears for a user" +
                         " who is not logged in!");
             }
-            Logger.debug("User is Offline!");
+            Logger.debug(event.getUser().getUsername() + " is Offline!");
             onlineUser.remove(event.getUser());
         }
         for(long boardId : boardActors.keySet()){
             boardActors.get(boardId).tell(event, self());
+        }
+
+        String onOffSocketEvent = SessionEventSerializationUtil.serializeUserAppEvent(event);
+        for (User u : listSocketConnections.keySet()) {
+            listSocketConnections.get(u).getOut().tell(onOffSocketEvent, self());
         }
     }
 

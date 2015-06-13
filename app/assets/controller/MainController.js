@@ -1,7 +1,7 @@
 'use strict';
 
-app.controller('MainController', ['$scope', 'AuthenticationService', '$location',
-    function($scope, AuthenticationService, $location){
+app.controller('MainController', ['$scope', 'AuthenticationService', 'ListSocketService', '$location',
+    function($scope, AuthenticationService, listSocketService, $location){
 
         $scope.isLoggedIn = function(){
             //Check if User is logged in
@@ -15,9 +15,9 @@ app.controller('MainController', ['$scope', 'AuthenticationService', '$location'
         };
 
         $scope.logout = function(){
+            listSocketService.closeConnection();
             AuthenticationService.clearCredentials();
         };
-
 
 
     }]);

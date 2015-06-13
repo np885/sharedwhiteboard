@@ -1,6 +1,6 @@
 'use strict';
 
-app.service('WhiteboardSocketService',[ '$http', function ($http) {
+app.service('ListSocketService',[ '$http', function ($http) {
     //Event 'class'
     function SocketServerEvent(eventType) {
         this.eventType = eventType;
@@ -12,23 +12,13 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
 
     //List of hanlded Events:
     var handledServerEvents = {
-        'BoardUserOpenEvent' : new SocketServerEvent('BoardUserOpenEvent'),
-        'BoardUserCloseEvent' : new SocketServerEvent('BoardUserCloseEvent'),
-        'InitialBoardStateEvent' : new SocketServerEvent('InitialBoardStateEvent'),
-        'FreeHandEvent' : new SocketServerEvent('FreeHandEvent'),
-        'LineEvent' : new SocketServerEvent('LineEvent'),
-        'RectangleEvent' : new SocketServerEvent('RectangleEvent'),
-        'CircleEvent' : new SocketServerEvent('CircleEvent'),
-        'TextEvent' : new SocketServerEvent('TextEvent'),
-        'DrawFinishEvent' : new SocketServerEvent('DrawFinishEvent'),
+        'ListStateChangedEvent' : new SocketServerEvent('ListStateChangedEvent'),
         'BoardUserOnlineEvent' : new SocketServerEvent('BoardUserOnlineEvent'),
         'BoardUserOfflineEvent' : new SocketServerEvent('BoardUserOfflineEvent')
     };
 
     var service = {};
     var connection;
-    var drawFunction;
-    var whiteboard;
 
     service.registerForSocketEvent = function(eventName, theCallback) {
         handledServerEvents[eventName].callbacks.push(theCallback);
@@ -40,20 +30,24 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
             handledServerEvents[e.eventType].callbacks.forEach(function(registeredCallback) {
                 registeredCallback(e);
             })
-        } else {
-            drawFunction(e.xStart, e.yStart, e.currentX, e.currentY);
         }
     };
 
-    service.openSocketConnection = function(){
+    service.openSocketConnection = function(onConnectCallback){
+        if (connection != null && connection.readyState != 3) {
+            console.log('connection already open.')
+            //connection exists and is not closed.
+            return;
+        }
+
         //try to create a connection ticket:
-        $http.post(whiteboard.socket)
+        $http.post('/login/session/ticket')
             .success(function(data, status, headers, config) {
-                //on success: connect to socket. Path of ticket will be send by server in Location Header.
+                //if we have a ticket, connect to it:
                 connection = new WebSocket('ws://' + window.location.host + headers('Location'));
 
                 connection.onopen = function () {
-                    //connection.send('Ping'); // Send the message 'Ping' to the server
+                    //onConnectCallback();
                 };
 
                 connection.onmessage = function (e) {
@@ -68,31 +62,11 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
                 connection.onerror = function (error) {
                     console.log('WebSocket Error ' + error);
                 };
-
             });
     };
 
     service.closeConnection = function(){
-      connection.close();
-    };
-
-    service.send = function(payload){
-      connection.send(payload);
-    };
-
-    service.setFkt = function(fktCallback){
-        drawFunction = fktCallback;
-    };
-
-    service.setWhiteboard = function(board){
-        whiteboard = board;
-    };
-    service.getWhiteboard = function(){
-        return whiteboard;
-    };
-
-    service.checkOwner = function(username){
-        return whiteboard.owner === username;
+        connection.close();
     };
 
     return service;

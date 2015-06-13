@@ -1,7 +1,7 @@
 'use strict';
 
-app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService',
-function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
+app.controller('WhiteboardListController', ['$scope', '$modal', 'AuthenticationService', '$http', 'WhiteboardSocketService', 'ListSocketService',
+function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, listSocketService){
     function Whiteboard(id, name, owner, collaborators, socket){
         this.id = id;
         this.name = name;
@@ -13,6 +13,7 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
     $scope.currentUser = AuthenticationService.getUser();
 
     $scope.whiteboards = [];
+    $scope.onlinelist = [];
 
     $scope.prepareOpening = function(whiteboard){
         WhiteboardSocketService.setWhiteboard(whiteboard);
@@ -27,6 +28,21 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
             .error(function (data, status, headers, config) {
                 //ToDO: error
             });
+    };
+
+    $scope.refreshOnlineList = function() {
+        $http.get('/users/online')
+            .success(function(data, status, headers, config) {
+                $scope.onlinelist = data.map(function(u) {return u.id});
+                console.log($scope.onlinelist);
+            })
+            .error(function (data, status, headers, config) {
+                //ToDO: error
+            });
+    };
+
+    $scope.isOnline = function(userId) {
+        return $scope.onlinelist.indexOf(userId) >= 0;
     };
 
     $scope.transform = function(data){
@@ -52,5 +68,11 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService){
         });
     };
 
+    listSocketService.registerForSocketEvent('ListStateChangedEvent', $scope.loadWhiteboards);
+    listSocketService.registerForSocketEvent('BoardUserOnlineEvent', $scope.refreshOnlineList);
+    listSocketService.registerForSocketEvent('BoardUserOfflineEvent', $scope.refreshOnlineList);
+
+    listSocketService.openSocketConnection();
+    $scope.refreshOnlineList();
     $scope.loadWhiteboards();
 }]);

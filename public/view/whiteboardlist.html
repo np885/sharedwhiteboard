@@ -15,7 +15,7 @@
             <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>
             <div class="list-group list-group-horizontal">
                 <!--<div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in whiteboard.collaborators">-->
-                <div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in whiteboard.collaborators">
+                <div class="list-group-item" ng-class="{'list-group-item-success' : isOnline(user.description.userId)}" ng-repeat="user in whiteboard.collaborators">
                     {{user.description.username}}<span ng-class="{'glyphicon glyphicon-star-empty' : whiteboard.owner === user.description.username}"></span> <span ng-class="{'glyphicon glyphicon-eye-open': user.join }" ></span>
                 </div>
             </div>

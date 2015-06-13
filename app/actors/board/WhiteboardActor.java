@@ -7,11 +7,9 @@ import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
-import actors.events.socket.boardstate.BoardStateSerializationUtil;
-import actors.events.socket.boardstate.CollabState;
-import actors.events.socket.boardstate.InitialBoardStateEvent;
+import actors.events.socket.boardstate.*;
 import actors.events.socket.draw.*;
-import actors.events.socket.boardstate.WhiteboardSessionState;
+import actors.events.socket.liststate.ListStateChangedEvent;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
@@ -45,7 +43,7 @@ public class WhiteboardActor extends UntypedActor {
         //add to collabs if not already done:
         User connectingUser = connection.getUser();
         if (! currentState.getCollaborators().contains(connectingUser)) {
-            currentState.getCollaborators().add(connectingUser);
+            addNewCollaborator(connectingUser);
         }
 
         //add first connection to connections:
@@ -122,7 +120,7 @@ public class WhiteboardActor extends UntypedActor {
 
         User connectingUser = userOpenEvent.getConnection().getUser();
         if (! currentState.getCollaborators().contains(connectingUser)) {
-            currentState.getCollaborators().add(connectingUser);
+            addNewCollaborator(connectingUser);
             //Adding to sessionState
             sessionState.getCollabs().add(new CollabState(connectingUser.getId(), connectingUser.getUsername()));
             sessionState.changeCollabStateOnline(connectingUser.getId(), true);
@@ -143,6 +141,14 @@ public class WhiteboardActor extends UntypedActor {
 
         //tell the new connection the initial State:
         connection.getOut().tell(produceCurrentStateRepresentation(), self());
+    }
+
+    private void addNewCollaborator(User connectingUser) {
+        currentState.getCollaborators().add(connectingUser);
+        persistCurrentState();
+        ListStateChangedEvent lscEvent = new ListStateChangedEvent();
+        lscEvent.setUser(new SimpleUser(connectingUser));
+        Akka.system().eventStream().publish(lscEvent);
     }
 
     private void onFreeHandEvent(FreeHandEvent fhe) {
@@ -247,6 +253,7 @@ public class WhiteboardActor extends UntypedActor {
     @Override
     public void postStop() throws Exception {
         persistCurrentState();
+        super.postStop();
     }
 
     private void persistCurrentState() {

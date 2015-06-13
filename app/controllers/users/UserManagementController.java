@@ -1,33 +1,43 @@
 package controllers.users;
 
-import actors.events.intern.app.AppUserLoginEvent;
-import actors.events.intern.app.AppUserLogoutEvent;
+import actors.ApplicationActor;
+import actors.board.BoardSocketInActor;
+import actors.list.ListSocketInActor;
+import akka.actor.ActorRef;
+import akka.actor.Props;
 import controllers.common.Paths;
 import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
 import controllers.users.dto.UserMapper;
+import controllers.users.dto.UserReadDTO;
+import controllers.whiteboards.SocketTicketSystem;
 import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
 import play.libs.Akka;
+import play.libs.F;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.mvc.WebSocket;
+
+import java.util.*;
 
 /**
  * Created by Flo on 26.04.2015.
  */
 public class UserManagementController extends Controller {
 
+    private static SocketTicketSystem ticketSystem = new SocketTicketSystem();
+
+
     @AuthRequired
     @Transactional
     public static Result checkLoginCredentials() {
         User currentuser = (User) ctx().args.get("currentuser");
-        //Send UserLoginEvent
-        sendUserLoginEvent(currentuser);
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
     }
 
@@ -35,21 +45,7 @@ public class UserManagementController extends Controller {
     @Transactional
     public static Result logout() {
         User currentuser = (User) ctx().args.get("currentuser");
-        //Send UserLoginEvent
-        sendUserLogoutEvent(currentuser);
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
-    }
-
-    private static void sendUserLogoutEvent(User currentuser) {
-        AppUserLogoutEvent appUserLogoutEvent = new AppUserLogoutEvent();
-        appUserLogoutEvent.setUser(currentuser);
-        Akka.system().eventStream().publish(appUserLogoutEvent);
-    }
-
-    private static void sendUserLoginEvent(User currentuser) {
-        AppUserLoginEvent appUserLoginEvent = new AppUserLoginEvent();
-        appUserLoginEvent.setUser(currentuser);
-        Akka.system().eventStream().publish(appUserLoginEvent);
     }
 
     @ConsumesJSON
@@ -99,5 +95,46 @@ public class UserManagementController extends Controller {
                 && dto.getUsername() != null && !dto.getUsername().trim().isEmpty();
     }
 
+    @AuthRequired
+    public static Result createTicket() {
+        //Authenticated User can create ticket for websocket connection.
 
+        HashMap<String, String> properties = new HashMap<>();
+        String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), null);
+
+        response().setHeader(
+                Http.HeaderNames.LOCATION,
+                Paths.APPLICATION_SOCKET_TICKET + "/" + ticketNumber);
+
+        return created();
+    }
+
+    public static WebSocket<String> connectToApplication(final String ticket) {
+        //tickets.get(ticketNumber);
+        Map<String, String> desiredProperties = new HashMap<>();
+        if (! ticketSystem.validate(ticket, desiredProperties)){
+            //TODO timestamp expiration would be necessary for real system.
+            return WebSocket.reject(forbidden());
+        }
+
+        return WebSocket.withActor(new F.Function<ActorRef, Props>() {
+            @Override
+            public Props apply(ActorRef outActor) throws Throwable {
+                User userForValidTicket = ticketSystem.invalidate(ticket);
+                return Props.create(ListSocketInActor.class, outActor, userForValidTicket);
+            }
+        });
+    }
+
+    @AuthRequired
+    public static Result getOnlineList() {
+        Set<User> users = ApplicationActor.getOnlineList();
+
+        List<UserReadDTO> dtos = new ArrayList<>();
+        for (User u : users) {
+            dtos.add(UserMapper.mapToReadDTO(u));
+        }
+
+        return ok(Json.toJson(dtos));
+    }
 }

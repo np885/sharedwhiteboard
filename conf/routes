@@ -13,6 +13,7 @@ GET         /login/session/ticket/:ticket           controllers.users.UserManage
 GET         /logout                                 controllers.users.UserManagementController.logout()
 POST        /register                               controllers.users.UserManagementController.registerUser()
 GET         /users                                  controllers.users.UserCollectionController.getAllUsers()
+GET         /users/online                           controllers.users.UserManagementController.getOnlineList()
 
 #Whiteboard Management:
 GET         /whiteboards                            controllers.whiteboards.WhiteboardCollectionController.getWhiteboardCollection()

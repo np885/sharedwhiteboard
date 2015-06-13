@@ -1,5 +1,6 @@
 package controllers.users;
 
+import actors.ApplicationActor;
 import actors.board.BoardSocketInActor;
 import actors.list.ListSocketInActor;
 import akka.actor.ActorRef;
@@ -9,11 +10,13 @@ import controllers.common.mediatypes.ConsumesJSON;
 import controllers.common.security.AuthRequired;
 import controllers.users.dto.NewUserWriteDTO;
 import controllers.users.dto.UserMapper;
+import controllers.users.dto.UserReadDTO;
 import controllers.whiteboards.SocketTicketSystem;
 import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.db.jpa.Transactional;
+import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -21,8 +24,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Flo on 26.04.2015.
@@ -122,5 +124,17 @@ public class UserManagementController extends Controller {
                 return Props.create(ListSocketInActor.class, outActor, userForValidTicket);
             }
         });
+    }
+
+    @AuthRequired
+    public static Result getOnlineList() {
+        Set<User> users = ApplicationActor.getOnlineList();
+
+        List<UserReadDTO> dtos = new ArrayList<>();
+        for (User u : users) {
+            dtos.add(UserMapper.mapToReadDTO(u));
+        }
+
+        return ok(Json.toJson(dtos));
     }
 }

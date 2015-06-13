@@ -17,14 +17,13 @@ import play.Logger;
 import play.libs.Akka;
 import play.libs.Json;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ApplicationActor extends UntypedActor {
 
     public static final String NAME = "Aplication";
+
+    private static ApplicationActor instance;
 
     /* maps <boardId, BoardActor> */
     private Map<Long, ActorRef> boardActors = new HashMap<>();
@@ -35,6 +34,7 @@ public class ApplicationActor extends UntypedActor {
     private List<User> onlineUser = new ArrayList<>();
 
     public ApplicationActor() {
+        instance = this;
         Akka.system().eventStream().subscribe(self(), BoardSessionEvent.class);
         Akka.system().eventStream().subscribe(self(), BoardActorClosedEvent.class);
         Akka.system().eventStream().subscribe(self(), AbstractAppUserEvent.class);
@@ -108,5 +108,7 @@ public class ApplicationActor extends UntypedActor {
         }
     }
 
-
+    public static Set<User> getOnlineList() {
+        return new HashSet<>(instance.listSocketConnections.keySet());
+    }
 }

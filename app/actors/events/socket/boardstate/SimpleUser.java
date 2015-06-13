@@ -1,6 +1,8 @@
 package actors.events.socket.boardstate;
 
 
+import model.user.entities.User;
+
 public class SimpleUser {
     private long userId;
     private String username;
@@ -11,6 +13,11 @@ public class SimpleUser {
     public SimpleUser(long userId, String username) {
         this.userId = userId;
         this.username = username;
+    }
+
+    public SimpleUser(User userEntity) {
+        this.userId = userEntity.getId();
+        this.username = userEntity.getUsername();
     }
 
     public long getUserId() {

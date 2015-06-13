@@ -52,6 +52,8 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
         });
     };
 
+    listSocketService.registerForSocketEvent('ListStateChangedEvent', $scope.loadWhiteboards);
+
     $scope.loadWhiteboards();
     listSocketService.openSocketConnection();
 }]);

@@ -1,5 +1,7 @@
 package controllers.whiteboards;
 
+import actors.events.socket.boardstate.SimpleUser;
+import actors.events.socket.liststate.ListStateChangedEvent;
 import controllers.common.Paths;
 import controllers.common.dto.LinkedDTO;
 import controllers.common.dto.XHref;
@@ -14,6 +16,7 @@ import model.AlreadyExistsException;
 import model.user.entities.User;
 import model.whiteboards.entities.Whiteboard;
 import model.whiteboards.repositories.WhiteboardRepo;
+import play.libs.Akka;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -75,7 +78,8 @@ public class WhiteboardCollectionController extends Controller {
 
         //map: current authenticated user will be the owner.
         Whiteboard wb = WhiteboardMapper.mapFromNewWriteDTO(newWhiteboardWriteDTO);
-        wb.setOwner((User) ctx().args.get("currentuser"));
+        User currentuser = (User) ctx().args.get("currentuser");
+        wb.setOwner(currentuser);
 
         //persist:
         try {
@@ -83,6 +87,12 @@ public class WhiteboardCollectionController extends Controller {
         } catch (AlreadyExistsException e) {
             return status(422, "" + e.getMessage());
         }
+        wb.getCollaborators().add(currentuser);
+        whiteboardRepo.saveWhiteboard(wb);
+
+        ListStateChangedEvent lscEvent = new ListStateChangedEvent();
+        lscEvent.setUser(new SimpleUser(currentuser));
+        Akka.system().eventStream().publish(lscEvent);
 
         //response:
         response().setHeader(

@@ -7,6 +7,7 @@ import actors.events.intern.app.AppUserLogoutEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
+import actors.events.socket.liststate.ListStateChangedEvent;
 import actors.list.ListSocketConnection;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -14,6 +15,7 @@ import akka.actor.UntypedActor;
 import model.user.entities.User;
 import play.Logger;
 import play.libs.Akka;
+import play.libs.Json;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +38,7 @@ public class ApplicationActor extends UntypedActor {
         Akka.system().eventStream().subscribe(self(), BoardSessionEvent.class);
         Akka.system().eventStream().subscribe(self(), BoardActorClosedEvent.class);
         Akka.system().eventStream().subscribe(self(), AbstractAppUserEvent.class);
+        Akka.system().eventStream().subscribe(self(), ListStateChangedEvent.class);
     }
 
     @Override
@@ -46,6 +49,16 @@ public class ApplicationActor extends UntypedActor {
             onBoardActorClosedEvent((BoardActorClosedEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
             onAppUserEvent((AbstractAppUserEvent) message);
+        } else if (message instanceof ListStateChangedEvent) {
+            onListStateChangedEvent((ListStateChangedEvent) message);
+        }
+    }
+
+    private void onListStateChangedEvent(ListStateChangedEvent lsce) {
+        for (User u : listSocketConnections.keySet()) {
+            if (u.getId() != lsce.getUser().getUserId()) {
+                listSocketConnections.get(u).getOut().tell(Json.stringify(Json.toJson(lsce)), self());
+            }
         }
     }
 
@@ -53,6 +66,7 @@ public class ApplicationActor extends UntypedActor {
         if(event instanceof AppUserLoginEvent){
             ListSocketConnection connection = listSocketConnections.get(event.getUser());
             if (connection != null) {
+                Logger.warn("Double login for user: " + event.getUser());
                 //todo... double login. kill old login the hard way?
             }
             listSocketConnections.put(event.getUser(), ((AppUserLoginEvent) event).getSocketConnection());

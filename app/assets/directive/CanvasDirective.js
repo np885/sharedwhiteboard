@@ -7,10 +7,18 @@ app.directive('drawing',[ 'DrawService',
         link: function(scope, element, attrs){
             var ctx = element[0].getContext('2d');
             ctx.font = '30px Arial';
+            var h = attrs.height;
+            var w = attrs.width;
+
             scope.$watch(attrs.drawing, function(value) {
                 DrawService.setTool(value);
             });
 
+            var paintBackgroundWhite = function(){
+                ctx.rect(0, 0, w, h);
+                ctx.fillStyle="#FFFFFF";
+                ctx.fill();
+            };
             var drawLine = function(xStart, yStart, xEnd, yEnd) {
                 // line from
                 ctx.moveTo(xStart, yStart);
@@ -35,13 +43,14 @@ app.directive('drawing',[ 'DrawService',
                 if (typeof cursorPos !== 'undefined') {
                     text = [text.slice(0, cursorPos), '|', text.slice(cursorPos)].join('');
                 }
-
+                ctx.fillStyle = '#000000';
                 ctx.fillText(text, x, y);
 
             };
 
             var clear = function(){
-                ctx.clearRect(0, 0, element[0].width, element[0].height);
+                ctx.clearRect(0, 0, w, h);
+                paintBackgroundWhite();
             };
             var mesureSize = function(text){
                   return ctx.measureText(text);

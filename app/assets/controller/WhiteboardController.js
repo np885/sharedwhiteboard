@@ -13,6 +13,12 @@ function($scope, $routeParams, WhiteboardSocketService, constant){
     ];
     $scope.tooling = $scope.tools[0];
 
+    $scope.downloadLink = '';
+
+    $scope.saveCanvas = function(){
+        $scope.downloadLink = document.getElementById('canvas').toDataURL("image/png");
+    };
+
     $scope.selectTool = function(tool){
         $scope.tooling = tool;
     };

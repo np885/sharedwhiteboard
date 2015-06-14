@@ -3,8 +3,8 @@
 // Declare app level module which depends on views, and components
 var app = angular.module('sharedwhiteboard', ['ngRoute', 'ui.bootstrap']);
 
-app.config(['$routeProvider', '$httpProvider',
-function($routeProvider, $httpProvider) {
+app.config(['$routeProvider', '$httpProvider', '$compileProvider',
+function($routeProvider, $httpProvider, $compileProvider) {
     $routeProvider.
         when('/login', {
             templateUrl: 'assets/view/login.html',
@@ -44,6 +44,8 @@ function($routeProvider, $httpProvider) {
             }
         };
     });
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|data|ftp|mailto|file):/);
+
 }]);
 
 app.run(['$rootScope', '$location', 'AuthenticationService', 'WhiteboardSocketService',

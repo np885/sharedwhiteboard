@@ -39,11 +39,15 @@ app.directive('drawing',[ 'DrawService',
                 ctx.moveTo(centerX+radius, centerY);
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             };
-            var drawText = function(x, y, text, cursorPos) {
+            var drawText = function(x, y, text, cursorPos, color) {
                 if (typeof cursorPos !== 'undefined') {
                     text = [text.slice(0, cursorPos), '|', text.slice(cursorPos)].join('');
                 }
-                ctx.fillStyle = '#000000';
+                if (typeof color !== 'undefined') {
+                    ctx.fillStyle = color;
+                } else {
+                    ctx.fillStyle = '#000000';
+                }
                 ctx.fillText(text, x, y);
 
             };

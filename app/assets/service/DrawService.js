@@ -203,7 +203,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawCircle(drawing.centerX, drawing.centerY, drawing.radius);
         } else if(drawing.type === 'TextDrawing'){
             if(selectedDrawing === drawing){
-                drawText(drawing.x, drawing.y, drawing.text, cursorPos);
+                drawText(drawing.x, drawing.y, drawing.text, cursorPos, '#ff0000');
             } else {
                 drawText(drawing.x, drawing.y, drawing.text);
             }

@@ -2,7 +2,7 @@ import sbt.Keys._
 
 name := "sharedwhiteboard"
 
-version := "0.1"
+version := "0.2"
 
 lazy val `sharedwhiteboard` = (project in file(".")).enablePlugins(PlayJava)
 

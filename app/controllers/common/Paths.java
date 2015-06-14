@@ -1,14 +1,13 @@
 package controllers.common;
 
 import model.whiteboards.entities.Whiteboard;
+import play.Play;
 
 /**
  * Behilfsloesung solange die Play-generierten "routes" Klassen rumspinnen.
  */
 public class Paths {
-//    public static final String ROOT = "http://192.168.0.2:9000";
-        public static final String ROOT = ""; //relative URLs
-//        public static final String ROOT = "http://localhost:9000";
+    public static final String ROOT = ""; //relative URLs
 
     public static final String WHITEBOARDS_RELATIVE = "/whiteboards";
     public static final String WHITEBOARDS_FULL = ROOT + WHITEBOARDS_RELATIVE;

@@ -10,8 +10,8 @@ scalaVersion := "2.11.1"
 
 libraryDependencies ++= Seq( javaJdbc , cache , javaWs )
 
-libraryDependencies += "org.mariadb.jdbc" % "mariadb-java-client" % "1.1.8"
-//libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
+//libraryDependencies += "org.mariadb.jdbc" % "mariadb-java-client" % "1.1.8"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.18"
 
 
 

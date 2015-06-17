@@ -88,9 +88,27 @@ app.directive('drawing',[ 'DrawService',
                 ctx.closePath();
             });
 
+
+            function transformTouchEvent(e) {
+                e.offsetX = e.touches[0].clientX - e.target.getBoundingClientRect().left;
+                e.offsetY = e.touches[0].clientY- e.target.getBoundingClientRect().top;
+                e.isMobile = true;
+            }
+
             element.bind('mousedown', DrawService.onMouseDown);
             element.bind('mousemove', DrawService.onMouseMove);
             element.bind('mouseup', DrawService.onMouseUp);
+            element.bind('touchstart', function(e) {
+                transformTouchEvent(e);
+                DrawService.onMouseDown(e);
+            });
+            element.bind('touchmove', function(e) {
+                transformTouchEvent(e);
+                DrawService.onMouseMove(e);
+            });
+            element.bind('touchend', function(e) {
+                DrawService.onMouseUp(e);
+            });
         }
     };
 }]);

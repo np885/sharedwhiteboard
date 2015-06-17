@@ -404,7 +404,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         var x2 = leDrawing.points[1].x;
                         var y2 = leDrawing.points[1].y;
 
-                        var d = 7; //delta so that you dont have to hit pixel perfect.
+                        var d = (event.isMobile) ? 14 : 7; //delta so that you dont have to hit pixel perfect.
 
                         //in range?
                         var minX, maxX, minY, maxY;
@@ -427,7 +427,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             return;
                         }
                     } else if (leDrawing.type === 'RectangleDrawing') {
-                        var d = 5;//delta so that you dont have to hit exactly to the pixel.
+                        var d = (event.isMobile) ? 10 : 5;//delta so that you dont have to hit exactly to the pixel.
                         if (inRect(currentX, currentY,
                                 leDrawing.x - d, leDrawing.y - d, leDrawing.width + 2*d, leDrawing.height + 2*d)
                             && !inRect(currentX,currentY,
@@ -441,7 +441,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             return;
                         }
                     } else if (leDrawing.type === 'CircleDrawing') {
-                        var d = 4;//delta so that you dont have to hit exactly to the pixel.
+                        var d = (event.isMobile) ? 8 : 4;//delta so that you dont have to hit exactly to the pixel.
                         if (inCircle(currentX, currentY,
                                 leDrawing.centerX, leDrawing.centerY, leDrawing.radius + d)
                             && !inCircle(currentX, currentY,

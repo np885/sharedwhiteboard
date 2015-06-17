@@ -597,16 +597,24 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         if(drawing) {
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            drawing = false;
         }
 
+        getCurrentMouse(event);
 
 
         var id = DrawIdService.getCurrent();
         DrawIdService.incrementId();
         var input = document.getElementById('drawText');
+        //move input to click position to prevent "jumping" to hidden element on type:
+        input.style['margin-left'] = currentX + 'px';
+        input.style['margin-top'] = currentY-24 + 'px';
+        //set focus without "jumping" to hidden element on click:
+        var x = window.scrollX, y = window.scrollY;
         input.focus();
+        window.scrollTo(x, y);
+
         input.value = '';
-        getCurrentMouse(event);
         var textEvent = new TextEvent(id, currentX, currentY, input.value);
         drawTextEvent(textEvent, input.selectionStart);
         input.onkeyup = function (event) {
@@ -708,5 +716,16 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         repaint(true);
         return getSaveUrl();
     };
+
+
+    //some UX for the Text-Tooling:
+    document.getElementById('drawText').addEventListener("blur", function( event ) {
+        selectedDrawing = null;
+        repaint();
+    }, true);
+
+
+
+
     return service;
 }]);

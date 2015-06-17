@@ -70,6 +70,6 @@ body {
 }
 .shadowInput{
     opacity: 0;
-    margin-left: -5000px;
     position: absolute;
+    z-index: -100;
 }

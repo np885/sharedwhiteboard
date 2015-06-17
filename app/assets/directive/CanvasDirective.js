@@ -34,8 +34,8 @@ app.directive('drawing',[ 'DrawService',
             };
 
             var drawCircle = function(centerX, centerY, radius) {
-                ctx.rect(centerX-2, centerY, 5, 1);
-                ctx.rect(centerX, centerY-2, 1, 5);
+                //ctx.rect(centerX-2, centerY, 5, 1);
+                //ctx.rect(centerX, centerY-2, 1, 5);
                 ctx.moveTo(centerX+radius, centerY);
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
             };

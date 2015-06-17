@@ -4,6 +4,7 @@ app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constan
 function (WhiteboardSocketService, DrawIdService, constant) {
     var tool;
     var cursorPos;
+    var getSaveUrl;
     var drawLine;
     var drawText;
     var mesureText;
@@ -237,10 +238,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
 
-    var repaint = function(){
+    var repaint = function(background){
         //var start = new Date().getTime();
 
-        clearCanvas();
+        clearCanvas(background);
         beginPath();
         for(var boardElementId in drawings){
             if(drawings.hasOwnProperty(boardElementId)){
@@ -696,6 +697,16 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseDownWrapper = this.freeHandMouseDown;
                 onMouseUpWrapper = this.freeHandMouseUp;
         }
+    };
+
+    service.setGetSaveUrl = function(fkt){
+        getSaveUrl = fkt;
+    };
+
+    service.prepareSaveCanvas = function(){
+        selectedDrawing = null;
+        repaint(true);
+        return getSaveUrl();
     };
     return service;
 }]);

@@ -1,7 +1,7 @@
 'use strict';
 
-app.controller('WhiteboardController', ['$scope', '$routeParams', 'WhiteboardSocketService', 'constant',
-function($scope, $routeParams, WhiteboardSocketService, constant){
+app.controller('WhiteboardController', ['$scope', '$routeParams', 'WhiteboardSocketService', 'constant', 'DrawService',
+function($scope, $routeParams, WhiteboardSocketService, constant, DrawService){
     $scope.whiteboardname = WhiteboardSocketService.getWhiteboard().name;
     $scope.tools = [
         constant.DRAWTOOLS.FREEHAND,
@@ -16,7 +16,7 @@ function($scope, $routeParams, WhiteboardSocketService, constant){
     $scope.downloadLink = '';
 
     $scope.saveCanvas = function(){
-        $scope.downloadLink = document.getElementById('canvas').toDataURL("image/png");
+        $scope.downloadLink = DrawService.prepareSaveCanvas();
     };
 
     $scope.selectTool = function(tool){

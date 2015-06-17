@@ -52,14 +52,22 @@ app.directive('drawing',[ 'DrawService',
 
             };
 
-            var clear = function(){
+            var clear = function(background){
                 ctx.clearRect(0, 0, w, h);
-                paintBackgroundWhite();
+                if (typeof background!== 'undefined') {
+                    paintBackgroundWhite();
+                }
             };
             var mesureSize = function(text){
                   return ctx.measureText(text);
             };
 
+            var getSaveUrl = function(){
+                return element[0].toDataURL("image/png");
+            };
+
+
+            DrawService.setGetSaveUrl(getSaveUrl);
             DrawService.setDrawLine(drawLine);
             DrawService.setDrawText(drawText);
             DrawService.setMesureText(mesureSize);

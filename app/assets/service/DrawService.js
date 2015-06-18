@@ -21,9 +21,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     // the last coordinates before the current move
     var lastX;
     var lastY;
-    var onMouseUpWrapper;
-    var onMouseDownWrapper;
-    var onMouseMoveWrapper;
+    var selectedTooling = new FreehandTooling();
 
     var drawings = {};
 
@@ -323,17 +321,17 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         event.stopPropagation();
         event.preventDefault();
 
-        return onMouseDownWrapper(event);
+        return selectedTooling.mouseDown(event);
     };
     service.onMouseUp = function(event) {
         event.stopPropagation();
         event.preventDefault();
-        return onMouseUpWrapper(event);
+        return selectedTooling.mouseUp(event);
     };
     service.onMouseMove = function(event){
         event.stopPropagation();
         event.preventDefault();
-        return onMouseMoveWrapper(event);
+        return selectedTooling.mouseMove(event);
     };
 
     service.freeHandMouseUp = function(event){
@@ -659,6 +657,42 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
 
+
+
+
+    function TextTooling() {
+        this.mouseMove = service.textMouseMove;
+        this.mouseUp = service.textMouseUp;
+        this.mouseDown = service.textMouseDown;
+    };
+    function CircleTooling() {
+        this.mouseMove = service.circleMouseMove;
+        this.mouseUp = service.circleMouseUp;
+        this.mouseDown = service.circleMouseDown;
+    };
+    function RectangleTooling() {
+        this.mouseMove = service.rectMouseMove;
+        this.mouseUp = service.rectMouseUp;
+        this.mouseDown = service.rectMouseDown;
+    };
+    function LineTooling() {
+        this.mouseMove = service.lineMouseMove;
+        this.mouseUp = service.lineMouseUp;
+        this.mouseDown = service.lineMouseDown;
+    };
+    function FreehandTooling() {
+        this.mouseMove = service.freeHandMouseMove;
+        this.mouseUp = service.freeHandMouseUp;
+        this.mouseDown = service.freeHandMouseDown;
+    };
+    function MovementTooling() {
+        this.mouseMove = service.moveMouseMove;
+        this.mouseUp = service.moveMouseUp;
+        this.mouseDown = service.moveMouseDown;
+    };
+
+
+
     service.setTool = function(value){
         if(tool === constant.DRAWTOOLS.TEXT){
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
@@ -671,39 +705,25 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         tool = value;
         switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
-                onMouseMoveWrapper = this.freeHandMouseMove;
-                onMouseDownWrapper = this.freeHandMouseDown;
-                onMouseUpWrapper = this.freeHandMouseUp;
+                selectedTooling = new FreehandTooling();
                 break;
             case constant.DRAWTOOLS.LINE:
-                onMouseMoveWrapper = this.lineMouseMove;
-                onMouseDownWrapper = this.lineMouseDown;
-                onMouseUpWrapper = this.lineMouseUp;
+                selectedTooling = new LineTooling();
                 break;
             case constant.DRAWTOOLS.RECTANGLE:
-                onMouseMoveWrapper = this.rectMouseMove;
-                onMouseDownWrapper = this.rectMouseDown;
-                onMouseUpWrapper = this.rectMouseUp;
+                selectedTooling = new RectangleTooling();
                 break;
             case constant.DRAWTOOLS.MOVE:
-                onMouseMoveWrapper = this.moveMouseMove;
-                onMouseDownWrapper = this.moveMouseDown;
-                onMouseUpWrapper = this.moveMouseUp;
+                selectedTooling = new MovementTooling();
                 break;
             case constant.DRAWTOOLS.CIRCLE:
-                onMouseMoveWrapper = this.circleMouseMove;
-                onMouseDownWrapper = this.circleMouseDown;
-                onMouseUpWrapper = this.circleMouseUp;
+                selectedTooling = new CircleTooling();
                 break;
             case constant.DRAWTOOLS.TEXT:
-                onMouseMoveWrapper = this.textMouseMove;
-                onMouseDownWrapper = this.textMouseDown;
-                onMouseUpWrapper = this.textMouseUp;
+                selectedTooling = new TextTooling();
                 break;
             default:
-                onMouseMoveWrapper = this.freeHandMouseMove;
-                onMouseDownWrapper = this.freeHandMouseDown;
-                onMouseUpWrapper = this.freeHandMouseUp;
+                selectedTooling = new FreehandTooling();
         }
     };
 

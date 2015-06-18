@@ -623,12 +623,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         };
 
     };
-    service.textMouseMove = function(event){
-        //Do Nothing
-    };
-    service.textMouseUp = function(event){
-        //Do Nothing
-    };
 
     service.setDrawText = function(fkt){
         drawText = fkt;
@@ -658,34 +652,64 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
 
-
+    function AbstractTooling() {
+        this.startX;
+        this.startY;
+        this.currentX;
+        this.currentY;
+        this.getCurrentMouse = function(event) {
+            if(event.offsetX !== undefined){
+                this.currentX = event.offsetX;
+                this.currentY = event.offsetY;
+            } else {
+                this.currentX = event.layerX - event.currentTarget.offsetLeft;
+                this.currentY = event.layerY - event.currentTarget.offsetTop;
+            }
+        }
+        this.getStartMouse = function(event) {
+            if(event.offsetX!==undefined){
+                this.startX = event.offsetX;
+                this.startY = event.offsetY;
+            } else {
+                this.startX = event.layerX - event.currentTarget.offsetLeft;
+                this.startY = event.layerY - event.currentTarget.offsetTop;
+            }
+        };
+    };
+    var abstractTooling = new AbstractTooling();
 
     function TextTooling() {
-        this.mouseMove = service.textMouseMove;
-        this.mouseUp = service.textMouseUp;
+        this.prototype = abstractTooling;
+        this.mouseMove = function(event){/*Do Nothing*/};
+        this.mouseUp = function(event){/*Do Nothing*/};
         this.mouseDown = service.textMouseDown;
     };
     function CircleTooling() {
+        this.prototype = abstractTooling;
         this.mouseMove = service.circleMouseMove;
         this.mouseUp = service.circleMouseUp;
         this.mouseDown = service.circleMouseDown;
     };
     function RectangleTooling() {
+        this.prototype = abstractTooling;
         this.mouseMove = service.rectMouseMove;
         this.mouseUp = service.rectMouseUp;
         this.mouseDown = service.rectMouseDown;
     };
     function LineTooling() {
+        this.prototype = abstractTooling;
         this.mouseMove = service.lineMouseMove;
         this.mouseUp = service.lineMouseUp;
         this.mouseDown = service.lineMouseDown;
     };
     function FreehandTooling() {
+        this.prototype = abstractTooling;
         this.mouseMove = service.freeHandMouseMove;
         this.mouseUp = service.freeHandMouseUp;
         this.mouseDown = service.freeHandMouseDown;
     };
     function MovementTooling() {
+        this.prototype = abstractTooling;
         this.mouseMove = service.moveMouseMove;
         this.mouseUp = service.moveMouseUp;
         this.mouseDown = service.moveMouseDown;

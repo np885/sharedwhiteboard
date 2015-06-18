@@ -562,33 +562,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing = false;
     };
 
-    service.circleMouseDown = function(event){
-        if (!drawing) {
-            getStartMouse(event);
-            drawing = true;
-        }
-    };
-    service.circleMouseMove = function(event){
-        if (drawing) {
-            // get current mouse position
-            getCurrentMouse(event);
-            var dx = currentX - startX;
-            var dy = currentY - startY;
-            var radius = Math.sqrt(dx*dx + dy*dy);
-            var circleEvent = new CircleEvent(DrawIdService.getCurrent(), startX, startY, radius);
-
-            drawCircleEvent(circleEvent);
-            sendMoveEvent(circleEvent);
-        }
-    };
-    service.circleMouseUp = function(event){
-        var drawFinishedEvent  = new DrawFinishedEvent('CircleEvent', DrawIdService.getCurrent());
-        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-
-        // stop drawing
-        DrawIdService.incrementId();
-        drawing = false;
-    };
 
 
     service.textMouseDown = function(event){
@@ -665,7 +638,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 this.currentX = event.layerX - event.currentTarget.offsetLeft;
                 this.currentY = event.layerY - event.currentTarget.offsetTop;
             }
-        }
+        };
         this.getStartMouse = function(event) {
             if(event.offsetX!==undefined){
                 this.startX = event.offsetX;
@@ -679,41 +652,70 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var abstractTooling = new AbstractTooling();
 
     function TextTooling() {
-        this.prototype = abstractTooling;
         this.mouseMove = function(event){/*Do Nothing*/};
         this.mouseUp = function(event){/*Do Nothing*/};
         this.mouseDown = service.textMouseDown;
     };
+    TextTooling.prototype = abstractTooling;
     function CircleTooling() {
-        this.prototype = abstractTooling;
-        this.mouseMove = service.circleMouseMove;
-        this.mouseUp = service.circleMouseUp;
-        this.mouseDown = service.circleMouseDown;
+        this.drawing = false;
+
+        this.mouseDown = function(event){
+            if (!this.drawing) {
+                this.getStartMouse(event);
+                this.drawing = true;
+            }
+        };
+
+        this.mouseMove = function(event){
+            if (this.drawing) {
+                // get current mouse position
+                this.getCurrentMouse(event);
+                var dx = this.currentX - this.startX;
+                var dy = this.currentY - this.startY;
+                var radius = Math.sqrt(dx*dx + dy*dy);
+                var circleEvent = new CircleEvent(DrawIdService.getCurrent(), this.startX, this.startY, radius);
+
+                drawCircleEvent(circleEvent);
+                sendMoveEvent(circleEvent);
+            }
+        };
+
+        this.mouseUp = function(event){
+            var drawFinishedEvent  = new DrawFinishedEvent('CircleEvent', DrawIdService.getCurrent());
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+
+            // stop drawing
+            DrawIdService.incrementId();
+            this.drawing = false;
+        };
     };
+    CircleTooling.prototype = abstractTooling;
+
     function RectangleTooling() {
-        this.prototype = abstractTooling;
         this.mouseMove = service.rectMouseMove;
         this.mouseUp = service.rectMouseUp;
         this.mouseDown = service.rectMouseDown;
     };
+    RectangleTooling.prototype = abstractTooling;
     function LineTooling() {
-        this.prototype = abstractTooling;
         this.mouseMove = service.lineMouseMove;
         this.mouseUp = service.lineMouseUp;
         this.mouseDown = service.lineMouseDown;
     };
+    LineTooling.prototype = abstractTooling;
     function FreehandTooling() {
-        this.prototype = abstractTooling;
         this.mouseMove = service.freeHandMouseMove;
         this.mouseUp = service.freeHandMouseUp;
         this.mouseDown = service.freeHandMouseDown;
     };
+    FreehandTooling.prototype = abstractTooling;
     function MovementTooling() {
-        this.prototype = abstractTooling;
         this.mouseMove = service.moveMouseMove;
         this.mouseUp = service.moveMouseUp;
         this.mouseDown = service.moveMouseDown;
     };
+    MovementTooling.prototype = abstractTooling;
 
 
 

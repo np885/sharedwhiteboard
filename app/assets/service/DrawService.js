@@ -4,6 +4,7 @@ app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constan
 function (WhiteboardSocketService, DrawIdService, constant) {
     var tool;
     var cursorPos;
+    var getSaveUrl;
     var drawLine;
     var drawText;
     var mesureText;
@@ -203,7 +204,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawCircle(drawing.centerX, drawing.centerY, drawing.radius);
         } else if(drawing.type === 'TextDrawing'){
             if(selectedDrawing === drawing){
-                drawText(drawing.x, drawing.y, drawing.text, cursorPos);
+                drawText(drawing.x, drawing.y, drawing.text, cursorPos, '#ff0000');
             } else {
                 drawText(drawing.x, drawing.y, drawing.text);
             }
@@ -237,10 +238,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
 
-    var repaint = function(){
+    var repaint = function(background){
         //var start = new Date().getTime();
 
-        clearCanvas();
+        clearCanvas(background);
         beginPath();
         for(var boardElementId in drawings){
             if(drawings.hasOwnProperty(boardElementId)){
@@ -403,7 +404,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                         var x2 = leDrawing.points[1].x;
                         var y2 = leDrawing.points[1].y;
 
-                        var d = 7; //delta so that you dont have to hit pixel perfect.
+                        var d = (event.isMobile) ? 14 : 7; //delta so that you dont have to hit pixel perfect.
 
                         //in range?
                         var minX, maxX, minY, maxY;
@@ -426,7 +427,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             return;
                         }
                     } else if (leDrawing.type === 'RectangleDrawing') {
-                        var d = 5;//delta so that you dont have to hit exactly to the pixel.
+                        var d = (event.isMobile) ? 10 : 5;//delta so that you dont have to hit exactly to the pixel.
                         if (inRect(currentX, currentY,
                                 leDrawing.x - d, leDrawing.y - d, leDrawing.width + 2*d, leDrawing.height + 2*d)
                             && !inRect(currentX,currentY,
@@ -440,7 +441,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                             return;
                         }
                     } else if (leDrawing.type === 'CircleDrawing') {
-                        var d = 4;//delta so that you dont have to hit exactly to the pixel.
+                        var d = (event.isMobile) ? 8 : 4;//delta so that you dont have to hit exactly to the pixel.
                         if (inCircle(currentX, currentY,
                                 leDrawing.centerX, leDrawing.centerY, leDrawing.radius + d)
                             && !inCircle(currentX, currentY,
@@ -596,16 +597,24 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         if(drawing) {
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            drawing = false;
         }
 
+        getCurrentMouse(event);
 
 
         var id = DrawIdService.getCurrent();
         DrawIdService.incrementId();
         var input = document.getElementById('drawText');
+        //move input to click position to prevent "jumping" to hidden element on type:
+        input.style['margin-left'] = currentX + 'px';
+        input.style['margin-top'] = currentY-24 + 'px';
+        //set focus without "jumping" to hidden element on click:
+        var x = window.scrollX, y = window.scrollY;
         input.focus();
+        window.scrollTo(x, y);
+
         input.value = '';
-        getCurrentMouse(event);
         var textEvent = new TextEvent(id, currentX, currentY, input.value);
         drawTextEvent(textEvent, input.selectionStart);
         input.onkeyup = function (event) {
@@ -697,5 +706,26 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 onMouseUpWrapper = this.freeHandMouseUp;
         }
     };
+
+    service.setGetSaveUrl = function(fkt){
+        getSaveUrl = fkt;
+    };
+
+    service.prepareSaveCanvas = function(){
+        selectedDrawing = null;
+        repaint(true);
+        return getSaveUrl();
+    };
+
+
+    //some UX for the Text-Tooling:
+    document.getElementById('drawText').addEventListener("blur", function( event ) {
+        selectedDrawing = null;
+        repaint();
+    }, true);
+
+
+
+
     return service;
 }]);

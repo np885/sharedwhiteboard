@@ -470,39 +470,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
 
-    service.textMouseDown = function(event){
-        if(drawing) {
-            var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-            drawing = false;
-        }
-
-        getCurrentMouse(event);
-
-
-        var id = DrawIdService.getCurrent();
-        DrawIdService.incrementId();
-        var input = document.getElementById('drawText');
-        //move input to click position to prevent "jumping" to hidden element on type:
-        input.style['margin-left'] = currentX + 'px';
-        input.style['margin-top'] = currentY-24 + 'px';
-        //set focus without "jumping" to hidden element on click:
-        var x = window.scrollX, y = window.scrollY;
-        input.focus();
-        window.scrollTo(x, y);
-
-        input.value = '';
-        var textEvent = new TextEvent(id, currentX, currentY, input.value);
-        drawTextEvent(textEvent, input.selectionStart);
-        input.onkeyup = function (event) {
-            drawing = true;
-            var textEvent = new TextEvent(id, currentX, currentY, input.value);
-            drawTextEvent(textEvent, input.selectionStart);
-            WhiteboardSocketService.send(JSON.stringify(textEvent));
-        };
-
-    };
-
     service.setDrawText = function(fkt){
         drawText = fkt;
     };
@@ -561,9 +528,44 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     function TextTooling() {
         this.mouseMove = function(event){/*Do Nothing*/};
         this.mouseUp = function(event){/*Do Nothing*/};
-        this.mouseDown = service.textMouseDown;
+        this.mouseDown =  function(event){
+            if(this.drawing) {
+                //drawing is true if at least one letter was written.
+                var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
+                WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+                this.drawing = false; //mouseDown = new id = new textelement = no letter written yet = drawing is false.
+            }
+
+            this.getCurrentMouse(event);
+
+
+            var id = DrawIdService.getCurrent();
+            DrawIdService.incrementId();
+            var input = document.getElementById('drawText');
+            //move input to click position to prevent "jumping" to hidden element on type:
+            input.style['margin-left'] = this.currentX + 'px';
+            input.style['margin-top'] = this.currentY-24 + 'px';
+            //set focus without "jumping" to hidden element on click:
+            var x = window.scrollX, y = window.scrollY;
+            input.focus();
+            window.scrollTo(x, y);
+
+            input.value = '';
+            var textEvent = new TextEvent(id, this.currentX, this.currentY, input.value);
+            drawTextEvent(textEvent, input.selectionStart);
+            var dirtyHelper = this;
+            input.onkeyup = function (event) {
+                dirtyHelper.drawing = true;
+                var textEvent = new TextEvent(id, dirtyHelper.currentX, dirtyHelper.currentY, input.value);
+                drawTextEvent(textEvent, input.selectionStart);
+                WhiteboardSocketService.send(JSON.stringify(textEvent));
+            };
+
+        };
     };
     TextTooling.prototype = abstractTooling;
+
+
     function CircleTooling() {
         this.mouseDown = function(event){
             if (!this.drawing) {
@@ -725,14 +727,13 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
     service.setTool = function(value){
-        if(tool === constant.DRAWTOOLS.TEXT){
+        if(tool === constant.DRAWTOOLS.TEXT && selectedTooling.drawing){
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
             cursorPos = undefined;
         }
         selectedDrawing = null;
         repaint();
-        drawing = false;
         tool = value;
         switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
@@ -756,6 +757,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             default:
                 selectedTooling = new FreehandTooling();
         }
+
+        selectedTooling.drawing = false;
     };
 
     service.setGetSaveUrl = function(fkt){

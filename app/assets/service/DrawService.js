@@ -270,26 +270,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
     };
 
-    service.freeHandMouseMove = function(event){
-
-        if(drawing){
-            // get current mouse position
-            getCurrentMouse(event);
-            var lastPoint = {};
-            lastPoint.x = currentX;
-            lastPoint.y = currentY;
-
-            var freeHandEvent = new FreeHandEvent(DrawIdService.getCurrent(), lastX, lastY, currentX, currentY);
-
-            drawFreeHandEvent(freeHandEvent);
-            sendMoveEvent(freeHandEvent);
-
-            // set current coordinates to last one
-            lastX = currentX;
-            lastY = currentY;
-        }
-
-    };
 
     var iter = 0;
 
@@ -303,19 +283,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         }
     };
 
-
-    service.freeHandMouseDown = function(event){
-        if(event.offsetX!==undefined){
-            lastX = event.offsetX;
-            lastY = event.offsetY;
-        } else {
-            lastX = event.layerX - event.currentTarget.offsetLeft;
-            lastY = event.layerY - event.currentTarget.offsetTop;
-        }
-        // begins new line
-
-        drawing = true;
-    };
 
     service.onMouseDown = function(event) {
         event.stopPropagation();
@@ -334,14 +301,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         return selectedTooling.mouseMove(event);
     };
 
-    service.freeHandMouseUp = function(event){
-        //Finished painting object
-        var drawFinishedEvent  = new DrawFinishedEvent('FreeHandEvent', DrawIdService.getCurrent());
-        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-        // stop drawing
-        DrawIdService.incrementId();
-        drawing = false;
-    };
 
      //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
     function inRect(cx,cy,x,y,w,h) {
@@ -715,11 +674,47 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
     function FreehandTooling() {
-        this.mouseMove = service.freeHandMouseMove;
-        this.mouseUp = service.freeHandMouseUp;
-        this.mouseDown = service.freeHandMouseDown;
+        this.mouseMove = function(event){
+
+            if(this.drawing){
+                // get current mouse position
+                this.getCurrentMouse(event);
+
+                var freeHandEvent = new FreeHandEvent(
+                    DrawIdService.getCurrent(),
+                    this.startX,
+                    this.startY,
+                    this.currentX,
+                    this.currentY);
+
+                drawFreeHandEvent(freeHandEvent);
+                sendMoveEvent(freeHandEvent);
+
+                // set current coordinates to last one
+                this.startX = this.currentX;
+                this.startY = this.currentY;
+            }
+        };
+
+        this.mouseUp =  function(event){
+            //Finished painting object
+            var drawFinishedEvent  = new DrawFinishedEvent('FreeHandEvent', DrawIdService.getCurrent());
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            // stop drawing
+            DrawIdService.incrementId();
+            this.drawing = false;
+        };
+
+        this.mouseDown = function(event){
+            // begins new line
+            this.getStartMouse(event);
+            this.drawing = true;
+        };
     };
     FreehandTooling.prototype = abstractTooling;
+
+
+
     function MovementTooling() {
         this.mouseMove = service.moveMouseMove;
         this.mouseUp = service.moveMouseUp;

@@ -9,7 +9,7 @@
     <div class="col-md-2"><button type="button" class="btn btn-primary" ng-click="addWhiteboard()"><span class="glyphicon glyphicon-plus-sign"></span> Whiteboard erstellen</button></div>
 </div>
 
-<div class="list-group whiteboardlist">
+<div class="list-group">
     <div ng-repeat="whiteboard in whiteboards | filter:search" >
         <a ng-href="#/whiteboard/{{whiteboard.id}}" ng-class="{'my-own-board' : whiteboard.owner === currentUser}" ng-click="prepareOpening(whiteboard)" class="list-group-item" ng-hide="myown && currentUser !== whiteboard.owner">
             <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>

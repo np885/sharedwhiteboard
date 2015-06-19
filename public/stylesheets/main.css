@@ -32,10 +32,6 @@ body {
     border: 1px solid #333333;
     cursor: crosshair;
 }
-.whiteboardlist{
-    max-height: 600px;
-    overflow-y: scroll;
-}
 .whiteboardsidebar{
     margin-top: 56px;
 }

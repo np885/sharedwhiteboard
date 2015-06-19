@@ -535,32 +535,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         moving = false;
     };
 
-    service.rectMouseDown = function(event){
-        if (!drawing) {
-            getStartMouse(event);
-            drawing = true;
-        }
-    };
-    service.rectMouseMove = function(event){
-        if (drawing) {
-            // get current mouse position
-            getCurrentMouse(event);
-            var rectWidth = currentX - startX;
-            var rectHeight = currentY - startY;
-            var rectangleEvent = new RectangleEvent(DrawIdService.getCurrent(), startX, startY, rectWidth, rectHeight);
-
-            drawRectangleEvent(rectangleEvent);
-            sendMoveEvent(rectangleEvent);
-        }
-    };
-    service.rectMouseUp = function(event){
-        var drawFinishedEvent  = new DrawFinishedEvent('RectangleEvent', DrawIdService.getCurrent());
-        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-
-        // stop drawing
-        DrawIdService.incrementId();
-        drawing = false;
-    };
 
 
 
@@ -626,6 +600,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
     function AbstractTooling() {
+        this.drawing = false;
         this.startX;
         this.startY;
         this.currentX;
@@ -658,8 +633,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     TextTooling.prototype = abstractTooling;
     function CircleTooling() {
-        this.drawing = false;
-
         this.mouseDown = function(event){
             if (!this.drawing) {
                 this.getStartMouse(event);
@@ -693,9 +666,40 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     CircleTooling.prototype = abstractTooling;
 
     function RectangleTooling() {
-        this.mouseMove = service.rectMouseMove;
-        this.mouseUp = service.rectMouseUp;
-        this.mouseDown = service.rectMouseDown;
+        this.mouseMove = function(event){
+            if (this.drawing) {
+                // get current mouse position
+                this.getCurrentMouse(event);
+                var rectWidth = this.currentX - this.startX;
+                var rectHeight = this.currentY - this.startY;
+                var rectangleEvent = new RectangleEvent(
+                    DrawIdService.getCurrent(),
+                    this.startX,
+                    this.startY,
+                    rectWidth,
+                    rectHeight
+                );
+
+                drawRectangleEvent(rectangleEvent);
+                sendMoveEvent(rectangleEvent);
+            }
+        };
+
+        this.mouseUp = function(event){
+            var drawFinishedEvent  = new DrawFinishedEvent('RectangleEvent', DrawIdService.getCurrent());
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+
+            // stop drawing
+            DrawIdService.incrementId();
+            this.drawing = false;
+        };
+
+        this.mouseDown = function(event){
+            if (!this.drawing) {
+                this.getStartMouse(event);
+                this.drawing = true;
+            }
+        };
     };
     RectangleTooling.prototype = abstractTooling;
     function LineTooling() {

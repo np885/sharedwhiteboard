@@ -343,34 +343,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         drawing = false;
     };
 
-    service.lineMouseUp = function(event){
-        var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', DrawIdService.getCurrent());
-        WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-        // stop drawing
-        DrawIdService.incrementId();
-        drawing = false;
-    };
-    service.lineMouseDown = function(event){
-        if (!drawing) {
-            getStartMouse(event);
-            // begins new line
-            drawing = true;
-        }
-    };
-    service.lineMouseMove = function(event){
-        if(drawing){
-            // get current mouse position
-            getCurrentMouse(event);
-            var lineEvent = new LineEvent(DrawIdService.getCurrent(), startX, startY, currentX, currentY);
-
-            drawLineEvent(lineEvent);
-            sendMoveEvent(lineEvent);
-
-        }
-    };
-
-
-    //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
+     //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
     function inRect(cx,cy,x,y,w,h) {
         //check in rect:
         return cx >= x && cx <= (x+w)   //proper horizontal area
@@ -702,12 +675,45 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         };
     };
     RectangleTooling.prototype = abstractTooling;
+
+
+
     function LineTooling() {
-        this.mouseMove = service.lineMouseMove;
-        this.mouseUp = service.lineMouseUp;
-        this.mouseDown = service.lineMouseDown;
+        this.mouseMove = function(event){
+            if(this.drawing){
+                // get current mouse position
+                this.getCurrentMouse(event);
+                var lineEvent = new LineEvent(
+                    DrawIdService.getCurrent(),
+                    this.startX,
+                    this.startY,
+                    this.currentX,
+                    this.currentY);
+
+                drawLineEvent(lineEvent);
+                sendMoveEvent(lineEvent);
+            }
+        };
+
+        this.mouseUp = function(event){
+            var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', DrawIdService.getCurrent());
+            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            // stop drawing
+            DrawIdService.incrementId();
+            this.drawing = false;
+        };
+
+        this.mouseDown = function(event){
+            if (! this.drawing) {
+                this.getStartMouse(event);
+                // begins new line
+                this.drawing = true;
+            }
+        };
     };
     LineTooling.prototype = abstractTooling;
+
+
     function FreehandTooling() {
         this.mouseMove = service.freeHandMouseMove;
         this.mouseUp = service.freeHandMouseUp;

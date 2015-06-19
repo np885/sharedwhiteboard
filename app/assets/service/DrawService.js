@@ -315,157 +315,8 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         return Math.sqrt(dx*dx + dy*dy) <= r;
     }
 
-    var moving = false;
     var selectedDrawing = null;
-    service.moveMouseDown= function(event){
-        if (!moving) {
-            // get current mouse position
-            getCurrentMouse(event);
 
-            //select element:
-            for(var boardElementId in drawings){
-                if(drawings.hasOwnProperty(boardElementId)){
-
-                    var leDrawing = drawings[boardElementId];
-                    if (leDrawing.type === 'LineDrawing') {
-                        //linear form: ((y2-y1)/(x2-x1))*( _x_ - x1)+y1 = _y_
-                        var x1 = leDrawing.points[0].x;
-                        var y1 = leDrawing.points[0].y;
-                        var x2 = leDrawing.points[1].x;
-                        var y2 = leDrawing.points[1].y;
-
-                        var d = (event.isMobile) ? 14 : 7; //delta so that you dont have to hit pixel perfect.
-
-                        //in range?
-                        var minX, maxX, minY, maxY;
-                        if (x1 >= x2) { minX = x2; maxX = x1; } else {minX = x1; maxX = x2}
-                        if (y1 >= y2) { minY = y2; maxY = y1; } else {minY = y1; maxY = y2}
-                        if (!inRect(currentX, currentY, minX-d, minY-d, maxX-minX + 2*d, maxY-minY + 2*d)) {
-                            continue; //not in range, go to next element.
-                        }
-
-                        //on line? distance between point and line:
-                        // see http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
-                        var dist = Math.abs((y2-y1)*currentX - (x2-x1)*currentY + x2*y1-y2*x1)
-                            / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
-                        if (dist <= d) {
-                            selectedDrawing = leDrawing;
-                            moving = true;
-                            startX = currentX;
-                            startY = currentY;
-                            repaint();
-                            return;
-                        }
-                    } else if (leDrawing.type === 'RectangleDrawing') {
-                        var d = (event.isMobile) ? 10 : 5;//delta so that you dont have to hit exactly to the pixel.
-                        if (inRect(currentX, currentY,
-                                leDrawing.x - d, leDrawing.y - d, leDrawing.width + 2*d, leDrawing.height + 2*d)
-                            && !inRect(currentX,currentY,
-                                leDrawing.x + d,leDrawing.y + d, leDrawing.width - 2*d, leDrawing.height - 2*d)
-                        ) {
-                            selectedDrawing = leDrawing;
-                            moving = true;
-                            startX = currentX;
-                            startY = currentY;
-                            repaint();
-                            return;
-                        }
-                    } else if (leDrawing.type === 'CircleDrawing') {
-                        var d = (event.isMobile) ? 8 : 4;//delta so that you dont have to hit exactly to the pixel.
-                        if (inCircle(currentX, currentY,
-                                leDrawing.centerX, leDrawing.centerY, leDrawing.radius + d)
-                            && !inCircle(currentX, currentY,
-                                leDrawing.centerX, leDrawing.centerY, leDrawing.radius - d)
-                        ) {
-                            selectedDrawing = leDrawing;
-                            moving = true;
-                            startX = currentX;
-                            startY = currentY;
-                            repaint();
-                            return;
-                        }
-                    } else if (leDrawing.type === 'TextDrawing') {
-                        var h = 30;
-                        if (inRect(currentX, currentY,
-                            leDrawing.x, leDrawing.y-h, mesureText(leDrawing.text).width, h)) {
-
-                            selectedDrawing = leDrawing;
-                            moving = true;
-                            startX = currentX;
-                            startY = currentY;
-                            repaint();
-                            return;
-                        }
-                    }
-                }
-            }
-            //didnt found anything:
-            selectedDrawing = null;
-            repaint();
-        }
-    };
-
-
-    service.moveMouseMove= function(event){
-        if (moving) {
-            // get current mouse position
-            getCurrentMouse(event);
-
-            var deltaX =  currentX - startX;
-            var deltaY =  currentY - startY;
-
-            var socketEvent;
-            if (selectedDrawing.type === 'LineDrawing') {
-                socketEvent = new LineEvent(
-                    selectedDrawing.boardElementId,
-                    selectedDrawing.points[0].x + deltaX,
-                    selectedDrawing.points[0].y + deltaY,
-                    selectedDrawing.points[1].x + deltaX,
-                    selectedDrawing.points[1].y + deltaY
-                );
-                drawLineEvent(socketEvent);
-            } else if (selectedDrawing.type === 'RectangleDrawing') {
-                socketEvent = new RectangleEvent(
-                    selectedDrawing.boardElementId,
-                    selectedDrawing.x + deltaX,
-                    selectedDrawing.y + deltaY,
-                    selectedDrawing.width,
-                    selectedDrawing.height
-                );
-                drawRectangleEvent(socketEvent);
-            } else if (selectedDrawing.type === 'CircleDrawing') {
-                socketEvent = new CircleEvent(
-                    selectedDrawing.boardElementId,
-                    selectedDrawing.centerX + deltaX,
-                    selectedDrawing.centerY + deltaY,
-                    selectedDrawing.radius
-                );
-                drawCircleEvent(socketEvent);
-            } else if (selectedDrawing.type === 'TextDrawing') {
-                socketEvent = new TextEvent(
-                    selectedDrawing.boardElementId,
-                    selectedDrawing.x + deltaX,
-                    selectedDrawing.y + deltaY,
-                    selectedDrawing.text
-                );
-                drawTextEvent(socketEvent);
-            }
-
-            startX = currentX;
-            startY = currentY;
-
-            if (socketEvent != null) {
-                sendMoveEvent(socketEvent);
-            }
-        }
-    };
-    service.moveMouseUp = function(event){
-        if (selectedDrawing !== null) {
-            var drawFinishedEvent  = new DrawFinishedEvent('MoveEvent', selectedDrawing.boardElementId);
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-        }
-        moving = false;
-    };
 
 
 
@@ -715,12 +566,169 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     FreehandTooling.prototype = abstractTooling;
 
-
+    service.forAllDrawings = function(callback) {
+        for(var boardElementId in drawings) {
+            if (drawings.hasOwnProperty(boardElementId)) {
+                var leDrawing = drawings[boardElementId];
+                if (callback(leDrawing)) {
+                    return; //callback returns true = found element, no need to iterate further.
+                }
+            }
+        }
+    };
 
     function MovementTooling() {
-        this.mouseMove = service.moveMouseMove;
-        this.mouseUp = service.moveMouseUp;
-        this.mouseDown = service.moveMouseDown;
+        this.moving = false;
+
+        this.mouseMove = function(event){
+            if (this.moving) {
+                // get current mouse position
+                this.getCurrentMouse(event);
+
+                var deltaX =  this.currentX - this.startX;
+                var deltaY =  this.currentY - this.startY;
+
+                var socketEvent;
+                if (selectedDrawing.type === 'LineDrawing') {
+                    socketEvent = new LineEvent(
+                        selectedDrawing.boardElementId,
+                        selectedDrawing.points[0].x + deltaX,
+                        selectedDrawing.points[0].y + deltaY,
+                        selectedDrawing.points[1].x + deltaX,
+                        selectedDrawing.points[1].y + deltaY
+                    );
+                    drawLineEvent(socketEvent);
+                } else if (selectedDrawing.type === 'RectangleDrawing') {
+                    socketEvent = new RectangleEvent(
+                        selectedDrawing.boardElementId,
+                        selectedDrawing.x + deltaX,
+                        selectedDrawing.y + deltaY,
+                        selectedDrawing.width,
+                        selectedDrawing.height
+                    );
+                    drawRectangleEvent(socketEvent);
+                } else if (selectedDrawing.type === 'CircleDrawing') {
+                    socketEvent = new CircleEvent(
+                        selectedDrawing.boardElementId,
+                        selectedDrawing.centerX + deltaX,
+                        selectedDrawing.centerY + deltaY,
+                        selectedDrawing.radius
+                    );
+                    drawCircleEvent(socketEvent);
+                } else if (selectedDrawing.type === 'TextDrawing') {
+                    socketEvent = new TextEvent(
+                        selectedDrawing.boardElementId,
+                        selectedDrawing.x + deltaX,
+                        selectedDrawing.y + deltaY,
+                        selectedDrawing.text
+                    );
+                    drawTextEvent(socketEvent);
+                }
+
+                this.startX = this.currentX;
+                this.startY = this.currentY;
+
+                if (socketEvent != null) {
+                    sendMoveEvent(socketEvent);
+                }
+            }
+        };
+
+        this.mouseUp = function(event){
+            if (selectedDrawing !== null) {
+                var drawFinishedEvent  = new DrawFinishedEvent('MoveEvent', selectedDrawing.boardElementId);
+                WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
+            }
+            this.moving = false;
+        };
+
+        this.mouseDown = function(event){
+            if (! this.moving) {
+                // get current mouse position
+                this.getCurrentMouse(event);
+
+                //select element:
+                selectedDrawing = null;
+                var dirtyHelper = this;
+                service.forAllDrawings(function(leDrawing) {
+                    return dirtyHelper.isSelected(leDrawing, event);
+                }); //end for All Drawings.
+                //at this point, if drawing was found, selectedDrawing will be set. otherwise it will be null.
+                repaint();
+            }
+        };
+
+        this.isSelected = function(leDrawing, event) {
+            if (leDrawing.type === 'LineDrawing') {
+                //linear form: ((y2-y1)/(x2-x1))*( _x_ - x1)+y1 = _y_
+                var x1 = leDrawing.points[0].x;
+                var y1 = leDrawing.points[0].y;
+                var x2 = leDrawing.points[1].x;
+                var y2 = leDrawing.points[1].y;
+
+                var d = (event.isMobile) ? 14 : 7; //delta so that you dont have to hit pixel perfect.
+
+                //in range?
+                var minX, maxX, minY, maxY;
+                if (x1 >= x2) { minX = x2; maxX = x1; } else {minX = x1; maxX = x2}
+                if (y1 >= y2) { minY = y2; maxY = y1; } else {minY = y1; maxY = y2}
+                if (!inRect(this.currentX, this.currentY, minX-d, minY-d, maxX-minX + 2*d, maxY-minY + 2*d)) {
+                    return false; //not in range, go to next element.
+                }
+
+                //on line? distance between point and line:
+                // see http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line#Line_defined_by_two_points
+                var dist = Math.abs((y2-y1)*this.currentX - (x2-x1)*this.currentY + x2*y1-y2*x1)
+                    / Math.sqrt((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1));
+                if (dist <= d) {
+                    selectedDrawing = leDrawing;
+                    this.moving = true;
+                    this.getStartMouse(event);
+                    repaint();
+                    return true;
+                }
+            } else if (leDrawing.type === 'RectangleDrawing') {
+                var d = (event.isMobile) ? 10 : 5;//delta so that you dont have to hit exactly to the pixel.
+                if (inRect(this.currentX, this.currentY,
+                        leDrawing.x - d, leDrawing.y - d, leDrawing.width + 2*d, leDrawing.height + 2*d)
+                    && !inRect(this.currentX,this.currentY,
+                        leDrawing.x + d,leDrawing.y + d, leDrawing.width - 2*d, leDrawing.height - 2*d)
+                ) {
+                    selectedDrawing = leDrawing;
+                    this.moving = true;
+                    this.getStartMouse(event);
+                    repaint();
+                    return true;
+                }
+            } else if (leDrawing.type === 'CircleDrawing') {
+                var d = (event.isMobile) ? 8 : 4;//delta so that you dont have to hit exactly to the pixel.
+                if (inCircle(this.currentX, this.currentY,
+                        leDrawing.centerX, leDrawing.centerY, leDrawing.radius + d)
+                    && !inCircle(this.currentX, this.currentY,
+                        leDrawing.centerX, leDrawing.centerY, leDrawing.radius - d)
+                ) {
+                    selectedDrawing = leDrawing;
+                    this.moving = true;
+                    this.getStartMouse(event);
+                    repaint();
+                    return true;
+                }
+            } else if (leDrawing.type === 'TextDrawing') {
+                var h = 30;
+                if (inRect(this.currentX, this.currentY,
+                        leDrawing.x, leDrawing.y-h, mesureText(leDrawing.text).width, h)) {
+
+                    selectedDrawing = leDrawing;
+                    this.moving = true;
+                    this.getStartMouse(event);
+                    repaint();
+                    return true;
+                }
+            }
+
+            return false; //this drawing was not selected.
+        };
+
     };
     MovementTooling.prototype = abstractTooling;
 

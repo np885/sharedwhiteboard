@@ -2,8 +2,13 @@
 
 app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant',
 function (WhiteboardSocketService, DrawIdService, constant) {
+    var service = {};
+
+    //tool management:
     var tool;
-    var cursorPos;
+    var selectedTooling = new FreehandTooling();
+
+    //external methods (probably set by DrawDirective):
     var getSaveUrl;
     var drawLine;
     var drawText;
@@ -13,21 +18,10 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     var clearCanvas;
     var beginPath;
     var closePath;
-    var service = {};
-    var currentX;
-    var currentY;
-    // variable that decides if something should be drawn on mousemove
-    var drawing = false;
-    // the last coordinates before the current move
-    var lastX;
-    var lastY;
-    var selectedTooling = new FreehandTooling();
 
+    //draw elements state management:
     var drawings = {};
-
-
-    var startX;
-    var startY;
+    var selectedDrawing = null;
 
     //Draw Events:
     function LineEvent(boardElementId, xStart, yStart, xEnd, yEnd){
@@ -166,8 +160,11 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawings[drawing.boardElementId] = drawing;
         }
         if(typeof cursorPosition !== 'undefined') {
+            if (selectedDrawing != null) {
+                selectedDrawing.cursorPos = undefined;
+            }
+            drawing.cursorPos = cursorPosition;
             selectedDrawing = drawing;
-            cursorPos = cursorPosition;
         }
         drawing.x = textevent.x;
         drawing.y = textevent.y;
@@ -202,7 +199,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             drawCircle(drawing.centerX, drawing.centerY, drawing.radius);
         } else if(drawing.type === 'TextDrawing'){
             if(selectedDrawing === drawing){
-                drawText(drawing.x, drawing.y, drawing.text, cursorPos, '#ff0000');
+                drawText(drawing.x, drawing.y, drawing.text, drawing.cursorPos, '#ff0000');
             } else {
                 drawText(drawing.x, drawing.y, drawing.text);
             }
@@ -251,39 +248,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         //console.log( new Date().getTime() - start);
     };
 
-    var getCurrentMouse = function(event) {
-        if(event.offsetX !== undefined){
-            currentX = event.offsetX;
-            currentY = event.offsetY;
-        } else {
-            currentX = event.layerX - event.currentTarget.offsetLeft;
-            currentY = event.layerY - event.currentTarget.offsetTop;
-        }
-    };
-    var getStartMouse = function(event) {
-        if(event.offsetX!==undefined){
-            startX = event.offsetX;
-            startY = event.offsetY;
-        } else {
-            startX = event.layerX - event.currentTarget.offsetLeft;
-            startY = event.layerY - event.currentTarget.offsetTop;
-        }
-    };
-
-
-    var iter = 0;
-
-    var sendMoveEvent = function(e) {
-        //ignore 2 of 3 events as Performance-Hack (will do for the demo)
-        if (iter >= 2) {
-            iter = 0;
-            WhiteboardSocketService.send(JSON.stringify(e));
-        } else {
-            iter++;
-        }
-    };
-
-
     service.onMouseDown = function(event) {
         event.stopPropagation();
         event.preventDefault();
@@ -302,20 +266,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
 
-     //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
-    function inRect(cx,cy,x,y,w,h) {
-        //check in rect:
-        return cx >= x && cx <= (x+w)   //proper horizontal area
-            && cy >= y && cy <= y+h;     //proper vertical area
-    }
-
-    function inCircle(cx,cy, centerX, centerY, r) {
-        var dx = centerX - cx;
-        var dy = centerY - cy;
-        return Math.sqrt(dx*dx + dy*dy) <= r;
-    }
-
-    var selectedDrawing = null;
 
 
 
@@ -349,6 +299,18 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
 
 
+    service.forAllDrawings = function(callback) {
+        for(var boardElementId in drawings) {
+            if (drawings.hasOwnProperty(boardElementId)) {
+                var leDrawing = drawings[boardElementId];
+                if (callback(leDrawing)) {
+                    return; //callback returns true = found element, no need to iterate further.
+                }
+            }
+        }
+    };
+
+
     function AbstractTooling() {
         this.drawing = false;
         this.startX;
@@ -373,12 +335,24 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 this.startY = event.layerY - event.currentTarget.offsetTop;
             }
         };
+
+        var iter = 0
+        this.sendMoveEvent = function(e) {
+            //ignore 2 of 3 events as Performance-Hack (will do for the demo)
+            if (iter >= 2) {
+                iter = 0;
+                WhiteboardSocketService.send(JSON.stringify(e));
+            } else {
+                iter++;
+            }
+        };
     };
     var abstractTooling = new AbstractTooling();
 
     function TextTooling() {
         this.mouseMove = function(event){/*Do Nothing*/};
         this.mouseUp = function(event){/*Do Nothing*/};
+
         this.mouseDown =  function(event){
             if(this.drawing) {
                 //drawing is true if at least one letter was written.
@@ -388,7 +362,6 @@ function (WhiteboardSocketService, DrawIdService, constant) {
             }
 
             this.getCurrentMouse(event);
-
 
             var id = DrawIdService.getCurrent();
             DrawIdService.incrementId();
@@ -435,7 +408,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 var circleEvent = new CircleEvent(DrawIdService.getCurrent(), this.startX, this.startY, radius);
 
                 drawCircleEvent(circleEvent);
-                sendMoveEvent(circleEvent);
+                this.sendMoveEvent(circleEvent);
             }
         };
 
@@ -466,7 +439,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 );
 
                 drawRectangleEvent(rectangleEvent);
-                sendMoveEvent(rectangleEvent);
+                this.sendMoveEvent(rectangleEvent);
             }
         };
 
@@ -503,7 +476,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     this.currentY);
 
                 drawLineEvent(lineEvent);
-                sendMoveEvent(lineEvent);
+                this.sendMoveEvent(lineEvent);
             }
         };
 
@@ -541,7 +514,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                     this.currentY);
 
                 drawFreeHandEvent(freeHandEvent);
-                sendMoveEvent(freeHandEvent);
+                this.sendMoveEvent(freeHandEvent);
 
                 // set current coordinates to last one
                 this.startX = this.currentX;
@@ -566,18 +539,20 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
     FreehandTooling.prototype = abstractTooling;
 
-    service.forAllDrawings = function(callback) {
-        for(var boardElementId in drawings) {
-            if (drawings.hasOwnProperty(boardElementId)) {
-                var leDrawing = drawings[boardElementId];
-                if (callback(leDrawing)) {
-                    return; //callback returns true = found element, no need to iterate further.
-                }
-            }
-        }
-    };
-
     function MovementTooling() {
+        //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
+        var inRect = function(cx,cy,x,y,w,h) {
+            //check in rect:
+            return cx >= x && cx <= (x+w)   //proper horizontal area
+                && cy >= y && cy <= y+h;     //proper vertical area
+        };
+
+        var inCircle = function(cx,cy, centerX, centerY, r) {
+            var dx = centerX - cx;
+            var dy = centerY - cy;
+            return Math.sqrt(dx*dx + dy*dy) <= r;
+        };
+
         this.moving = false;
 
         this.mouseMove = function(event){
@@ -629,7 +604,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
                 this.startY = this.currentY;
 
                 if (socketEvent != null) {
-                    sendMoveEvent(socketEvent);
+                    this.sendMoveEvent(socketEvent);
                 }
             }
         };
@@ -738,7 +713,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
         if(tool === constant.DRAWTOOLS.TEXT && selectedTooling.drawing){
             var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-            cursorPos = undefined;
+            if (selectedDrawing != null) {
+                selectedDrawing.cursorPos = undefined;
+            }
         }
         selectedDrawing = null;
         repaint();
@@ -774,6 +751,7 @@ function (WhiteboardSocketService, DrawIdService, constant) {
     };
 
     service.prepareSaveCanvas = function(){
+        selectedDrawing.cursorPos = undefined;
         selectedDrawing = null;
         repaint(true);
         return getSaveUrl();
@@ -782,6 +760,9 @@ function (WhiteboardSocketService, DrawIdService, constant) {
 
     //some UX for the Text-Tooling:
     document.getElementById('drawText').addEventListener("blur", function( event ) {
+        if (selectedDrawing != null) {
+            selectedDrawing.cursorPos = null;
+        }
         selectedDrawing = null;
         repaint();
     }, true);

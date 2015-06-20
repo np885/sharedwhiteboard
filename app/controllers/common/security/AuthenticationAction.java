@@ -53,7 +53,7 @@ public class AuthenticationAction extends Action.Simple {
     }
 
     private void addAuthMethodHeader(Http.Response response) {
-        response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
+        //response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
     }
 
 }

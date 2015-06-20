@@ -49,5 +49,9 @@ function () {
         this.boardElementId = boardElementId;
     }
 
+    service.RepaintRequest = function() {
+        this.eventType = 'RequestRepaint';
+    };
+
     return service;
 }]);

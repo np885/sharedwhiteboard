@@ -1,7 +1,7 @@
 'use strict';
 
-app.service('DrawService',[ 'WhiteboardSocketService', 'DrawIdService', 'constant', 'AbstractTooling',
-function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
+app.service('DrawService',[ 'WhiteboardSocketService', 'Events', 'DrawIdService', 'constant', 'AbstractTooling', 'ToolSet',
+function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTooling, toolSet) {
     var service = {};
 
     //tool management:
@@ -23,52 +23,6 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
     var drawings = {};
     var selectedDrawing = null;
 
-    //Draw Events:
-    function LineEvent(boardElementId, xStart, yStart, xEnd, yEnd){
-        this.eventType = 'LineEvent';
-        this.boardElementId = boardElementId;
-        this.xStart = xStart;
-        this.yStart = yStart;
-        this.xEnd = xEnd;
-        this.yEnd = yEnd;
-    }
-
-    function FreeHandEvent(boardElementId, xStart, yStart, xEnd, yEnd){
-        this.eventType = 'FreeHandEvent';
-        this.boardElementId = boardElementId;
-        this.xStart = xStart;
-        this.yStart = yStart;
-        this.xEnd = xEnd;
-        this.yEnd = yEnd;
-    }
-    function RectangleEvent(boardElementId, x, y, w, h){
-        this.eventType = 'RectangleEvent';
-        this.boardElementId = boardElementId;
-        this.xStart = x;
-        this.yStart = y;
-        this.width = w;
-        this.height = h;
-    }
-    function CircleEvent(boardElementId, centerX, centerY, r){
-        this.eventType = 'CircleEvent';
-        this.boardElementId = boardElementId;
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.radius = r;
-    }
-    function TextEvent(boardElementId, x, y, text){
-        this.eventType = 'TextEvent';
-        this.boardElementId = boardElementId;
-        this.y = y;
-        this.x = x;
-        this.text = text;
-    }
-
-    function DrawFinishedEvent(drawType, boardElementId){
-        this.eventType = 'DrawFinishEvent';
-        this.drawType = drawType;
-        this.boardElementId = boardElementId;
-    }
 
     //Draw Objects:
     function Drawing(type, boardElementId){
@@ -107,7 +61,7 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
         repaint();
     };
 
-    var drawRectangleEvent = function(rectEvent){
+    service.drawRectangleEvent = function(rectEvent){
         var drawing;
         if(drawings.hasOwnProperty(rectEvent.boardElementId)){
             //existingDrawing.
@@ -217,7 +171,7 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
 
     WhiteboardSocketService.registerForSocketEvent('FreeHandEvent', drawFreeHandEvent);
     WhiteboardSocketService.registerForSocketEvent('LineEvent', drawLineEvent);
-    WhiteboardSocketService.registerForSocketEvent('RectangleEvent', drawRectangleEvent);
+    WhiteboardSocketService.registerForSocketEvent('RectangleEvent', service.drawRectangleEvent);
     WhiteboardSocketService.registerForSocketEvent('CircleEvent', drawCircleEvent);
     WhiteboardSocketService.registerForSocketEvent('TextEvent', drawTextEvent);
 
@@ -384,45 +338,6 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
     };
     CircleTooling.prototype = abstractTooling;
 
-    function RectangleTooling() {
-        this.mouseMove = function(event){
-            if (this.drawing) {
-                // get current mouse position
-                this.getCurrentMouse(event);
-                var rectWidth = this.currentX - this.startX;
-                var rectHeight = this.currentY - this.startY;
-                var rectangleEvent = new RectangleEvent(
-                    DrawIdService.getCurrent(),
-                    this.startX,
-                    this.startY,
-                    rectWidth,
-                    rectHeight
-                );
-
-                drawRectangleEvent(rectangleEvent);
-                this.sendMoveEvent(rectangleEvent);
-            }
-        };
-
-        this.mouseUp = function(event){
-            var drawFinishedEvent  = new DrawFinishedEvent('RectangleEvent', DrawIdService.getCurrent());
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-
-            // stop drawing
-            DrawIdService.incrementId();
-            this.drawing = false;
-        };
-
-        this.mouseDown = function(event){
-            if (!this.drawing) {
-                this.getStartMouse(event);
-                this.drawing = true;
-            }
-        };
-    };
-    RectangleTooling.prototype = abstractTooling;
-
-
 
     function LineTooling() {
         this.mouseMove = function(event){
@@ -542,7 +457,7 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
                         selectedDrawing.width,
                         selectedDrawing.height
                     );
-                    drawRectangleEvent(socketEvent);
+                    service.drawRectangleEvent(socketEvent);
                 } else if (selectedDrawing.type === 'CircleDrawing') {
                     socketEvent = new CircleEvent(
                         selectedDrawing.boardElementId,
@@ -689,7 +604,7 @@ function (WhiteboardSocketService, DrawIdService, constant, abstractTooling) {
                 selectedTooling = new LineTooling();
                 break;
             case constant.DRAWTOOLS.RECTANGLE:
-                selectedTooling = new RectangleTooling();
+                selectedTooling = toolSet.rectangleTooling;
                 break;
             case constant.DRAWTOOLS.MOVE:
                 selectedTooling = new MovementTooling();

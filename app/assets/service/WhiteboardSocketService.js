@@ -80,6 +80,10 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
       connection.send(payload);
     };
 
+    service.sendEventPrivate = function(event){
+        service.dispatchServerEvent(event);
+    };
+
     service.setFkt = function(fktCallback){
         drawFunction = fktCallback;
     };

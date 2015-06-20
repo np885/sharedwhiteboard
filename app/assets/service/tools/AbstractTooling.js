@@ -1,6 +1,7 @@
 'use strict';
 
-app.service('AbstractTooling',[function () {
+app.service('AbstractTooling',['WhiteboardSocketService',
+    function (whiteboardSocketService) {
 
         function AbstractTooling() {
             this.drawing = false;
@@ -27,16 +28,17 @@ app.service('AbstractTooling',[function () {
                 }
             };
 
-            var iter = 0
+            var iter = 0;
             this.sendMoveEvent = function(e) {
                 //ignore 2 of 3 events as Performance-Hack (will do for the demo)
                 if (iter >= 2) {
                     iter = 0;
-                    WhiteboardSocketService.send(JSON.stringify(e));
+                    whiteboardSocketService.send(JSON.stringify(e));
                 } else {
                     iter++;
                 }
             };
-        };
+        }
         return new AbstractTooling();
-    }]);
+    }
+]);

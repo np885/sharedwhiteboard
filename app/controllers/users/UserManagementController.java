@@ -24,6 +24,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -66,7 +68,13 @@ public class UserManagementController extends Controller {
         }
 
         //map:
-        User userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
+        User userToSave = null;
+        try {
+            userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+            //Hmm should never happen
+            return badRequest("Something went wrong! Please contact the Admin!");
+        }
 
         try {
             UserRepo.createNewUser(userToSave);

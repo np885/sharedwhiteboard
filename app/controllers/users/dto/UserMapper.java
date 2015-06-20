@@ -1,16 +1,21 @@
 package controllers.users.dto;
 
+import controllers.common.security.HashUtil;
 import model.user.entities.User;
+
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Flo on 30.04.2015.
  */
 public class UserMapper {
 
-    public static User mapFromNewUserDTO(NewUserWriteDTO dto) {
+    public static User mapFromNewUserDTO(NewUserWriteDTO dto) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         User mappedUser = new User();
         mappedUser.setUsername(dto.getUsername().toLowerCase());
-        mappedUser.setPassword(dto.getPassword());
+        mappedUser.setPassword(HashUtil.hashString(dto.getPassword()));
         return mappedUser;
     }
 
@@ -18,5 +23,7 @@ public class UserMapper {
         UserReadDTO dto = new UserReadDTO(user.getId(), user.getUsername());
         return dto;
     }
+
+
 
 }

@@ -1,5 +1,6 @@
 package controllers.common.security;
 
+import controllers.users.dto.UserMapper;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
 import play.libs.F;
@@ -41,7 +42,7 @@ public class AuthenticationAction extends Action.Simple {
 
         User requestingUser = UserRepo.getUserForUsername(username);
 
-        if (requestingUser == null || !requestingUser.getPassword().equals(password)) {
+        if (requestingUser == null || !requestingUser.getPassword().equals(HashUtil.hashString(password))) {
             //username not found or wrong password ^
             addAuthMethodHeader(context.response());
             return unauthorizedResultPromise;

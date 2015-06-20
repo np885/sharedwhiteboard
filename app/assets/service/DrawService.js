@@ -6,7 +6,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
 
     //tool management:
     var tool;
-    var selectedTooling = new FreehandTooling();
+    var selectedTooling = toolSet.freehandTooling;
 
     //external methods (probably set by DrawDirective):
     var getSaveUrl;
@@ -308,45 +308,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
 
 
 
-    function FreehandTooling() {
-        this.mouseMove = function(event){
 
-            if(this.drawing){
-                // get current mouse position
-                this.getCurrentMouse(event);
-
-                var freeHandEvent = new FreeHandEvent(
-                    DrawIdService.getCurrent(),
-                    this.startX,
-                    this.startY,
-                    this.currentX,
-                    this.currentY);
-
-                drawFreeHandEvent(freeHandEvent);
-                this.sendMoveEvent(freeHandEvent);
-
-                // set current coordinates to last one
-                this.startX = this.currentX;
-                this.startY = this.currentY;
-            }
-        };
-
-        this.mouseUp =  function(event){
-            //Finished painting object
-            var drawFinishedEvent  = new DrawFinishedEvent('FreeHandEvent', DrawIdService.getCurrent());
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-            // stop drawing
-            DrawIdService.incrementId();
-            this.drawing = false;
-        };
-
-        this.mouseDown = function(event){
-            // begins new line
-            this.getStartMouse(event);
-            this.drawing = true;
-        };
-    };
-    FreehandTooling.prototype = abstractTooling;
 
     function MovementTooling() {
         //returns whether the point (cx,cy) is inside the rect (x,y,w,h)
@@ -531,7 +493,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
         tool = value;
         switch(tool){
             case constant.DRAWTOOLS.FREEHAND:
-                selectedTooling = new FreehandTooling();
+                selectedTooling = toolSet.freehandTooling;
                 break;
             case constant.DRAWTOOLS.LINE:
                 selectedTooling = toolSet.lineTooling;

@@ -1,7 +1,7 @@
 'use strict';
 
 app.service('RectangleTooling',['AbstractTooling', 'DrawIdService', 'WhiteboardSocketService', 'Events',
-    function (abstractTooling, drawIdService, whiteboardSocketService, events) {
+    function (abstractTooling, drawIdService, whiteboardSocketService, Events) {
         function RectangleTooling() {
             this.mouseMove = function(event){
                 if (this.drawing) {
@@ -9,7 +9,7 @@ app.service('RectangleTooling',['AbstractTooling', 'DrawIdService', 'WhiteboardS
                     this.getCurrentMouse(event);
                     var rectWidth = this.currentX - this.startX;
                     var rectHeight = this.currentY - this.startY;
-                    var rectangleEvent = new events.RectangleEvent(
+                    var rectangleEvent = new Events.RectangleEvent(
                         drawIdService.getCurrent(),
                         this.startX,
                         this.startY,
@@ -23,7 +23,7 @@ app.service('RectangleTooling',['AbstractTooling', 'DrawIdService', 'WhiteboardS
             };
 
             this.mouseUp = function(event){
-                var drawFinishedEvent  = new events.DrawFinishedEvent('RectangleEvent', drawIdService.getCurrent());
+                var drawFinishedEvent  = new Events.DrawFinishedEvent('RectangleEvent', drawIdService.getCurrent());
                 whiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
 
                 // stop drawing

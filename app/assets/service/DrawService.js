@@ -305,40 +305,6 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
     TextTooling.prototype = abstractTooling;
 
 
-    function CircleTooling() {
-        this.mouseDown = function(event){
-            if (!this.drawing) {
-                this.getStartMouse(event);
-                this.drawing = true;
-            }
-        };
-
-        this.mouseMove = function(event){
-            if (this.drawing) {
-                // get current mouse position
-                this.getCurrentMouse(event);
-                var dx = this.currentX - this.startX;
-                var dy = this.currentY - this.startY;
-                var radius = Math.sqrt(dx*dx + dy*dy);
-                var circleEvent = new CircleEvent(DrawIdService.getCurrent(), this.startX, this.startY, radius);
-
-                drawCircleEvent(circleEvent);
-                this.sendMoveEvent(circleEvent);
-            }
-        };
-
-        this.mouseUp = function(event){
-            var drawFinishedEvent  = new DrawFinishedEvent('CircleEvent', DrawIdService.getCurrent());
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-
-            // stop drawing
-            DrawIdService.incrementId();
-            this.drawing = false;
-        };
-    };
-    CircleTooling.prototype = abstractTooling;
-
-
     function LineTooling() {
         this.mouseMove = function(event){
             if(this.drawing){
@@ -610,7 +576,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
                 selectedTooling = new MovementTooling();
                 break;
             case constant.DRAWTOOLS.CIRCLE:
-                selectedTooling = new CircleTooling();
+                selectedTooling = toolSet.circleTooling;
                 break;
             case constant.DRAWTOOLS.TEXT:
                 selectedTooling = new TextTooling();

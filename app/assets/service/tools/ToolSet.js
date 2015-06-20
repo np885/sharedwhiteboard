@@ -1,7 +1,8 @@
 'use strict';
 
 app.service('ToolSet',['RectangleTooling', 'CircleTooling', 'LineTooling', 'FreehandTooling', 'MovementTooling',
-    function (rectangleTooling, circleTooling, lineTooling, freehandTooling, movementTooling) {
+    'TextTooling',
+    function (rectangleTooling, circleTooling, lineTooling, freehandTooling, movementTooling, textTooling) {
         var service = {};
 
         service.rectangleTooling = rectangleTooling;
@@ -9,6 +10,7 @@ app.service('ToolSet',['RectangleTooling', 'CircleTooling', 'LineTooling', 'Free
         service.lineTooling = lineTooling;
         service.freehandTooling = freehandTooling;
         service.movementTooling = movementTooling;
+        service.textTooling = textTooling;
 
         return service;
     }

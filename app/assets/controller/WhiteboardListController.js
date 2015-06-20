@@ -34,7 +34,6 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
         $http.get('/users/online')
             .success(function(data, status, headers, config) {
                 $scope.onlinelist = data.map(function(u) {return u.id});
-                console.log($scope.onlinelist);
             })
             .error(function (data, status, headers, config) {
                 //ToDO: error

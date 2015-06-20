@@ -99,7 +99,7 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
 
         repaint();
     };
-    var drawTextEvent = function(textevent, cursorPosition){
+    var drawTextEvent = function(textevent){
         var drawing;
         if(boardStateService.drawings.hasOwnProperty(textevent.boardElementId)){
             //existingDrawing.
@@ -108,11 +108,11 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
             drawing = new Drawing('TextDrawing', textevent.boardElementId);
             boardStateService.drawings[drawing.boardElementId] = drawing;
         }
-        if(typeof cursorPosition !== 'undefined') {
+        if(typeof textevent.cursorPosition !== 'undefined') {
             if (boardStateService.selectedDrawing != null) {
                 boardStateService.selectedDrawing.cursorPos = undefined;
             }
-            drawing.cursorPos = cursorPosition;
+            drawing.cursorPos = textevent.cursorPosition;
             boardStateService.selectedDrawing = drawing;
         }
         drawing.x = textevent.x;
@@ -216,11 +216,6 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
     };
 
 
-
-
-
-
-
     service.setDrawText = function(fkt){
         drawText = fkt;
     };
@@ -244,52 +239,14 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
         clearCanvas = fkt;
     };
 
-
-
-    function TextTooling() {
-        this.mouseMove = function(event){/*Do Nothing*/};
-        this.mouseUp = function(event){/*Do Nothing*/};
-
-        this.mouseDown =  function(event){
-            if(this.drawing) {
-                //drawing is true if at least one letter was written.
-                var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
-                WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-                this.drawing = false; //mouseDown = new id = new textelement = no letter written yet = drawing is false.
-            }
-
-            this.getCurrentMouse(event);
-
-            var id = DrawIdService.getCurrent();
-            DrawIdService.incrementId();
-            var input = document.getElementById('drawText');
-            //move input to click position to prevent "jumping" to hidden element on type:
-            input.style['margin-left'] = this.currentX + 'px';
-            input.style['margin-top'] = this.currentY-24 + 'px';
-            //set focus without "jumping" to hidden element on click:
-            var x = window.scrollX, y = window.scrollY;
-            input.focus();
-            window.scrollTo(x, y);
-
-            input.value = '';
-            var textEvent = new TextEvent(id, this.currentX, this.currentY, input.value);
-            drawTextEvent(textEvent, input.selectionStart);
-            var dirtyHelper = this;
-            input.onkeyup = function (event) {
-                dirtyHelper.drawing = true;
-                var textEvent = new TextEvent(id, dirtyHelper.currentX, dirtyHelper.currentY, input.value);
-                drawTextEvent(textEvent, input.selectionStart);
-                WhiteboardSocketService.send(JSON.stringify(textEvent));
-            };
-
-        };
+    service.setGetSaveUrl = function(fkt){
+        getSaveUrl = fkt;
     };
-    TextTooling.prototype = abstractTooling;
 
 
     service.setTool = function(value){
         if(tool === constant.DRAWTOOLS.TEXT && selectedTooling.drawing){
-            var drawFinishedEvent  = new DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
+            var drawFinishedEvent  = new Events.DrawFinishedEvent('TextEvent', DrawIdService.getCurrent() - 1);
             WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
             if (boardStateService.selectedDrawing != null) {
                 boardStateService.selectedDrawing.cursorPos = undefined;
@@ -315,7 +272,7 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
                 selectedTooling = toolSet.circleTooling;
                 break;
             case constant.DRAWTOOLS.TEXT:
-                selectedTooling = new TextTooling();
+                selectedTooling = toolSet.textTooling;
                 break;
             default:
                 selectedTooling = toolSet.freehandTooling;
@@ -324,12 +281,11 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
         selectedTooling.drawing = false;
     };
 
-    service.setGetSaveUrl = function(fkt){
-        getSaveUrl = fkt;
-    };
 
     service.prepareSaveCanvas = function(){
-        boardStateService.selectedDrawing.cursorPos = undefined;
+        if (boardStateService.selectedDrawing != null) {
+            boardStateService.selectedDrawing.cursorPos = undefined;
+        }
         boardStateService.selectedDrawing = null;
         repaint(true);
         return getSaveUrl();
@@ -339,7 +295,7 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
     //some UX for the Text-Tooling:
     document.getElementById('drawText').addEventListener("blur", function( event ) {
         if (boardStateService.selectedDrawing != null) {
-            boardStateService.selectedDrawing.cursorPos = null;
+            boardStateService.selectedDrawing.cursorPos = undefined;
         }
         boardStateService.selectedDrawing = null;
         repaint();

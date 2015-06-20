@@ -305,40 +305,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
     TextTooling.prototype = abstractTooling;
 
 
-    function LineTooling() {
-        this.mouseMove = function(event){
-            if(this.drawing){
-                // get current mouse position
-                this.getCurrentMouse(event);
-                var lineEvent = new LineEvent(
-                    DrawIdService.getCurrent(),
-                    this.startX,
-                    this.startY,
-                    this.currentX,
-                    this.currentY);
 
-                drawLineEvent(lineEvent);
-                this.sendMoveEvent(lineEvent);
-            }
-        };
-
-        this.mouseUp = function(event){
-            var drawFinishedEvent  = new DrawFinishedEvent('LineEvent', DrawIdService.getCurrent());
-            WhiteboardSocketService.send(JSON.stringify(drawFinishedEvent));
-            // stop drawing
-            DrawIdService.incrementId();
-            this.drawing = false;
-        };
-
-        this.mouseDown = function(event){
-            if (! this.drawing) {
-                this.getStartMouse(event);
-                // begins new line
-                this.drawing = true;
-            }
-        };
-    };
-    LineTooling.prototype = abstractTooling;
 
 
     function FreehandTooling() {
@@ -567,7 +534,7 @@ function (WhiteboardSocketService, Events, DrawIdService, constant, abstractTool
                 selectedTooling = new FreehandTooling();
                 break;
             case constant.DRAWTOOLS.LINE:
-                selectedTooling = new LineTooling();
+                selectedTooling = toolSet.lineTooling;
                 break;
             case constant.DRAWTOOLS.RECTANGLE:
                 selectedTooling = toolSet.rectangleTooling;

@@ -43,12 +43,6 @@ public class UserManagementController extends Controller {
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
     }
 
-    @Transactional
-    public static Result logout() {
-        User currentuser = (User) ctx().args.get("currentuser");
-        return ok();
-    }
-
     @ConsumesJSON
     @Transactional
     /*public, NO AUTHENTICATION needed!*/

@@ -10,7 +10,6 @@ GET         /                                       controllers.Application.inde
 GET         /login                                  controllers.users.UserManagementController.checkLoginCredentials()
 POST        /login/session/ticket                   controllers.users.UserManagementController.createTicket()
 GET         /login/session/ticket/:ticket           controllers.users.UserManagementController.connectToApplication(ticket: String)
-GET         /logout                                 controllers.users.UserManagementController.logout()
 POST        /register                               controllers.users.UserManagementController.registerUser()
 GET         /users                                  controllers.users.UserCollectionController.getAllUsers()
 GET         /users/online                           controllers.users.UserManagementController.getOnlineList()

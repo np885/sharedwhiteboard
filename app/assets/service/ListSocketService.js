@@ -66,7 +66,9 @@ app.service('ListSocketService',[ '$http', function ($http) {
     };
 
     service.closeConnection = function(){
-        connection.close();
+        if (connection != null) {
+            connection.close();
+        }
     };
 
     return service;

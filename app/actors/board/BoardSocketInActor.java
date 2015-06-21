@@ -35,7 +35,7 @@ public class BoardSocketInActor extends UntypedActor {
     public void postStop() throws Exception {
         Logger.debug("SOCKET ACTOR '" + this.toString() + "' WAS KILLED!");
 
-        tellMyWhiteboardActor(new BoardUserCloseEvent(this.socketConnection));
+        Akka.system().eventStream().publish(new BoardUserCloseEvent(this.socketConnection));
         super.postStop();
     }
 

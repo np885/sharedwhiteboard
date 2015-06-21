@@ -6,6 +6,7 @@ import actors.events.intern.app.AppUserLoginEvent;
 import actors.events.intern.app.AppUserLogoutEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardSessionEvent;
+import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
 import actors.events.socket.liststate.ListStateChangedEvent;
@@ -32,6 +33,9 @@ public class ApplicationActor extends UntypedActor {
     /* maps <User, ListSocketConnection>*/
     private Map<User, ListSocketConnection> listSocketConnections = new HashMap<>();
 
+    /* todo: the whole online user thing is legacy, now that we have the
+     * listSocketConnections, this should be the source for the online data. At the moment
+     * we have much redundancy in the 'users online management' */
     private List<User> onlineUser = new ArrayList<>();
 
     public ApplicationActor() {
@@ -46,6 +50,8 @@ public class ApplicationActor extends UntypedActor {
     public void onReceive(Object message) throws Exception {
         if(message instanceof BoardUserOpenEvent){
             onBoardUserOpenEvent((BoardUserOpenEvent) message);
+        } else if (message instanceof BoardUserCloseEvent) {
+            onBoardUserCloseEvent((BoardUserCloseEvent) message);
         } else if (message instanceof BoardActorClosedEvent) {
             onBoardActorClosedEvent((BoardActorClosedEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
@@ -54,6 +60,7 @@ public class ApplicationActor extends UntypedActor {
             onListStateChangedEvent((ListStateChangedEvent) message);
         }
     }
+
 
     private void onListStateChangedEvent(ListStateChangedEvent lsce) {
         for (User u : listSocketConnections.keySet()) {
@@ -94,11 +101,6 @@ public class ApplicationActor extends UntypedActor {
         }
     }
 
-    private void onBoardActorClosedEvent(BoardActorClosedEvent message) {
-        Logger.debug("Removed closed BoardActor with id=" + message.getBoardId());
-        boardActors.remove(message.getBoardId());
-    }
-
     /**
      * A User opened a Whiteboard and thus created a new Websocket Connection:
      */
@@ -114,7 +116,23 @@ public class ApplicationActor extends UntypedActor {
         }
     }
 
+    private void onBoardUserCloseEvent(BoardUserCloseEvent buce) {
+        if(!boardActors.containsKey(buce.getBoardId())){
+            Logger.warn("Caught Board Closed Event to a board, which has no board-actor!");
+        } else {
+            ActorRef actorRef = boardActors.get(buce.getBoardId());
+            actorRef.tell(buce, self());
+        }
+    }
+
+    private void onBoardActorClosedEvent(BoardActorClosedEvent message) {
+        Logger.debug("Removed closed BoardActor with id=" + message.getBoardId());
+        boardActors.remove(message.getBoardId());
+    }
+
+
     public static Set<User> getOnlineList() {
         return new HashSet<>(instance.listSocketConnections.keySet());
     }
+
 }

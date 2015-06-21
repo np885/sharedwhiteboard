@@ -9,6 +9,7 @@ import actors.events.intern.boardsessions.BoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
+import actors.events.socket.boardstate.SimpleUser;
 import actors.events.socket.liststate.ListStateChangedEvent;
 import actors.list.ListSocketConnection;
 import akka.actor.ActorRef;
@@ -116,6 +117,26 @@ public class ApplicationActor extends UntypedActor {
      * A User opened a Whiteboard and thus created a new Websocket Connection:
      */
     private void onBoardUserOpenEvent(BoardUserOpenEvent event) {
+        UserOnlineData userOnlineData = listSocketConnections.get(event.getConnection().getUser());
+        if (userOnlineData == null) {
+            Logger.warn("Caught Board Open Event for a User, who is not logged in! userid="
+                    + ((event.getConnection().getUser() == null)
+                    ? "user is null." : event.getConnection().getUser().getId()));
+        } else {
+            if (userOnlineData.currentlyJoined != null) {
+                Logger.warn("Caught Board Open Event for a user, who was still joined to another Board!" +
+                        " userid=" + event.getConnection().getUser().getId() +
+                        ", newly joined boardid=" + event.getBoardId() +
+                        ", old joined board: " + userOnlineData.currentlyJoined);
+                Logger.warn("Old join state will be overwritten.");
+            }
+            userOnlineData.currentlyJoined = event.getBoardId();
+            ListStateChangedEvent lscEvent = new ListStateChangedEvent();
+            lscEvent.setUser(new SimpleUser(event.getConnection().getUser()));
+            lscEvent.setStructuralChanges(false);
+            Akka.system().eventStream().publish(lscEvent);
+        }
+
         if(!boardActors.containsKey(event.getBoardId())){
             ActorRef actorRef = Akka.system().actorOf(
                     Props.create(WhiteboardActor.class, event.getConnection(), onlineUser),
@@ -129,12 +150,33 @@ public class ApplicationActor extends UntypedActor {
     }
 
     private void onBoardUserCloseEvent(BoardUserCloseEvent buce) {
+        //Track live data for reactive eye on whiteboardlist:
+        UserOnlineData userOnlineData = listSocketConnections.get(buce.getConnection().getUser());
+        if (userOnlineData == null) {
+            Logger.warn("Caught Board Closed Event for a User, who is not logged in! userid="
+                    + ((buce.getConnection().getUser() == null)
+                        ? "user is null." : buce.getConnection().getUser().getId()));
+        } else {
+            if (userOnlineData.currentlyJoined == buce.getBoardId()) {
+                userOnlineData.currentlyJoined = null;
+                ListStateChangedEvent lscEvent = new ListStateChangedEvent();
+                lscEvent.setUser(new SimpleUser(buce.getConnection().getUser()));
+                lscEvent.setStructuralChanges(false);
+                Akka.system().eventStream().publish(lscEvent);
+            } else {
+                Logger.warn("Caught Board Closed Event for a board, for which the user in the event" +
+                        " is not joined! userid=" + buce.getConnection().getUser().getId() +
+                        ", boardid=" + buce.getBoardId());
+            }
+        }
+
         if(!boardActors.containsKey(buce.getBoardId())){
             Logger.warn("Caught Board Closed Event to a board, which has no board-actor!");
         } else {
             ActorRef actorRef = boardActors.get(buce.getBoardId());
             actorRef.tell(buce, self());
         }
+
     }
 
     private void onBoardActorClosedEvent(BoardActorClosedEvent message) {

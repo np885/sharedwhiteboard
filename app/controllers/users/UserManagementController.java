@@ -133,8 +133,7 @@ public class UserManagementController extends Controller {
 
         List<UserReadDTO> dtos = new ArrayList<>();
         for (User u : onlineList.keySet()) {
-            dtos.add(UserMapper.mapToReadDTO(u,  7L));
-//            dtos.add(UserMapper.mapToReadDTO(u,  onlineList.get(u)));
+            dtos.add(UserMapper.mapToReadDTO(u,  onlineList.get(u)));
         }
 
         return ok(Json.toJson(dtos));

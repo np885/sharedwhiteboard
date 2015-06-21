@@ -33,6 +33,7 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
     $scope.refreshOnlineList = function() {
         $http.get('/users/online')
             .success(function(data, status, headers, config) {
+                console.log(data);
                 $scope.onlinelist = {};
                 data.forEach(function(userElement) {
                     $scope.onlinelist[userElement.id] =
@@ -40,12 +41,6 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
                             ? null
                             : userElement.currentlyJoinedBoardId;
                 });
-                    //var userOnlineData = {};
-                    //userOnlineData.id = u.id;
-                    //userOnlineData.joined = (typeof u.currentlyJoinedBoardId === 'undefined') ? null : u.currentlyJoinedBoardId;
-                    //return userOnlineData;
-                //});
-                console.log($scope.onlinelist);
             })
             .error(function (data, status, headers, config) {
                 //ToDO: error
@@ -85,7 +80,13 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
         });
     };
 
-    listSocketService.registerForSocketEvent('ListStateChangedEvent', $scope.loadWhiteboards);
+    listSocketService.registerForSocketEvent('ListStateChangedEvent', function(event) {
+            if (event.structuralChanges) {
+                $scope.$apply($scope.loadWhiteboards);
+            } else {
+                $scope.$apply($scope.refreshOnlineList);
+            }
+    });
     listSocketService.registerForSocketEvent('BoardUserOnlineEvent', $scope.refreshOnlineList);
     listSocketService.registerForSocketEvent('BoardUserOfflineEvent', $scope.refreshOnlineList);
 

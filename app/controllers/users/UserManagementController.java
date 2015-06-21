@@ -129,11 +129,12 @@ public class UserManagementController extends Controller {
 
     @AuthRequired
     public static Result getOnlineList() {
-        Set<User> users = ApplicationActor.getOnlineList();
+        Map<User, Long> onlineList = ApplicationActor.getOnlineList();
 
         List<UserReadDTO> dtos = new ArrayList<>();
-        for (User u : users) {
-            dtos.add(UserMapper.mapToReadDTO(u));
+        for (User u : onlineList.keySet()) {
+            dtos.add(UserMapper.mapToReadDTO(u,  7L));
+//            dtos.add(UserMapper.mapToReadDTO(u,  onlineList.get(u)));
         }
 
         return ok(Json.toJson(dtos));

@@ -24,6 +24,12 @@ public class UserMapper {
         return dto;
     }
 
+    public static UserReadDTO mapToReadDTO(User user, Long joinedBoardId) {
+        UserReadDTO dto = mapToReadDTO(user);
+        dto.setCurrentlyJoinedBoardId(joinedBoardId);
+        return dto;
+    }
+
 
 
 }

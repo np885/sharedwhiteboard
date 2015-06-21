@@ -22,6 +22,14 @@ import play.libs.Json;
 import java.util.*;
 
 public class ApplicationActor extends UntypedActor {
+    private static class UserOnlineData {
+        private ListSocketConnection connection;
+        private Long currentlyJoined;
+        public UserOnlineData(ListSocketConnection connection, Long currentlyJoined) {
+            this.connection = connection;
+            this.currentlyJoined = currentlyJoined;
+        }
+    }
 
     public static final String NAME = "Aplication";
 
@@ -30,8 +38,10 @@ public class ApplicationActor extends UntypedActor {
     /* maps <boardId, BoardActor> */
     private Map<Long, ActorRef> boardActors = new HashMap<>();
 
-    /* maps <User, ListSocketConnection>*/
-    private Map<User, ListSocketConnection> listSocketConnections = new HashMap<>();
+    /* maps <User, <ListSocketConnection, currentlyJoined>>*/
+    private Map<User, UserOnlineData> listSocketConnections = new HashMap<>();
+
+
 
     /* todo: the whole online user thing is legacy, now that we have the
      * listSocketConnections, this should be the source for the online data. At the moment
@@ -65,24 +75,25 @@ public class ApplicationActor extends UntypedActor {
     private void onListStateChangedEvent(ListStateChangedEvent lsce) {
         for (User u : listSocketConnections.keySet()) {
             if (u.getId() != lsce.getUser().getUserId()) {
-                listSocketConnections.get(u).getOut().tell(Json.stringify(Json.toJson(lsce)), self());
+                listSocketConnections.get(u).connection.getOut().tell(Json.stringify(Json.toJson(lsce)), self());
             }
         }
     }
 
     private void onAppUserEvent(AbstractAppUserEvent event) {
         if(event instanceof AppUserLoginEvent){
-            ListSocketConnection connection = listSocketConnections.get(event.getUser());
-            if (connection != null) {
+            UserOnlineData userOnlineData = listSocketConnections.get(event.getUser());
+            if (userOnlineData != null) {
                 Logger.warn("Double login for user: " + event.getUser());
                 //todo... double login. kill old login the hard way?
             }
-            listSocketConnections.put(event.getUser(), ((AppUserLoginEvent) event).getSocketConnection());
+            listSocketConnections.put(event.getUser(),
+                    new UserOnlineData(((AppUserLoginEvent) event).getSocketConnection(), null));
 
             Logger.debug(event.getUser().getUsername() + " is Online!");
             onlineUser.add(event.getUser());
         } else if (event instanceof AppUserLogoutEvent) {
-            ListSocketConnection removed = listSocketConnections.remove(event.getUser());
+            UserOnlineData removed = listSocketConnections.remove(event.getUser());
             if (removed == null) {
                 Logger.warn("Could not remove listSocketConnection for User " + event.getUser().getId()
                         + ", probably because he was not logged in! Check why a logout event appears for a user" +
@@ -97,7 +108,7 @@ public class ApplicationActor extends UntypedActor {
 
         String onOffSocketEvent = SessionEventSerializationUtil.serializeUserAppEvent(event);
         for (User u : listSocketConnections.keySet()) {
-            listSocketConnections.get(u).getOut().tell(onOffSocketEvent, self());
+            listSocketConnections.get(u).connection.getOut().tell(onOffSocketEvent, self());
         }
     }
 
@@ -114,6 +125,7 @@ public class ApplicationActor extends UntypedActor {
             ActorRef actorRef = boardActors.get(event.getBoardId());
             actorRef.tell(event, self());
         }
+
     }
 
     private void onBoardUserCloseEvent(BoardUserCloseEvent buce) {
@@ -131,8 +143,17 @@ public class ApplicationActor extends UntypedActor {
     }
 
 
-    public static Set<User> getOnlineList() {
-        return new HashSet<>(instance.listSocketConnections.keySet());
+    /**
+     * @return Map &lt;Online User, Board he is currently joined (may be null, if not joined any board)&gt;
+     */
+    public static Map<User, Long> getOnlineList() {
+        Map<User, Long> result = new HashMap<>();
+
+        for (User u : instance.listSocketConnections.keySet()) {
+            result.put(u, instance.listSocketConnections.get(u).currentlyJoined);
+        }
+
+        return result;
     }
 
 }

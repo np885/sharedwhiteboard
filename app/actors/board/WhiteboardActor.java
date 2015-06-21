@@ -103,8 +103,12 @@ public class WhiteboardActor extends UntypedActor {
             }
             //Tell everyone about the online Event
             for (BoardSocketConnection c : socketConnections) {
-                String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
-                c.getOut().tell(outputJSON, self());
+                //logout event means, the client is (parallel to our server actions here) closing its sockets.
+                //sending the logout event to the outlogging client can eventually cause closedChannelExceptions.
+                if (!(event instanceof AppUserLogoutEvent && c.getUser().getId().equals(event.getUser().getId()))) {
+                    String outputJSON = SessionEventSerializationUtil.serializeUserAppEvent(event);
+                    c.getOut().tell(outputJSON, self());
+                }
             }
         }
     }

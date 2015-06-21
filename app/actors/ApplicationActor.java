@@ -103,13 +103,18 @@ public class ApplicationActor extends UntypedActor {
             Logger.debug(event.getUser().getUsername() + " is Offline!");
             onlineUser.remove(event.getUser());
         }
+
         for(long boardId : boardActors.keySet()){
             boardActors.get(boardId).tell(event, self());
         }
 
         String onOffSocketEvent = SessionEventSerializationUtil.serializeUserAppEvent(event);
         for (User u : listSocketConnections.keySet()) {
-            listSocketConnections.get(u).connection.getOut().tell(onOffSocketEvent, self());
+            //logout event means, the client is (parallel to our server actions here) closing its sockets.
+            //sending the logout event to the outlogging client can eventually cause closedChannelExceptions.
+            if (!(event instanceof AppUserLogoutEvent && u.getId().equals(event.getUser().getId()))) {
+                listSocketConnections.get(u).connection.getOut().tell(onOffSocketEvent, self());
+            }
         }
     }
 

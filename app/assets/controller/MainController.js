@@ -15,6 +15,7 @@ app.controller('MainController', ['$scope', 'AuthenticationService', 'ListSocket
         };
 
         $scope.logout = function(){
+            $scope.error = null;
             listSocketService.closeConnection();
             AuthenticationService.clearCredentials();
         };

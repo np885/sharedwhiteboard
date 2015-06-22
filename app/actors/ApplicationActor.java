@@ -4,6 +4,7 @@ import actors.board.WhiteboardActor;
 import actors.events.intern.app.AbstractAppUserEvent;
 import actors.events.intern.app.AppUserLoginEvent;
 import actors.events.intern.app.AppUserLogoutEvent;
+import actors.events.intern.app.ConnectionRejectedEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
 import actors.events.intern.boardsessions.BoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
@@ -13,6 +14,7 @@ import actors.events.socket.boardstate.SimpleUser;
 import actors.events.socket.liststate.ListStateChangedEvent;
 import actors.list.ListSocketConnection;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
@@ -87,6 +89,8 @@ public class ApplicationActor extends UntypedActor {
             if (userOnlineData != null) {
                 Logger.warn("Double login for user: " + event.getUser());
                 //todo... double login. kill old login the hard way?
+                ((AppUserLoginEvent) event).getSocketConnection().getIn().tell(new ConnectionRejectedEvent(), self());
+                return;
             }
             listSocketConnections.put(event.getUser(),
                     new UserOnlineData(((AppUserLoginEvent) event).getSocketConnection(), null));

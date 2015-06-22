@@ -33,7 +33,6 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
     $scope.refreshOnlineList = function() {
         $http.get('/users/online')
             .success(function(data, status, headers, config) {
-                console.log(data);
                 $scope.onlinelist = {};
                 data.forEach(function(userElement) {
                     $scope.onlinelist[userElement.id] =
@@ -90,7 +89,15 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
     listSocketService.registerForSocketEvent('BoardUserOnlineEvent', $scope.refreshOnlineList);
     listSocketService.registerForSocketEvent('BoardUserOfflineEvent', $scope.refreshOnlineList);
 
-    listSocketService.openSocketConnection();
+    listSocketService.openSocketConnection(function() {
+        $scope.$apply(function() {
+            $scope.onlinelist = [];
+            $scope.whiteboards = [];
+        });
+        AuthenticationService.doubleLoginDetected();
+        AuthenticationService.clearCredentials();
+        console.log("double-login currently not allowed!");
+    });
     $scope.refreshOnlineList();
     $scope.loadWhiteboards();
 }]);

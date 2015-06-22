@@ -74,7 +74,10 @@ app.service('WhiteboardSocketService',[ '$http', function ($http) {
     };
 
     service.closeConnection = function(){
-      connection.close();
+        if (connection != null) {
+            connection.close();
+            connection.close();
+        }
     };
 
     service.send = function(payload){

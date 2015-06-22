@@ -33,7 +33,7 @@ app.service('ListSocketService',[ '$http', function ($http) {
         }
     };
 
-    service.openSocketConnection = function(onConnectCallback){
+    service.openSocketConnection = function(errorCallback){
         if (connection != null && connection.readyState != 3) {
             console.log('connection already open.')
             //connection exists and is not closed.
@@ -47,10 +47,13 @@ app.service('ListSocketService',[ '$http', function ($http) {
                 connection = new WebSocket('ws://' + window.location.host + headers('Location'));
 
                 connection.onopen = function () {
-                    //onConnectCallback();
                 };
 
                 connection.onmessage = function (e) {
+                    if (e.data === 'rejected') {
+                        errorCallback();
+                        return;
+                    }
                     var event = JSON.parse(e.data);
 
                     console.log(event);
@@ -60,8 +63,10 @@ app.service('ListSocketService',[ '$http', function ($http) {
 
                 // Log errors
                 connection.onerror = function (error) {
-                    console.log('WebSocket Error ' + error);
+                    console.log('WebSocket Error:');
+                    console.log(error);
                 };
+
             });
     };
 

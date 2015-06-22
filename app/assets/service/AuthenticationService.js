@@ -5,6 +5,8 @@ app.service('AuthenticationService',
             function (Base64, $http, $location, listSocketService) {
                 var service = {};
 
+                var doubleLoginCallback;
+
                 service.login = function (user) {
                     var authdata = Base64.encode(user.username + ':' + user.password);
                     sessionStorage.authData = authdata;
@@ -41,6 +43,16 @@ app.service('AuthenticationService',
 
                 service.isAuthenticated = function(){
                     return sessionStorage.user != null;
+                };
+
+                service.setDoubleLoginListener = function(callback) {
+                    doubleLoginCallback = callback;
+                };
+
+                service.doubleLoginDetected = function() {
+                    if (doubleLoginCallback != null) {
+                        doubleLoginCallback();
+                    }
                 };
 
                 return service;

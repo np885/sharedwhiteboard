@@ -19,6 +19,11 @@ app.controller('MainController', ['$scope', 'AuthenticationService', 'ListSocket
             AuthenticationService.clearCredentials();
         };
 
+        AuthenticationService.setDoubleLoginListener(function() {
+            $scope.$apply(function() {
+                $scope.error = "Zur zeit werden keine doppelten Logins unterstützt. Sie sind bereits eingeloggt. (sorry)";
+            });
+        });
 
     }]);
 

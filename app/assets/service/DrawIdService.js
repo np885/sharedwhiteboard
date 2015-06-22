@@ -3,12 +3,15 @@
 app.service('DrawIdService',[ 'WhiteboardSocketService', 'AuthenticationService',
 function (WhiteboardSocketService, AuthenticationService) {
     var nextBoardElementId = -1;
-    var minBoardElementId = AuthenticationService.getUserId() * 10000;
-    var maxBoardElementId = (AuthenticationService.getUserId() + 1) * 10000 - 1;
+    var minBoardElementId = parseInt(AuthenticationService.getUserId()) * 10000;
+    var maxBoardElementId = (parseInt(AuthenticationService.getUserId()) + 1) * 10000 - 1;
     var service = {};
 
     service.isInRange = function(drawing){
         return minBoardElementId <= drawing.boardElementId && drawing.boardElementId <= maxBoardElementId;
+    };
+    service.reset = function() {
+        //nextBoardElementId = -1;
     };
     service.computeDrawing = function(drawing){
         if (this.isInRange(drawing)) {

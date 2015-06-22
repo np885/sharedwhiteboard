@@ -173,6 +173,7 @@ function (boardStateService, WhiteboardSocketService, Events, DrawIdService, con
 
     WhiteboardSocketService.registerForSocketEvent('InitialBoardStateEvent', function(initStateEvent) {
         boardStateService.drawings = {};
+        DrawIdService.reset();
         initStateEvent.drawings.forEach(function (drawing) {
             DrawIdService.computeDrawing(drawing);
             boardStateService.drawings[drawing.boardElementId] = drawing;

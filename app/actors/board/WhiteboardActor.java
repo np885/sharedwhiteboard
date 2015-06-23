@@ -163,10 +163,10 @@ public class WhiteboardActor extends UntypedActor {
             drawObjForElementId = initDrawObjectAndAddToState(new FreeHandDrawing(), fhe);
             ((FreeHandDrawing)drawObjForElementId).getPoints()
                     .add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxStart(), fhe.getyStart()));
-        } else {
-            if (! (drawObjForElementId instanceof FreeHandDrawing)) {
-                //error...... todo
-            }
+        }
+        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+            logDrawEventTypeError(fhe, drawObjForElementId);
+            return;
         }
         FreeHandDrawing fhd = (FreeHandDrawing) drawObjForElementId;
         fhd.getPoints().add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxEnd(), fhe.getyEnd()));
@@ -178,6 +178,10 @@ public class WhiteboardActor extends UntypedActor {
             //new line:
             drawObjForElementId = initDrawObjectAndAddToState(new SingleLineDrawing(), sle);
         }
+        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+            logDrawEventTypeError(sle, drawObjForElementId);
+            return;
+        }
         SingleLineDrawing slDrawing = (SingleLineDrawing) drawObjForElementId;
         slDrawing.setX1(sle.getxStart());
         slDrawing.setY1(sle.getyStart());
@@ -186,11 +190,16 @@ public class WhiteboardActor extends UntypedActor {
     }
 
 
+
     private void onTextEvent(TextEvent txtEv) {
         AbstractDrawObject drawObjForElementId = currentState.getDrawObjects().get(txtEv.getBoardElementId());
         if (drawObjForElementId == null) {
             //new line:
             drawObjForElementId = initDrawObjectAndAddToState(new TextDrawing(), txtEv);
+        }
+        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+            logDrawEventTypeError(txtEv, drawObjForElementId);
+            return;
         }
         TextDrawing txtDrawing = (TextDrawing) drawObjForElementId;
         txtDrawing.setX(txtEv.getX());
@@ -203,6 +212,10 @@ public class WhiteboardActor extends UntypedActor {
         if (drawObjForElementId == null) {
             //new rectangle:
             drawObjForElementId = initDrawObjectAndAddToState(new RectangleDrawing(), re);
+        }
+        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+            logDrawEventTypeError(re, drawObjForElementId);
+            return;
         }
         RectangleDrawing rectDrawing = (RectangleDrawing) drawObjForElementId;
         rectDrawing.setX(re.getxStart());
@@ -218,6 +231,10 @@ public class WhiteboardActor extends UntypedActor {
         if (drawObjForElementId == null) {
             //new circle:
             drawObjForElementId = initDrawObjectAndAddToState(new CircleDrawing(), ce);
+        }
+        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+            logDrawEventTypeError(ce, drawObjForElementId);
+            return;
         }
         CircleDrawing rectDrawing = (CircleDrawing) drawObjForElementId;
         rectDrawing.setCenterX(ce.getCenterX());
@@ -254,6 +271,12 @@ public class WhiteboardActor extends UntypedActor {
         }
     }
 
+    private void logDrawEventTypeError(DrawEvent event, AbstractDrawObject drawObjForElementId) {
+        Logger.warn("Received " + event.getClass().getSimpleName() +
+                " for DrawObject (id=" + event.getBoardElementId() + ") but persisted element for this id" +
+                " was of Type " + drawObjForElementId.getClass().getSimpleName());
+    }
+
     @Override
     public void postStop() throws Exception {
         persistCurrentState();
@@ -273,5 +296,11 @@ public class WhiteboardActor extends UntypedActor {
         //Add CollabState from Session
         dto.getColaborators().addAll(sessionState.getCollabs());
         return Json.stringify(Json.toJson(dto));
+    }
+
+
+    //for unit testing: (package scoped)
+    void setWhiteboardRepo(WhiteboardRepo repo) {
+        this.whiteboardRepo = repo;
     }
 }

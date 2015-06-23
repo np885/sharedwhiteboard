@@ -44,9 +44,17 @@ public class BoardSocketInActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
-        Logger.debug("client via socket -> server: " + message);
-        JsonNode parsedMessage = Json.parse((String) message);
-        String eventType = parsedMessage.get("eventType").asText();
+        String eventType;
+        JsonNode parsedMessage;
+        try {
+            Logger.debug("client via socket -> server: " + message);
+            parsedMessage = Json.parse((String) message);
+            eventType = parsedMessage.get("eventType").asText();
+        } catch (Exception e) {
+            Logger.error("Error while parsing Board-Event: " + message.toString() + "\n... event will be ignored:", e);
+            return;
+        }
+
         switch (eventType) {
             case "FreeHandEvent":
                 FreeHandEvent freeHandEvent = Json.fromJson(parsedMessage, FreeHandEvent.class);

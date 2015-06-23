@@ -93,9 +93,13 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
         $scope.$apply(function() {
             $scope.onlinelist = [];
             $scope.whiteboards = [];
+            $scope.addWhiteboard = function() {
+              AuthenticationService.clearCredentials();
+            };
         });
         AuthenticationService.doubleLoginDetected();
         AuthenticationService.clearCredentials();
+
         console.log("double-login currently not allowed!");
     });
     $scope.refreshOnlineList();

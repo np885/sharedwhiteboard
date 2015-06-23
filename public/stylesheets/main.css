@@ -22,6 +22,26 @@ body {
 .my-own-board {
     background: url('../images/ownertriangle.png') top right no-repeat;
 }
+.circle-tool {
+    background: url('../images/circletooling.png') ;
+}
+.rectangle-tool {
+    background: url('../images/rectangletooling.png') ;
+}
+.line-tool {
+    background: url('../images/linetooling.png') ;
+}
+.freehand-tool {
+    background: url('../images/freehandtooling.png') ;
+}
+.toolbar-button{
+    min-height: 34px;
+    min-width: 34px;
+}
+.toolbar-button div {
+    min-height: 16px;
+    min-width: 16px;
+}
 
 .welcome{
     font-size: 34px;

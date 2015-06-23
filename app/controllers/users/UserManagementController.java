@@ -61,7 +61,7 @@ public class UserManagementController extends Controller {
         }
 
         //map:
-        User userToSave = null;
+        User userToSave;
         try {
             userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
@@ -100,7 +100,6 @@ public class UserManagementController extends Controller {
     public static Result createTicket() {
         //Authenticated User can create ticket for websocket connection.
 
-        HashMap<String, String> properties = new HashMap<>();
         String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), null);
 
         response().setHeader(

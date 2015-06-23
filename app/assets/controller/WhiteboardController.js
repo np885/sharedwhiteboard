@@ -24,7 +24,7 @@ function($scope, $routeParams, WhiteboardSocketService, constant, DrawService){
     };
 
     $scope.selectTool = function(tool){
-        $scope.tooling = tool.type;
+        $scope.tooling = tool;
     };
 
     WhiteboardSocketService.openSocketConnection();

@@ -164,7 +164,7 @@ public class WhiteboardActor extends UntypedActor {
             ((FreeHandDrawing)drawObjForElementId).getPoints()
                     .add(new FreeHandDrawing.FreeHandDrawingPoint(fhe.getxStart(), fhe.getyStart()));
         }
-        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+        if (! (drawObjForElementId instanceof FreeHandDrawing)) {
             logDrawEventTypeError(fhe, drawObjForElementId);
             return;
         }
@@ -197,7 +197,7 @@ public class WhiteboardActor extends UntypedActor {
             //new line:
             drawObjForElementId = initDrawObjectAndAddToState(new TextDrawing(), txtEv);
         }
-        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+        if (! (drawObjForElementId instanceof TextDrawing)) {
             logDrawEventTypeError(txtEv, drawObjForElementId);
             return;
         }
@@ -213,7 +213,7 @@ public class WhiteboardActor extends UntypedActor {
             //new rectangle:
             drawObjForElementId = initDrawObjectAndAddToState(new RectangleDrawing(), re);
         }
-        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+        if (! (drawObjForElementId instanceof RectangleDrawing)) {
             logDrawEventTypeError(re, drawObjForElementId);
             return;
         }
@@ -232,7 +232,7 @@ public class WhiteboardActor extends UntypedActor {
             //new circle:
             drawObjForElementId = initDrawObjectAndAddToState(new CircleDrawing(), ce);
         }
-        if (! (drawObjForElementId instanceof SingleLineDrawing)) {
+        if (! (drawObjForElementId instanceof CircleDrawing)) {
             logDrawEventTypeError(ce, drawObjForElementId);
             return;
         }
@@ -251,8 +251,7 @@ public class WhiteboardActor extends UntypedActor {
     }
 
 
-    private void onBoardUserClosed(BoardUserCloseEvent message) {
-        BoardUserCloseEvent event = message;
+    private void onBoardUserClosed(BoardUserCloseEvent event) {
 
         boolean removedConnection = socketConnections.remove(event.getConnection());
         if (!removedConnection) {

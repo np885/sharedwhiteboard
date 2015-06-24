@@ -1,10 +1,15 @@
 package controllers.users.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class UserReadDTO {
     private long id;
 
 
     private String username;
+
+    @JsonInclude(value = JsonInclude.Include.NON_NULL)
+    private Long currentlyJoinedBoardId;
 
     public UserReadDTO(long id, String username) {
         this.id = id;
@@ -24,5 +29,13 @@ public class UserReadDTO {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Long getCurrentlyJoinedBoardId() {
+        return currentlyJoinedBoardId;
+    }
+
+    public void setCurrentlyJoinedBoardId(Long currentlyJoinedBoardId) {
+        this.currentlyJoinedBoardId = currentlyJoinedBoardId;
     }
 }

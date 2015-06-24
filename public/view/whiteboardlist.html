@@ -9,14 +9,16 @@
     <div class="col-md-2"><button type="button" class="btn btn-primary" ng-click="addWhiteboard()"><span class="glyphicon glyphicon-plus-sign"></span> Whiteboard erstellen</button></div>
 </div>
 
-<div class="list-group whiteboardlist">
-    <div ng-repeat="whiteboard in whiteboards | filter:search" >
+<div class="list-group">
+    <div id="boardList" ng-repeat="whiteboard in whiteboards | filter:search" >
         <a ng-href="#/whiteboard/{{whiteboard.id}}" ng-class="{'my-own-board' : whiteboard.owner === currentUser}" ng-click="prepareOpening(whiteboard)" class="list-group-item" ng-hide="myown && currentUser !== whiteboard.owner">
             <h4 class="list-group-item-heading">{{whiteboard.name}}</h4>
             <div class="list-group list-group-horizontal">
                 <!--<div class="list-group-item" ng-class="{'list-group-item-success' : user.joined}" ng-repeat="user in whiteboard.collaborators">-->
                 <div class="list-group-item" ng-class="{'list-group-item-success' : isOnline(user.description.userId)}" ng-repeat="user in whiteboard.collaborators">
-                    {{user.description.username}}<span ng-class="{'glyphicon glyphicon-star-empty' : whiteboard.owner === user.description.username}"></span> <span ng-class="{'glyphicon glyphicon-eye-open': user.join }" ></span>
+                    {{user.description.username}}
+                    <span ng-class="{'glyphicon glyphicon-star-empty' : whiteboard.owner === user.description.username}"></span>
+                    <span ng-class="{'glyphicon glyphicon-eye-open': isJoined(user.description.userId, whiteboard.id) }" ></span>
                 </div>
             </div>
         </a>

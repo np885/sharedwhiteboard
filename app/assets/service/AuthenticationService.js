@@ -1,9 +1,11 @@
 'use strict';
 
 app.service('AuthenticationService',
-        ['Base64', '$http', '$location',
-            function (Base64, $http, $location) {
+        ['Base64', '$http', '$location','ListSocketService',
+            function (Base64, $http, $location, listSocketService) {
                 var service = {};
+
+                var doubleLoginCallback;
 
                 service.login = function (user) {
                     var authdata = Base64.encode(user.username + ':' + user.password);
@@ -24,14 +26,11 @@ app.service('AuthenticationService',
                 };
 
                 service.clearCredentials = function () {
-                    $http.get('/logout')
-                        .success(function(data, status, headers, config) {
-                            delete sessionStorage.user;
-                            delete sessionStorage.userid;
-                            delete sessionStorage.authData;
-                            $location.path('/login');
-                        });
-
+                    listSocketService.closeConnection();
+                    delete sessionStorage.user;
+                    delete sessionStorage.userid;
+                    delete sessionStorage.authData;
+                    $location.path('/login');
                 };
 
                 service.getUser = function(){
@@ -44,6 +43,16 @@ app.service('AuthenticationService',
 
                 service.isAuthenticated = function(){
                     return sessionStorage.user != null;
+                };
+
+                service.setDoubleLoginListener = function(callback) {
+                    doubleLoginCallback = callback;
+                };
+
+                service.doubleLoginDetected = function() {
+                    if (doubleLoginCallback != null) {
+                        doubleLoginCallback();
+                    }
                 };
 
                 return service;

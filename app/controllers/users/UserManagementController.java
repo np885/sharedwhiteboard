@@ -24,6 +24,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.WebSocket;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -37,13 +39,6 @@ public class UserManagementController extends Controller {
     @AuthRequired
     @Transactional
     public static Result checkLoginCredentials() {
-        User currentuser = (User) ctx().args.get("currentuser");
-        return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
-    }
-
-    @AuthRequired
-    @Transactional
-    public static Result logout() {
         User currentuser = (User) ctx().args.get("currentuser");
         return ok(Json.toJson(UserMapper.mapToReadDTO(currentuser)));
     }
@@ -66,7 +61,13 @@ public class UserManagementController extends Controller {
         }
 
         //map:
-        User userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
+        User userToSave;
+        try {
+            userToSave = UserMapper.mapFromNewUserDTO(newUserWriteDTO);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+            //Hmm should never happen
+            return badRequest("Something went wrong! Please contact the Admin!");
+        }
 
         try {
             UserRepo.createNewUser(userToSave);
@@ -99,7 +100,6 @@ public class UserManagementController extends Controller {
     public static Result createTicket() {
         //Authenticated User can create ticket for websocket connection.
 
-        HashMap<String, String> properties = new HashMap<>();
         String ticketNumber = ticketSystem.createTicket((User) ctx().args.get("currentuser"), null);
 
         response().setHeader(
@@ -128,11 +128,11 @@ public class UserManagementController extends Controller {
 
     @AuthRequired
     public static Result getOnlineList() {
-        Set<User> users = ApplicationActor.getOnlineList();
+        Map<User, Long> onlineList = ApplicationActor.getOnlineList();
 
         List<UserReadDTO> dtos = new ArrayList<>();
-        for (User u : users) {
-            dtos.add(UserMapper.mapToReadDTO(u));
+        for (User u : onlineList.keySet()) {
+            dtos.add(UserMapper.mapToReadDTO(u,  onlineList.get(u)));
         }
 
         return ok(Json.toJson(dtos));

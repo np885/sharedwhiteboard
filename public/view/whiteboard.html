@@ -4,15 +4,15 @@
             <div class="col-md-3 h3">{{ whiteboardname }}</div>
             <div class="col-md-9">
                 <div class="btn-group">
-                    <button type="button" ng-click="selectTool(tool)" class="btn btn-default" ng-class="{'active' : tool === tooling}" ng-repeat="tool in tools">
-                        {{tool}}
+                    <button type="button" ng-click="selectTool(tool)" class="toolbar-button btn btn-default" ng-class="{'active' : tool === tooling}" ng-repeat="tool in tools">
+                        <div ng-class="tool.css"></div>
                     </button>
                     <a ng-href="{{downloadLink}}" download="{{whiteboardname}}" ng-click="saveCanvas()" class="btn btn-default" ><span class="glyphicon glyphicon-download"></span></a>
                 </div>
                             </div>
         </div>
         <input id="drawText" type="text" class="shadowInput"  />
-        <canvas width="800" height="500" class="canvas" id="canvas" drawing="tooling"></canvas>
+        <canvas width="800" height="500" class="canvas" id="canvas" drawing="tooling.type"></canvas>
     </div>
     <div class="col-md-3 whiteboardsidebar"  ng-controller="WhiteboardSidebarController" >
         <div class="panel panel-default panelnobottom" >

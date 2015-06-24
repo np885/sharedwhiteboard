@@ -1,7 +1,9 @@
 package controllers.common.security;
 
+import controllers.users.dto.UserMapper;
 import model.user.entities.User;
 import model.user.repositories.UserRepo;
+import play.Logger;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
@@ -28,7 +30,7 @@ public class AuthenticationAction extends Action.Simple {
         /* now authHeader[0] contains the authentication method (expected to be "basic")
          * and authHeader[1] should contain the base64 hash!       */
         if (authHeader == null || ! authHeader[0].equalsIgnoreCase("basic")) {
-            addAuthMethodHeader(context.response());
+            addAuthMethodHeader(context, context.response());
             return unauthorizedResultPromise;
         }
 
@@ -41,9 +43,9 @@ public class AuthenticationAction extends Action.Simple {
 
         User requestingUser = UserRepo.getUserForUsername(username);
 
-        if (requestingUser == null || !requestingUser.getPassword().equals(password)) {
+        if (requestingUser == null || !requestingUser.getPassword().equals(HashUtil.hashString(password))) {
             //username not found or wrong password ^
-            addAuthMethodHeader(context.response());
+            addAuthMethodHeader(context, context.response());
             return unauthorizedResultPromise;
         }
 
@@ -51,8 +53,8 @@ public class AuthenticationAction extends Action.Simple {
         return delegate.call(context);
     }
 
-    private void addAuthMethodHeader(Http.Response response) {
-        response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
+    private void addAuthMethodHeader(Http.Context ctx, Http.Response response) {
+//        response.setHeader(Http.HeaderNames.WWW_AUTHENTICATE, "basic");
     }
 
 }

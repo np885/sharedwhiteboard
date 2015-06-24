@@ -33,8 +33,13 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
     $scope.refreshOnlineList = function() {
         $http.get('/users/online')
             .success(function(data, status, headers, config) {
-                $scope.onlinelist = data.map(function(u) {return u.id});
-                console.log($scope.onlinelist);
+                $scope.onlinelist = {};
+                data.forEach(function(userElement) {
+                    $scope.onlinelist[userElement.id] =
+                        (typeof userElement.currentlyJoinedBoardId === 'undefined')
+                            ? null
+                            : userElement.currentlyJoinedBoardId;
+                });
             })
             .error(function (data, status, headers, config) {
                 //ToDO: error
@@ -42,7 +47,13 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
     };
 
     $scope.isOnline = function(userId) {
-        return $scope.onlinelist.indexOf(userId) >= 0;
+        return $scope.onlinelist.hasOwnProperty(userId);
+    };
+
+    $scope.isJoined = function(userId, whiteboardId) {
+        if ($scope.onlinelist.hasOwnProperty(userId)) {
+            return $scope.onlinelist[userId] === whiteboardId;
+        }
     };
 
     $scope.transform = function(data){
@@ -68,11 +79,29 @@ function($scope, $modal, AuthenticationService, $http, WhiteboardSocketService, 
         });
     };
 
-    listSocketService.registerForSocketEvent('ListStateChangedEvent', $scope.loadWhiteboards);
+    listSocketService.registerForSocketEvent('ListStateChangedEvent', function(event) {
+            if (event.structuralChanges) {
+                $scope.$apply($scope.loadWhiteboards);
+            } else {
+                $scope.$apply($scope.refreshOnlineList);
+            }
+    });
     listSocketService.registerForSocketEvent('BoardUserOnlineEvent', $scope.refreshOnlineList);
     listSocketService.registerForSocketEvent('BoardUserOfflineEvent', $scope.refreshOnlineList);
 
-    listSocketService.openSocketConnection();
+    listSocketService.openSocketConnection(function() {
+        $scope.$apply(function() {
+            $scope.onlinelist = [];
+            $scope.whiteboards = [];
+            $scope.addWhiteboard = function() {
+              AuthenticationService.clearCredentials();
+            };
+        });
+        AuthenticationService.doubleLoginDetected();
+        AuthenticationService.clearCredentials();
+
+        console.log("double-login currently not allowed!");
+    });
     $scope.refreshOnlineList();
     $scope.loadWhiteboards();
 }]);

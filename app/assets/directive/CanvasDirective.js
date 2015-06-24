@@ -1,7 +1,7 @@
 'use strict';
 
-app.directive('drawing',[ 'DrawService',
-    function(DrawService){
+app.directive('drawing',[ 'DrawService', 'MovementTooling',
+    function(DrawService, movementTooling){
     return {
         restrict: 'A',
         link: function(scope, element, attrs){
@@ -67,10 +67,10 @@ app.directive('drawing',[ 'DrawService',
             };
 
 
+            movementTooling.setMeasureText(mesureSize);
             DrawService.setGetSaveUrl(getSaveUrl);
             DrawService.setDrawLine(drawLine);
             DrawService.setDrawText(drawText);
-            DrawService.setMesureText(mesureSize);
             DrawService.setDrawRectangle(drawRectangle);
             DrawService.setDrawCircle(drawCircle);
             DrawService.setClear(clear);

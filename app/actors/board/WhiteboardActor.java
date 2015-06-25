@@ -64,14 +64,14 @@ public class WhiteboardActor extends UntypedActor {
             onBoardUserOpen((BoardUserOpenEvent) message);
         } else if (message instanceof BoardUserCloseEvent) {
             onBoardUserClosed((BoardUserCloseEvent) message);
-        } else if (message instanceof DrawEvent) {
-            onDrawEvent((DrawEvent) message);
+        } else if (message instanceof AbstractDrawEvent) {
+            onDrawEvent((AbstractDrawEvent) message);
         } else if (message instanceof AbstractAppUserEvent) {
             onAppUserEvent((AbstractAppUserEvent) message);
         }
     }
 
-    private void onDrawEvent(DrawEvent drawEvent) {
+    private void onDrawEvent(AbstractDrawEvent drawEvent) {
         if (drawEvent instanceof FreeHandEvent) {
             onFreeHandEvent((FreeHandEvent) drawEvent);
         } else if (drawEvent instanceof SingleLineEvent) {
@@ -242,7 +242,7 @@ public class WhiteboardActor extends UntypedActor {
         rectDrawing.setRadius(ce.getRadius());
     }
 
-    private AbstractDrawObject initDrawObjectAndAddToState(AbstractDrawObject drawObject, DrawEvent event) {
+    private AbstractDrawObject initDrawObjectAndAddToState(AbstractDrawObject drawObject, AbstractDrawEvent event) {
         drawObject.setBoardElementId(event.getBoardElementId());
         drawObject.setWhiteboard(currentState);
         currentState.getDrawObjects().put(event.getBoardElementId(), drawObject);
@@ -270,7 +270,7 @@ public class WhiteboardActor extends UntypedActor {
         }
     }
 
-    private void logDrawEventTypeError(DrawEvent event, AbstractDrawObject drawObjForElementId) {
+    private void logDrawEventTypeError(AbstractDrawEvent event, AbstractDrawObject drawObjForElementId) {
         Logger.warn("Received " + event.getClass().getSimpleName() +
                 " for DrawObject (id=" + event.getBoardElementId() + ") but persisted element for this id" +
                 " was of Type " + drawObjForElementId.getClass().getSimpleName());

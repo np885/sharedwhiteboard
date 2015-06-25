@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * trust on the existence of properties of this class and we trust on the client setting the proper type.
  */
 @JsonPropertyOrder({"eventType"})
-public abstract class SocketEvent implements SWBEvent {
+public abstract class AbstractSocketEvent implements SWBEvent {
     @JsonProperty
     public abstract String getEventType();
 

@@ -2,7 +2,7 @@ package actors.events.socket.draw;
 
 /**
  */
-public class CircleEvent extends DrawEvent {
+public class CircleEvent extends AbstractDrawEvent {
     private int centerX;
     private int centerY;
     private int radius;

@@ -1,6 +1,6 @@
 package actors.events.socket.boardstate;
 
-import actors.events.SocketEvent;
+import actors.events.AbstractSocketEvent;
 import actors.events.socket.boardstate.drawings.DrawingDTO;
 import actors.events.socket.draw.DrawFinishedEvent;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  */
-public class InitialBoardStateEvent extends SocketEvent {
+public class InitialBoardStateEvent extends AbstractSocketEvent {
     private List<CollabState> colaborators = new ArrayList<>();
 
     private List<DrawingDTO> drawings = new LinkedList<>();

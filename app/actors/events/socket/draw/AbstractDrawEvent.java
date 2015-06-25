@@ -2,7 +2,7 @@ package actors.events.socket.draw;
 
 import actors.events.socket.boardsessions.AbstractBoardUserSocketEvent;
 
-public abstract class DrawEvent extends AbstractBoardUserSocketEvent {
+public abstract class AbstractDrawEvent extends AbstractBoardUserSocketEvent {
     /* common representation for the client:
         {
             eventtype : 'eg. FreeHandEvent',

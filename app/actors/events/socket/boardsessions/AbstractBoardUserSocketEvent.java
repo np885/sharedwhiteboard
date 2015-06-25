@@ -1,11 +1,11 @@
 package actors.events.socket.boardsessions;
 
 import actors.events.socket.boardstate.SimpleUser;
-import actors.events.SocketEvent;
+import actors.events.AbstractSocketEvent;
 
 /**
  */
-public abstract class AbstractBoardUserSocketEvent extends SocketEvent {
+public abstract class AbstractBoardUserSocketEvent extends AbstractSocketEvent {
     private SimpleUser user;
 
     public SimpleUser getUser() {

@@ -1,7 +1,5 @@
 package actors.events.socket.boardsessions;
 
-import actors.events.SocketEvent;
-
 /**
  */
 public class BoardUserCloseSocketEvent extends AbstractBoardUserSocketEvent {

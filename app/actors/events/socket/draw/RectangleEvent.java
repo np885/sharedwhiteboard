@@ -2,7 +2,7 @@ package actors.events.socket.draw;
 
 /**
  */
-public class RectangleEvent extends DrawEvent {
+public class RectangleEvent extends AbstractDrawEvent {
     private int xStart;
     private int yStart;
     private int width;

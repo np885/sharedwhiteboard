@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * Created by niclas on 06.06.15.
  */
-public class DrawFinishedEvent extends DrawEvent{
+public class DrawFinishedEvent extends AbstractDrawEvent {
 
     private String drawType;
 

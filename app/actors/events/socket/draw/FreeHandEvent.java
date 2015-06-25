@@ -2,7 +2,7 @@ package actors.events.socket.draw;
 
 /**
  */
-public class FreeHandEvent extends DrawEvent {
+public class FreeHandEvent extends AbstractDrawEvent {
     private int xStart;
     private int yStart;
 

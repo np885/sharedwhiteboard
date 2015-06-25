@@ -1,8 +1,10 @@
 package actors.events.intern.boardsessions;
 
+import actors.events.ServerInternEvent;
+
 /**
  */
-public class BoardActorClosedEvent {
+public class BoardActorClosedEvent implements ServerInternEvent{
 
     private long boardId;
 

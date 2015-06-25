@@ -22,6 +22,7 @@ import play.libs.Akka;
 import play.libs.Json;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationActor extends UntypedActor {
     private static class UserOnlineData {
@@ -41,7 +42,7 @@ public class ApplicationActor extends UntypedActor {
     private Map<Long, ActorRef> boardActors = new HashMap<>();
 
     /* maps <User, <ListSocketConnection, currentlyJoined>>*/
-    private Map<User, UserOnlineData> listSocketConnections = new HashMap<>();
+    private Map<User, UserOnlineData> listSocketConnections = new ConcurrentHashMap<>();
 
 
 

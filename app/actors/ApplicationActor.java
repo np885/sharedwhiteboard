@@ -6,7 +6,7 @@ import actors.events.intern.app.AppUserLoginEvent;
 import actors.events.intern.app.AppUserLogoutEvent;
 import actors.events.intern.app.ConnectionRejectedEvent;
 import actors.events.intern.boardsessions.BoardActorClosedEvent;
-import actors.events.intern.boardsessions.BoardSessionEvent;
+import actors.events.intern.boardsessions.AbstractBoardSessionEvent;
 import actors.events.intern.boardsessions.BoardUserCloseEvent;
 import actors.events.intern.boardsessions.BoardUserOpenEvent;
 import actors.events.socket.boardsessions.SessionEventSerializationUtil;
@@ -14,7 +14,6 @@ import actors.events.socket.boardstate.SimpleUser;
 import actors.events.socket.liststate.ListStateChangedEvent;
 import actors.list.ListSocketConnection;
 import akka.actor.ActorRef;
-import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import model.user.entities.User;
@@ -53,7 +52,7 @@ public class ApplicationActor extends UntypedActor {
 
     public ApplicationActor() {
         instance = this;
-        Akka.system().eventStream().subscribe(self(), BoardSessionEvent.class);
+        Akka.system().eventStream().subscribe(self(), AbstractBoardSessionEvent.class);
         Akka.system().eventStream().subscribe(self(), BoardActorClosedEvent.class);
         Akka.system().eventStream().subscribe(self(), AbstractAppUserEvent.class);
         Akka.system().eventStream().subscribe(self(), ListStateChangedEvent.class);

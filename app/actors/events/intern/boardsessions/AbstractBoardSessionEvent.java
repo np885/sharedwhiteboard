@@ -3,10 +3,10 @@ package actors.events.intern.boardsessions;
 import actors.board.BoardSocketConnection;
 import actors.events.ServerInternEvent;
 
-public abstract class BoardSessionEvent implements ServerInternEvent {
+public abstract class AbstractBoardSessionEvent implements ServerInternEvent {
     private BoardSocketConnection connection;
 
-    public BoardSessionEvent(BoardSocketConnection connection) {
+    public AbstractBoardSessionEvent(BoardSocketConnection connection) {
         this.connection = connection;
     }
 
